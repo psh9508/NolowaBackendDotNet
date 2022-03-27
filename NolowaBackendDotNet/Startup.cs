@@ -30,8 +30,8 @@ namespace NolowaBackendDotNet
             services.AddControllers();
 
             // Add functionality to inject IOptions<T>
-            services.AddOptions();
-            services.Configure<DBConfiguration>(Configuration.GetSection("DB"));
+            //services.AddOptions();
+            //services.Configure<DBConfiguration>(Configuration.GetSection("DB"));
 
             services.AddSwaggerGen(c =>
             {
