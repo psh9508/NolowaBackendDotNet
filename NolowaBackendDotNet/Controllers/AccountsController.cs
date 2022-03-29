@@ -5,11 +5,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NolowaBackendDotNet.Context;
 using NolowaBackendDotNet.Models;
 
 namespace NolowaBackendDotNet.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class AccountsController : ControllerBase
     {
@@ -27,7 +28,7 @@ namespace NolowaBackendDotNet.Controllers
             return await _context.Accounts.ToListAsync();
         }
 
-        // GET: api/Accounts/5
+        // GET: Accounts/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Account>> GetAccount(long id)
         {
@@ -41,7 +42,7 @@ namespace NolowaBackendDotNet.Controllers
             return account;
         }
 
-        // PUT: api/Accounts/5
+        // PUT: Accounts/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAccount(long id, Account account)
@@ -72,7 +73,7 @@ namespace NolowaBackendDotNet.Controllers
             return NoContent();
         }
 
-        // POST: api/Accounts
+        // POST: Accounts
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Account>> PostAccount(Account account)
@@ -83,7 +84,7 @@ namespace NolowaBackendDotNet.Controllers
             return CreatedAtAction("GetAccount", new { id = account.Id }, account);
         }
 
-        // DELETE: api/Accounts/5
+        // DELETE: Accounts/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAccount(long id)
         {
@@ -98,6 +99,12 @@ namespace NolowaBackendDotNet.Controllers
 
             return NoContent();
         }
+
+        //[HttpPost("Login")]
+        //public ActionResult<Account> Login(string jsonData)
+        //{
+        //    return Ok(new Account());
+        //}
 
         private bool AccountExists(long id)
         {

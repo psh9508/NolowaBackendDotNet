@@ -2,10 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Configuration;
+using NolowaBackendDotNet.Models;
 
 #nullable disable
 
-namespace NolowaBackendDotNet.Models
+namespace NolowaBackendDotNet.Context
 {
     public partial class NolowaContext : DbContext
     {
