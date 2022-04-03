@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Formatting;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -19,6 +20,12 @@ namespace NolowaBackendDotNet.Controllers
         public AccountsController(NolowaContext context)
         {
             _context = context;
+        }
+
+        [HttpGet("Alive")]
+        public ActionResult Alive()
+        {
+            return Ok();
         }
 
         // GET: api/Accounts
@@ -100,11 +107,11 @@ namespace NolowaBackendDotNet.Controllers
             return NoContent();
         }
 
-        //[HttpPost("Login")]
-        //public ActionResult<Account> Login(string jsonData)
-        //{
-        //    return Ok(new Account());
-        //}
+        [HttpPost("Login")]
+        public ActionResult<Account> Login([FromBody]dynamic jsonData)
+        {
+            return Ok(new Account());
+        }
 
         private bool AccountExists(long id)
         {
