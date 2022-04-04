@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http.Formatting;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NolowaBackendDotNet.Context;
+using NolowaBackendDotNet.Extensions;
 using NolowaBackendDotNet.Models;
 
 namespace NolowaBackendDotNet.Controllers
@@ -108,9 +109,42 @@ namespace NolowaBackendDotNet.Controllers
         }
 
         [HttpPost("Login")]
-        public ActionResult<Account> Login([FromBody]dynamic jsonData)
+        public ActionResult<Account> Login([FromBody]JsonElement jsonData)
         {
-            return Ok(new Account());
+            var id = jsonData.SafeGetProperty("id").GetString();
+            var password = jsonData.SafeGetProperty("password").GetString();
+
+            var account = GetAccount(id, password);
+
+            if (account == null)
+                return null;
+
+            return Ok(account);
+
+            //String id = param.get("id");
+            //String password = param.get("password");
+
+            //var account = authenticationService.login(id, password);
+
+            //if (account == null)
+            //    return null;
+
+            //// Follower setting
+
+
+            //ProfileImageHelper.setDefaultProfileFile(account);
+
+            //account.setJwtToken(jwtTokenProvider.generateToken(account.getEmail()));
+
+            //return account;
+        }
+
+        private Account GetAccount(string email, string password)
+        {
+            return _context.Accounts.Where(x => x.Email == email && x.Password == password)
+                                    .Include(account => account.Followers)
+                                    .Include(account => account.Posts.OrderByDescending(x => x.InsertDate).Take(10))
+                                    .FirstOrDefault() ?? throw new Exception("로그인 실패");
         }
 
         private bool AccountExists(long id)
