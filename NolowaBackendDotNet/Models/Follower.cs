@@ -12,5 +12,6 @@ namespace NolowaBackendDotNet.Models
         public long SourceAccountId { get; set; }
 
         public virtual Account DestinationAccount { get; set; }
+        public virtual Account SourceAccount { get; set; }
     }
 }

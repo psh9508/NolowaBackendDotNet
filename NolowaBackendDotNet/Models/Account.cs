@@ -9,7 +9,8 @@ namespace NolowaBackendDotNet.Models
     {
         public Account()
         {
-            Followers = new HashSet<Follower>();
+            FollowerDestinationAccounts = new HashSet<Follower>();
+            FollowerSourceAccounts = new HashSet<Follower>();
             Posts = new HashSet<Post>();
             SearchHistories = new HashSet<SearchHistory>();
         }
@@ -23,7 +24,8 @@ namespace NolowaBackendDotNet.Models
         public DateTime InsertDate { get; set; }
 
         public virtual ProfileImage ProfileImage { get; set; }
-        public virtual ICollection<Follower> Followers { get; set; }
+        public virtual ICollection<Follower> FollowerDestinationAccounts { get; set; }
+        public virtual ICollection<Follower> FollowerSourceAccounts { get; set; }
         public virtual ICollection<Post> Posts { get; set; }
         public virtual ICollection<SearchHistory> SearchHistories { get; set; }
     }

@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.Extensions.Configuration;
 using NolowaBackendDotNet.Models;
 
 #nullable disable
@@ -10,16 +9,13 @@ namespace NolowaBackendDotNet.Context
 {
     public partial class NolowaContext : DbContext
     {
-        private IConfiguration _configuration;
-
         public NolowaContext()
         {
         }
 
-        public NolowaContext(DbContextOptions<NolowaContext> options, IConfiguration configuration)
+        public NolowaContext(DbContextOptions<NolowaContext> options)
             : base(options)
         {
-            _configuration = configuration;
         }
 
         public virtual DbSet<Account> Accounts { get; set; }
@@ -32,7 +28,6 @@ namespace NolowaBackendDotNet.Context
         {
             if (!optionsBuilder.IsConfigured)
             {
-                var test = _configuration.GetConnectionString("NolowaContext");
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
                 optionsBuilder.UseSqlServer("Data Source=DESKTOP-4P0C2JG;Initial Catalog=Nolowa;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
             }
@@ -99,10 +94,16 @@ namespace NolowaBackendDotNet.Context
                 entity.Property(e => e.SourceAccountId).HasColumnName("SOURCE_ACCOUNT_ID");
 
                 entity.HasOne(d => d.DestinationAccount)
-                    .WithMany(p => p.Followers)
+                    .WithMany(p => p.FollowerDestinationAccounts)
                     .HasForeignKey(d => d.DestinationAccountId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__FOLLOWER__SOURCE__412EB0B6");
+
+                entity.HasOne(d => d.SourceAccount)
+                    .WithMany(p => p.FollowerSourceAccounts)
+                    .HasForeignKey(d => d.SourceAccountId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_SOURCE_ACCOUNT");
             });
 
             modelBuilder.Entity<Post>(entity =>
