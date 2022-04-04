@@ -141,10 +141,13 @@ namespace NolowaBackendDotNet.Controllers
 
         private Account GetAccount(string email, string password)
         {
-            return _context.Accounts.Where(x => x.Email == email && x.Password == password)
-                                    .Include(account => account.Followers)
+            var account = _context.Accounts.Where(x => x.Email == email && x.Password == password)
+                                    .Include(account => account.FollowerDestinationAccounts)
+                                    .Include(account => account.FollowerSourceAccounts)
                                     .Include(account => account.Posts.OrderByDescending(x => x.InsertDate).Take(10))
                                     .FirstOrDefault() ?? throw new Exception("로그인 실패");
+
+            return account;
         }
 
         private bool AccountExists(long id)
