@@ -145,6 +145,7 @@ namespace NolowaBackendDotNet.Controllers
                                     .Include(account => account.FollowerDestinationAccounts)
                                     .Include(account => account.FollowerSourceAccounts)
                                     .Include(account => account.Posts.OrderByDescending(x => x.InsertDate).Take(10))
+                                    .Include(account => account.ProfileImage)
                                     .FirstOrDefault() ?? throw new Exception("로그인 실패");
 
             return account;
