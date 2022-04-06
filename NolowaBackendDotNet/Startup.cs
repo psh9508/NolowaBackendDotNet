@@ -9,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using NolowaBackendDotNet.Context;
+using NolowaBackendDotNet.Models.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,8 +37,8 @@ namespace NolowaBackendDotNet
             });
 
             // Add functionality to inject IOptions<T>
-            //services.AddOptions();
-            //services.Configure<DBConfiguration>(Configuration.GetSection("DB"));
+            services.AddOptions();
+            services.Configure<JWT>(Configuration.GetSection("JWT"));
 
             services.AddSwaggerGen(c =>
             {
