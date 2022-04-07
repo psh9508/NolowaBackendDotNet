@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NolowaBackendDotNet.Context;
+using NolowaBackendDotNet.Core;
 using NolowaBackendDotNet.Extensions;
 using NolowaBackendDotNet.Models;
 
@@ -17,10 +19,12 @@ namespace NolowaBackendDotNet.Controllers
     public class AccountsController : ControllerBase
     {
         private readonly NolowaContext _context;
+        private readonly IJWTTokenProvider _jwtTokenProvider;
 
-        public AccountsController(NolowaContext context)
+        public AccountsController(NolowaContext context, IJWTTokenProvider jwtTokenProvider)
         {
             _context = context;
+            _jwtTokenProvider = jwtTokenProvider;
         }
 
         [HttpGet("Alive")]
@@ -109,6 +113,7 @@ namespace NolowaBackendDotNet.Controllers
         }
 
         [HttpPost("Login")]
+        [AllowAnonymous]
         public ActionResult<Account> Login([FromBody]JsonElement jsonData)
         {
             var id = jsonData.SafeGetProperty("id").GetString();
@@ -118,6 +123,8 @@ namespace NolowaBackendDotNet.Controllers
 
             if (account == null)
                 return null;
+
+            _jwtTokenProvider.GenerateJWTToken(account);
 
             return Ok(account);
 
