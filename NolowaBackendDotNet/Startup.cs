@@ -12,6 +12,7 @@ using Microsoft.OpenApi.Models;
 using NolowaBackendDotNet.Context;
 using NolowaBackendDotNet.Core;
 using NolowaBackendDotNet.Models.Configuration;
+using NolowaBackendDotNet.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,6 +54,7 @@ namespace NolowaBackendDotNet
 
         private void AddScoped(IServiceCollection services)
         {
+            services.AddScoped<IAccountsService, AccountsService>();
             services.AddScoped<IJWTTokenProvider, JWTTokenProvider>();
         }
 

@@ -11,6 +11,7 @@ using NolowaBackendDotNet.Context;
 using NolowaBackendDotNet.Core;
 using NolowaBackendDotNet.Extensions;
 using NolowaBackendDotNet.Models;
+using NolowaBackendDotNet.Services;
 
 namespace NolowaBackendDotNet.Controllers
 {
@@ -19,12 +20,12 @@ namespace NolowaBackendDotNet.Controllers
     public class AccountsController : ControllerBase
     {
         private readonly NolowaContext _context;
-        private readonly IJWTTokenProvider _jwtTokenProvider;
+        private readonly IAccountsService _accountsService;
 
-        public AccountsController(NolowaContext context, IJWTTokenProvider jwtTokenProvider)
+        public AccountsController(NolowaContext context, IAccountsService accountsService)
         {
             _context = context;
-            _jwtTokenProvider = jwtTokenProvider;
+            _accountsService = accountsService;
         }
 
         [HttpGet("Alive")]
@@ -119,44 +120,17 @@ namespace NolowaBackendDotNet.Controllers
             var id = jsonData.SafeGetProperty("id").GetString();
             var password = jsonData.SafeGetProperty("password").GetString();
 
-            var account = GetAccount(id, password).ToDTO();
+            var account = _accountsService.Login(id, password);
 
-            if (account == null)
-                return null;
-
-            account.JWTToken = _jwtTokenProvider.GenerateJWTToken(account);
+            if(account == null)
+            {
+                NotFound();
+            }
 
             return Ok(account);
-
-            //String id = param.get("id");
-            //String password = param.get("password");
-
-            //var account = authenticationService.login(id, password);
-
-            //if (account == null)
-            //    return null;
-
-            //// Follower setting
-
-
-            //ProfileImageHelper.setDefaultProfileFile(account);
-
-            //account.setJwtToken(jwtTokenProvider.generateToken(account.getEmail()));
-
-            //return account;
         }
 
-        private Account GetAccount(string email, string password)
-        {
-            var account = _context.Accounts.Where(x => x.Email == email && x.Password == password)
-                                    .Include(account => account.FollowerDestinationAccounts)
-                                    .Include(account => account.FollowerSourceAccounts)
-                                    .Include(account => account.Posts.OrderByDescending(x => x.InsertDate).Take(10))
-                                    .Include(account => account.ProfileImage)
-                                    .FirstOrDefault() ?? throw new Exception("로그인 실패");
-
-            return account;
-        }
+       
 
         private bool AccountExists(long id)
         {
