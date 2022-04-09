@@ -2,6 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.Configuration;
+using NolowaBackendDotNet.Models.DTOs;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -14,7 +15,7 @@ namespace NolowaBackendDotNet.Core
 {
     public interface IJWTTokenProvider
     {
-        public string GenerateJWTToken(Account account);
+        public string GenerateJWTToken(AccountDTO account);
     }
 
     public class JWTTokenProvider : IJWTTokenProvider
@@ -26,7 +27,7 @@ namespace NolowaBackendDotNet.Core
             _jwtOption = jwtOption.Value;
         }
 
-        public string GenerateJWTToken(Account account)
+        public string GenerateJWTToken(AccountDTO account)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOption.Secret));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);

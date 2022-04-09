@@ -119,12 +119,12 @@ namespace NolowaBackendDotNet.Controllers
             var id = jsonData.SafeGetProperty("id").GetString();
             var password = jsonData.SafeGetProperty("password").GetString();
 
-            var account = GetAccount(id, password);
+            var account = GetAccount(id, password).ToDTO();
 
             if (account == null)
                 return null;
 
-            _jwtTokenProvider.GenerateJWTToken(account);
+            account.JWTToken = _jwtTokenProvider.GenerateJWTToken(account);
 
             return Ok(account);
 
