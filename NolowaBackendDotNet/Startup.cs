@@ -55,6 +55,7 @@ namespace NolowaBackendDotNet
         private void AddScoped(IServiceCollection services)
         {
             services.AddScoped<IAccountsService, AccountsService>();
+            services.AddScoped<IPostsService, PostsService>();
             services.AddScoped<IJWTTokenProvider, JWTTokenProvider>();
         }
 

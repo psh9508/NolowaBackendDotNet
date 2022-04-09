@@ -1,0 +1,44 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using NolowaBackendDotNet.Context;
+using NolowaBackendDotNet.Models;
+using NolowaBackendDotNet.Services;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace NolowaBackendDotNet.Controllers
+{
+    [Route("[controller]")]
+    [ApiController]
+    public class PostsController : ControllerBase
+    {
+        private readonly IAccountsService _accountsService;
+        private readonly IPostsService _postsService;
+
+        public PostsController(IAccountsService accountsService, IPostsService postsService)
+        {
+            _accountsService = accountsService;
+            _postsService = postsService;
+        }
+
+        [HttpGet("Alive")]
+        public ActionResult Alive()
+        {
+            return Ok();
+        }
+
+        [HttpGet("{loginUserId}/Followers")]
+        public async Task<ActionResult<IEnumerable<Post>>> GetFollowerPosts(int loginUserId)
+        {
+            var logindedUser = await _accountsService.FindAsync(loginUserId);
+
+            var posts = _postsService.GetFollowerPosts(logindedUser);
+
+            if (posts.Count() <= 0)
+                return NotFound();
+
+            return Ok(posts);
+        }
+    }
+}
