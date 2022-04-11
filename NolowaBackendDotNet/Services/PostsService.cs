@@ -24,20 +24,18 @@ namespace NolowaBackendDotNet.Services
 
         public IEnumerable<Post> GetFollowerPosts(AccountDTO loginedUserAccount)
         {
-            //var followerIds = new ArrayList<Long>();
+            var followerIds = new List<long>() {
+                loginedUserAccount.Id,
+            };
 
-            //followerIds.add(user.getId());
+            foreach (var item in loginedUserAccount.Followers)
+            {
+                followerIds.Add(item.Id);
+            }
 
-            ////        user.getFollowers().stream().map(x -> x.getFollowerUser().getId()).forEach(x -> {
-            ////            followerIds.add(x); // It's not thread-safe.
-            ////        });
+            var followersPosts = _context.Posts.Where(x => followerIds.Contains(x.Id));
 
-            //for (var follower : user.getFollowers())
-            //{
-            //    followerIds.add(follower.getFollowerUser().getId());
-            //}
-
-            return _context.Posts.Where(x => x.Id == 2);
+            return followersPosts;
         }
     }
 }

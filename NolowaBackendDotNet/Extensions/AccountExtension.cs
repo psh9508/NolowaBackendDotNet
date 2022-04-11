@@ -12,14 +12,25 @@ namespace NolowaBackendDotNet.Extensions
     {
         public static AccountDTO ToDTO(this Account src)
         {
-            return new AccountDTO()
+            var dto = new AccountDTO()
             {
                 AccountId = src.AccountId,
                 AccountName = src.AccountName,
                 Email = src.Email,
                 Id = src.Id,
                 InsertDate = src.InsertDate,
+                ProfileImage = src.ProfileImage,
             };
+
+            foreach (var item in src.FollowerDestinationAccounts)
+            {
+                dto.Followers.Add(new FollowerDTO()
+                {
+                    Id = item.Id,
+                });
+            }
+
+            return dto;
         }
 
         public static bool SetJWTToken(this Account src)

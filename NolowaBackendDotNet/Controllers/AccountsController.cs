@@ -115,10 +115,10 @@ namespace NolowaBackendDotNet.Controllers
 
         [HttpPost("Login")]
         [AllowAnonymous]
-        public ActionResult<Account> Login([FromBody]JsonElement jsonData)
+        public ActionResult<Account> Login([FromBody] Newtonsoft.Json.Linq.JObject jsonData)
         {
-            var id = jsonData.SafeGetProperty("id").GetString();
-            var password = jsonData.SafeGetProperty("password").GetString();
+            var id = jsonData.Value<string>("id");
+            var password = jsonData.Value<string>("password");
 
             var account = _accountsService.Login(id, password);
 

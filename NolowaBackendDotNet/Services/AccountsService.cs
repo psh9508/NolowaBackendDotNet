@@ -38,9 +38,9 @@ namespace NolowaBackendDotNet.Services
         public AccountDTO Login(string email, string password)
         {
             var account = _context.Accounts.Where(x => x.Email == email && x.Password == password)
-                                    .Include(account => account.FollowerDestinationAccounts)
-                                    .Include(account => account.FollowerSourceAccounts)
-                                    .Include(account => account.Posts.OrderByDescending(x => x.InsertDate).Take(10))
+                                    //.Include(account => account.FollowerDestinationAccounts)
+                                    //.Include(account => account.FollowerSourceAccounts)
+                                    //.Include(account => account.Posts.OrderByDescending(x => x.InsertDate).Take(10))
                                     .Include(account => account.ProfileImage)
                                     .FirstOrDefault();
 
