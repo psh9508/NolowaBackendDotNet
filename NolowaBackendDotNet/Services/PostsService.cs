@@ -33,7 +33,7 @@ namespace NolowaBackendDotNet.Services
                 followerIds.Add(item.Id);
             }
 
-            var followersPosts = _context.Posts.Where(x => followerIds.Contains(x.Id));
+            var followersPosts = _context.Posts.Where(x => followerIds.Contains(x.AccountId));
 
             return followersPosts;
         }

@@ -22,13 +22,17 @@ namespace NolowaBackendDotNet.Extensions
                 ProfileImage = src.ProfileImage,
             };
 
+            var followers = new List<FollowerDTO>();
+
             foreach (var item in src.FollowerDestinationAccounts)
             {
-                dto.Followers.Add(new FollowerDTO()
-                {
-                    Id = item.Id,
+                followers.Add(new FollowerDTO() {
+                    Id = item.DestinationAccountId,
+                    //Email = item.,
                 });
             }
+
+            dto.Followers = followers;
 
             return dto;
         }

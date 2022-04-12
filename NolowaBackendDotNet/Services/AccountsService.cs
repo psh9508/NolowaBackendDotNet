@@ -30,9 +30,22 @@ namespace NolowaBackendDotNet.Services
 
         public async Task<AccountDTO> FindAsync(long id)
         {
-            var account = await _context.Accounts.FindAsync(id);
+            var account = await _context.Accounts.Where(x => x.Id == id)
+                                                  //.Include(account => account.FollowerDestinationAccounts)                                                  
+                                                  //.Include(account => account.FollowerSourceAccounts)
+                                                  //.Include(account => account.Posts.OrderByDescending(x => x.InsertDate).Take(10))
+                                                  .Include(account => account.ProfileImage)
+                                                  .FirstOrDefaultAsync();
 
-            return account == null ? null : account.ToDTO();
+            if (account == null)
+                return null;
+
+            foreach (var follower in _context.Followers.Where(x => x.SourceAccountId == account.Id))
+            {
+                account.FollowerDestinationAccounts.Add(follower);
+            }
+
+            return account.ToDTO();
         }
 
         public AccountDTO Login(string email, string password)
@@ -43,9 +56,13 @@ namespace NolowaBackendDotNet.Services
                                     //.Include(account => account.Posts.OrderByDescending(x => x.InsertDate).Take(10))
                                     .Include(account => account.ProfileImage)
                                     .FirstOrDefault();
-
             if (account == null)
                 return null;
+
+            foreach (var follower in _context.Followers.Where(x => x.SourceAccountId == account.Id))
+            {
+                account.FollowerDestinationAccounts.Add(follower);
+            }
 
             var accountDTO = account.ToDTO();
 

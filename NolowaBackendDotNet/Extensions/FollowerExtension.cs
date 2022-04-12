@@ -13,8 +13,8 @@ namespace NolowaBackendDotNet.Extensions
         {
             var dto = new FollowerDTO()
             {
-                Id = src.Id,
-                //Email = src.email
+                Id = src.DestinationAccount.Id,
+                Email = src.DestinationAccount.Email,
             };
 
             return dto;
