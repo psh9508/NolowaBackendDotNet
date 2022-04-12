@@ -130,8 +130,6 @@ namespace NolowaBackendDotNet.Controllers
             return Ok(account);
         }
 
-       
-
         private bool AccountExists(long id)
         {
             return _context.Accounts.Any(e => e.Id == id);
