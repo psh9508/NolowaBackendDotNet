@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 #nullable disable
@@ -23,6 +24,7 @@ namespace NolowaBackendDotNet.Models
         public long? ProfileImageId { get; set; }
         public DateTime InsertDate { get; set; }
 
+        [JsonProperty("profileImage")]
         public virtual ProfileImage ProfileImage { get; set; }
         public virtual ICollection<Follower> FollowerDestinationAccounts { get; set; }
         public virtual ICollection<Follower> FollowerSourceAccounts { get; set; }

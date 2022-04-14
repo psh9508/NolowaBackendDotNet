@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 #nullable disable
@@ -13,6 +14,7 @@ namespace NolowaBackendDotNet.Models
         }
 
         public long Id { get; set; }
+        [JsonProperty("hash")]
         public string FileHash { get; set; }
         public string Url { get; set; }
 

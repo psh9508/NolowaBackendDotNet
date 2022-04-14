@@ -19,7 +19,7 @@ namespace NolowaBackendDotNet.Extensions
                 Email = src.Email,
                 Id = src.Id,
                 InsertDate = src.InsertDate,
-                ProfileImage = src.ProfileImage,
+                ProfileImage = src.ProfileImage.ToDTO(),
             };
 
             var followers = new List<FollowerDTO>();
