@@ -1,4 +1,5 @@
 ﻿using NolowaBackendDotNet.Context;
+using NolowaBackendDotNet.Extensions;
 using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.DTOs;
 using System;
@@ -10,7 +11,7 @@ namespace NolowaBackendDotNet.Services
 {
     public interface IPostsService
     {
-        IEnumerable<Post> GetFollowerPosts(AccountDTO loginedUserAccount);
+        IEnumerable<PostDTO> GetFollowerPosts(AccountDTO loginedUserAccount);
     }
 
     public class PostsService : IPostsService
@@ -22,7 +23,7 @@ namespace NolowaBackendDotNet.Services
             _context = context;
         }
 
-        public IEnumerable<Post> GetFollowerPosts(AccountDTO loginedUserAccount)
+        public IEnumerable<PostDTO> GetFollowerPosts(AccountDTO loginedUserAccount)
         {
             var followerIds = new List<long>() {
                 loginedUserAccount.Id,
@@ -35,7 +36,7 @@ namespace NolowaBackendDotNet.Services
 
             var followersPosts = _context.Posts.Where(x => followerIds.Contains(x.AccountId));
 
-            return followersPosts;
+            return followersPosts.Select(x => x.ToDTO());
         }
     }
 }
