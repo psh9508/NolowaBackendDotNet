@@ -12,6 +12,7 @@ namespace NolowaBackendDotNet.Services
     public interface IPostsService
     {
         IEnumerable<PostDTO> GetFollowerPosts(AccountDTO loginedUserAccount);
+        Post InsertPost(Post post);
     }
 
     public class PostsService : IPostsService
@@ -37,6 +38,19 @@ namespace NolowaBackendDotNet.Services
             var followersPosts = _context.Posts.Where(x => followerIds.Contains(x.AccountId));
 
             return followersPosts.Select(x => x.ToDTO());
+        }
+
+        public Post InsertPost(Post post)
+        {
+            try
+            {
+                _context.Posts.Add(post);
+                return post;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
     }
 }
