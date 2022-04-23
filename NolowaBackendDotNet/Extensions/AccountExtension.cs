@@ -20,6 +20,7 @@ namespace NolowaBackendDotNet.Extensions
                 Id = src.Id,
                 InsertDate = src.InsertDate,
                 ProfileImage = src.ProfileImage.ToDTO(),
+                Posts = src.Posts,
             };
 
             var followers = new List<FollowerDTO>();

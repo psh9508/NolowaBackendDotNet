@@ -44,7 +44,12 @@ namespace NolowaBackendDotNet.Services
         {
             try
             {
+                post.AccountId = post.Account.Id;
+                post.Account = null;
                 _context.Posts.Add(post);
+
+                _context.SaveChanges();
+
                 return post;
             }
             catch (Exception ex)

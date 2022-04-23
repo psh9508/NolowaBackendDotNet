@@ -15,5 +15,6 @@ namespace NolowaBackendDotNet.Models.DTOs
         public string JWTToken { get; set; } = string.Empty;
         public ProfileImageDTO ProfileImage { get; set; } = new ProfileImageDTO();
         public IEnumerable<FollowerDTO> Followers { get; set; } = Enumerable.Empty<FollowerDTO>();
+        public IEnumerable<Post> Posts { get; set; } = Enumerable.Empty<Post>();
     }
 }

@@ -40,5 +40,14 @@ namespace NolowaBackendDotNet.Controllers
 
             return Ok(posts);
         }
+
+        [HttpPost("New")]
+        public async Task<ActionResult<Post>> InsertNewPost([FromBody] Post newPost)
+        {
+            return await Task.Run(() =>
+            {
+                return _postsService.InsertPost(newPost);
+            });
+        }
     }
 }

@@ -77,7 +77,14 @@ namespace NolowaBackendDotNet.Services
             foreach (var follower in _context.Followers.Where(x => x.SourceAccountId == account.Id))
             {
                 account.FollowerDestinationAccounts.Add(follower);
+                //account.Posts.AddRnage(_context.Posts.Where(x => x.AccountId == follower.Id).OrderByDescending(x => x.InsertDate).Take(10));
             }
+
+            foreach (var follower in account.FollowerDestinationAccounts)
+            {
+                account.Posts.AddRnage(_context.Posts.Where(x => x.AccountId == follower.DestinationAccountId).OrderByDescending(x => x.InsertDate).Take(10));
+            }
+
 
             return account.ToDTO();
         }
