@@ -66,23 +66,21 @@ namespace NolowaBackendDotNet.Services
         private async Task<AccountDTO> FindAsync(Expression<Func<Account, bool>> whereExpression)
         {
             var account = await _context.Accounts.Where(whereExpression)
-                                               //.Include(account => account.FollowerDestinationAccounts)
-                                               //.Include(account => account.FollowerSourceAccounts)
-                                               //.Include(account => account.Posts.OrderByDescending(x => x.InsertDate).Take(10))
+                                               .Include(account => account.FollowerSourceAccounts) 
                                                .Include(account => account.ProfileImage)
                                                .FirstOrDefaultAsync();
             if (account == null)
                 return null;
 
-            foreach (var follower in _context.Followers.Where(x => x.SourceAccountId == account.Id))
+            // 본인 아이디가 키인 데이터를 가져와서 그 데이터에 DestinationID로 Follower의 Post를 가져와야한다. 그래서 SourceAccount를 가져와 반복문을 도는 것임.
+            foreach (var follower in account.FollowerSourceAccounts)
             {
-                account.FollowerDestinationAccounts.Add(follower);
-                //account.Posts.AddRnage(_context.Posts.Where(x => x.AccountId == follower.Id).OrderByDescending(x => x.InsertDate).Take(10));
-            }
+                var followerPost = _context.Posts.Where(x => x.AccountId == follower.DestinationAccountId)
+                                                 .Include(x => x.Account)
+                                                 .ThenInclude(x => x.ProfileImage)
+                                                 .OrderByDescending(x => x.InsertDate).Take(10);
 
-            foreach (var follower in account.FollowerDestinationAccounts)
-            {
-                account.Posts.AddRnage(_context.Posts.Where(x => x.AccountId == follower.DestinationAccountId).OrderByDescending(x => x.InsertDate).Take(10));
+                account.Posts.AddRnage(followerPost);
             }
 
             return account.ToDTO();

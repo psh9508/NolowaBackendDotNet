@@ -25,7 +25,7 @@ namespace NolowaBackendDotNet.Extensions
 
             var followers = new List<FollowerDTO>();
 
-            foreach (var item in src.FollowerDestinationAccounts)
+            foreach (var item in src.FollowerSourceAccounts)
             {
                 followers.Add(new FollowerDTO() {
                     Id = item.DestinationAccountId,
