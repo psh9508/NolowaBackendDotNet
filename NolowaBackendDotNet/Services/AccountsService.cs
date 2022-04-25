@@ -85,7 +85,6 @@ namespace NolowaBackendDotNet.Services
                 account.Posts.AddRnage(_context.Posts.Where(x => x.AccountId == follower.DestinationAccountId).OrderByDescending(x => x.InsertDate).Take(10));
             }
 
-
             return account.ToDTO();
         }
     }

@@ -28,8 +28,7 @@ namespace NolowaBackendDotNet.Context
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Data Source=DESKTOP-4P0C2JG;Initial Catalog=Nolowa;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
+                optionsBuilder.UseSqlServer("Name=NolowaContext");
             }
         }
 
@@ -97,7 +96,7 @@ namespace NolowaBackendDotNet.Context
                     .WithMany(p => p.FollowerDestinationAccounts)
                     .HasForeignKey(d => d.DestinationAccountId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__FOLLOWER__SOURCE__412EB0B6");
+                    .HasConstraintName("FK_DESTINATION_ACCOUNT");
 
                 entity.HasOne(d => d.SourceAccount)
                     .WithMany(p => p.FollowerSourceAccounts)
