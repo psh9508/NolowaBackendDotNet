@@ -13,7 +13,7 @@ namespace NolowaBackendDotNet.Extensions
         {
             return new PostDTO()
             {
-                Account = src.Account,
+                Account = src.Account.ToDTO(),
                 AccountId = src.AccountId,
                 Id = src.Id,
                 InsertDate = src.InsertDate,

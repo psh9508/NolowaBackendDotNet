@@ -14,6 +14,6 @@ namespace NolowaBackendDotNet.Models.DTOs
         public long AccountId { get; set; }
 
         [JsonProperty("postedUser")]
-        public Account Account { get; set; }
+        public AccountDTO Account { get; set; }
     }
 }

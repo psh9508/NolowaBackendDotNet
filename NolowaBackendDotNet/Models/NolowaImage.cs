@@ -12,6 +12,6 @@ namespace NolowaBackendDotNet.Models
         public string URL { get; set; } = string.Empty;
 
         [JsonProperty("hash")]
-        public string Hash { get; set; } = string.Empty;
+        public string Hash { get; set; } = "ProfilePicture";
     }
 }

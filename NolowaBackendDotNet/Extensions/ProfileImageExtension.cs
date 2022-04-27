@@ -11,6 +11,9 @@ namespace NolowaBackendDotNet.Extensions
     {
         public static ProfileImageDTO ToDTO(this ProfileImage src)
         {
+            if (src == null)
+                return new ProfileImageDTO();
+
             var dto = new ProfileImageDTO()
             {
                 URL = src.Url,

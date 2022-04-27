@@ -12,6 +12,9 @@ namespace NolowaBackendDotNet.Extensions
     {
         public static AccountDTO ToDTO(this Account src)
         {
+            if (src == null)
+                return new AccountDTO();
+
             var dto = new AccountDTO()
             {
                 AccountId = src.AccountId,
