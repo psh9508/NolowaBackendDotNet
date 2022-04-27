@@ -44,23 +44,6 @@ namespace NolowaBackendDotNet.Services
             accountDTO.JWTToken = _jwtTokenProvider.GenerateJWTToken(accountDTO);
 
             return accountDTO;
-
-            //String id = param.get("id");
-            //String password = param.get("password");
-
-            //var account = authenticationService.login(id, password);
-
-            //if (account == null)
-            //    return null;
-
-            //// Follower setting
-
-
-            //ProfileImageHelper.setDefaultProfileFile(account);
-
-            //account.setJwtToken(jwtTokenProvider.generateToken(account.getEmail()));
-
-            //return account;
         }
 
         private async Task<AccountDTO> FindAsync(Expression<Func<Account, bool>> whereExpression)
