@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NolowaBackendDotNet.Context;
+using NolowaBackendDotNet.Extensions;
+using NolowaBackendDotNet.Models.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +12,7 @@ namespace NolowaBackendDotNet.Services
     public interface ISearchService
     {
         Task<List<string>> GetSearchedKeywordsAsync(long userId);
+        Task<List<AccountDTO>> SearchUsersAsync(string accountName);
     }
 
     public class SearchService : ISearchService
@@ -30,6 +33,16 @@ namespace NolowaBackendDotNet.Services
                                                            .Select(x => x.Keyword);
 
             return await searchedKeywords.ToListAsync();
+        }
+
+        public async Task<List<AccountDTO>> SearchUsersAsync(string accountName)
+        {
+            // 대소문자 무시하고 비교
+            var searchedUsers = _context.Accounts.Where(x => x.AccountName.Contains(accountName))
+                                                 .Include(x => x.ProfileImage)
+                                                 .Select(x => x.ToDTO());
+
+            return await searchedUsers.ToListAsync();
         }
     }
 }

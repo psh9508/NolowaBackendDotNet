@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NolowaBackendDotNet.Context;
+using NolowaBackendDotNet.Models.DTOs;
 using NolowaBackendDotNet.Services;
 using System;
 using System.Collections.Generic;
@@ -23,6 +24,12 @@ namespace NolowaBackendDotNet.Controllers
         public async Task<List<string>> GetSearchedKeywordsAsync(long userId)
         {
             return await _serachService.GetSearchedKeywordsAsync(userId);
+        }
+
+        [HttpGet("User/{accountName}")]
+        public async Task<List<AccountDTO>> SearchUsers(string accountName)
+        {
+            return await _serachService.SearchUsersAsync(accountName);
         }
     }
 }
