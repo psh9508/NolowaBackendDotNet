@@ -45,15 +45,25 @@ namespace NolowaBackendDotNet.Services
                                                  .Include(x => x.ProfileImage)
                                                  .Select(x => _mapper.Map<AccountDTO>(x));
 
-            await SaveKeyword(userID, accountName);
+            await DeleteAndSaveKeywordAsync(userID, accountName);
 
             return await searchedUsers.ToListAsync();
         }
 
-        private async Task SaveKeyword(long id, string keyword)
+        private async Task DeleteAndSaveKeywordAsync(long id, string keyword)
         {
+            using var transaction = _context.Database.BeginTransaction();
+
             try
             {
+                var sameKeyword = _context.SearchHistories.Where(x => x.Id == id && x.Keyword == keyword);
+
+                if (sameKeyword.Count() > 0)
+                {
+                    _context.SearchHistories.Remove(sameKeyword.FirstOrDefault());
+                    await _context.SaveChangesAsync();
+                }
+
                 _context.SearchHistories.Add(new Models.SearchHistory()
                 {
                     AccountId = id,
@@ -61,10 +71,13 @@ namespace NolowaBackendDotNet.Services
                 });
 
                 await _context.SaveChangesAsync();
+
+                transaction.Commit();
             }
             catch (Exception ex)
             {
-                // what should I do?
+                transaction.Rollback();
+                // we should tell'em that the request you give me is failed.
             }
         }
     }
