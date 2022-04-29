@@ -56,21 +56,9 @@ namespace NolowaBackendDotNet.Services
 
             try
             {
-                var sameKeyword = _context.SearchHistories.Where(x => x.Id == id && x.Keyword == keyword);
-
-                if (sameKeyword.Count() > 0)
-                {
-                    _context.SearchHistories.Remove(sameKeyword.FirstOrDefault());
-                    await _context.SaveChangesAsync();
-                }
-
-                _context.SearchHistories.Add(new Models.SearchHistory()
-                {
-                    AccountId = id,
-                    Keyword = keyword,
-                });
-
-                await _context.SaveChangesAsync();
+                await RemoveSameKeyword(id, keyword);
+                await SaveNewKeyword(id, keyword);
+                await RemoveRowsExceedMaxCountAsync(id);
 
                 transaction.Commit();
             }
@@ -79,6 +67,46 @@ namespace NolowaBackendDotNet.Services
                 transaction.Rollback();
                 // we should tell'em that the request you give me is failed.
             }
+        }
+
+        private async Task SaveNewKeyword(long id, string keyword)
+        {
+            _context.SearchHistories.Add(new Models.SearchHistory()
+            {
+                AccountId = id,
+                Keyword = keyword,
+            });
+
+            await _context.SaveChangesAsync();
+        }
+
+        private async Task RemoveSameKeyword(long id, string keyword)
+        {
+            var sameKeyword = _context.SearchHistories.Where(x => x.Id == id && x.Keyword == keyword);
+
+            if (sameKeyword.Count() > 0)
+            {
+                _context.SearchHistories.Remove(sameKeyword.FirstOrDefault());
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        private async Task RemoveRowsExceedMaxCountAsync(long id)
+        {
+            int deletedRowCount = GetRowCountExceedMaxCount(id);
+
+            if (deletedRowCount > 0)
+            {
+                var deletedRows = _context.SearchHistories.OrderByDescending(x => x).Take(deletedRowCount);
+                _context.SearchHistories.RemoveRange(deletedRows);
+
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        private int GetRowCountExceedMaxCount(long id)
+        {
+            return _context.SearchHistories.Where(x => x.Id == id).Count() - MAX_SEARCH_COUNT;
         }
     }
 }
