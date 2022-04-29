@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using NolowaBackendDotNet.Context;
 using NolowaBackendDotNet.Extensions;
 using NolowaBackendDotNet.Models.DTOs;
@@ -20,10 +21,12 @@ namespace NolowaBackendDotNet.Services
         private const int MAX_SEARCH_COUNT = 5;
 
         private readonly NolowaContext _context;
+        private readonly IMapper _mapper;
 
-        public SearchService(NolowaContext context)
+        public SearchService(NolowaContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         public async Task<List<string>> GetSearchedKeywordsAsync(long accountId)
@@ -40,8 +43,7 @@ namespace NolowaBackendDotNet.Services
             // 대소문자 무시하고 비교
             var searchedUsers = _context.Accounts.Where(x => x.AccountName.Contains(accountName))
                                                  .Include(x => x.ProfileImage)
-                                                 .Select(x => x.ToDTO());
-
+                                                 .Select(x => _mapper.Map<AccountDTO>(x));
 
             await SaveKeyword(userID, accountName);
 

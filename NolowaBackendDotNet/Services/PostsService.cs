@@ -1,4 +1,5 @@
-﻿using NolowaBackendDotNet.Context;
+﻿using AutoMapper;
+using NolowaBackendDotNet.Context;
 using NolowaBackendDotNet.Extensions;
 using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.DTOs;
@@ -17,10 +18,12 @@ namespace NolowaBackendDotNet.Services
 
     public class PostsService : IPostsService
     {
+        private readonly IMapper _mapper;
         private readonly NolowaContext _context;
 
-        public PostsService(NolowaContext context)
+        public PostsService(IMapper mapper, NolowaContext context)
         {
+            _mapper = mapper;
             _context = context;
         }
 
@@ -35,9 +38,9 @@ namespace NolowaBackendDotNet.Services
                 followerIds.Add(item.Id);
             }
 
-            var followersPosts = _context.Posts.Where(x => followerIds.Contains(x.AccountId));
+            var followersPosts = _context.Posts.Where(x => followerIds.Contains(x.AccountId)).AsEnumerable();
 
-            return followersPosts.Select(x => x.ToDTO());
+            return _mapper.Map<List<PostDTO>>(followersPosts);
         }
 
         public Post InsertPost(Post post)

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using NolowaBackendDotNet.Context;
 using NolowaBackendDotNet.Core;
 using NolowaBackendDotNet.Extensions;
@@ -22,11 +23,13 @@ namespace NolowaBackendDotNet.Services
     {
         private readonly NolowaContext _context;
         private readonly IJWTTokenProvider _jwtTokenProvider;
+        private readonly IMapper _mapper;
 
-        public AccountsService(NolowaContext context, IJWTTokenProvider jwtTokenProvider)
+        public AccountsService(NolowaContext context, IJWTTokenProvider jwtTokenProvider, IMapper mapper)
         {
             _context = context;
             _jwtTokenProvider = jwtTokenProvider;
+            _mapper = mapper;
         }
 
         public async Task<AccountDTO> FindAsync(long id)
@@ -66,7 +69,7 @@ namespace NolowaBackendDotNet.Services
                 account.Posts.AddRnage(followerPost);
             }
 
-            return account.ToDTO();
+            return _mapper.Map<AccountDTO>(account);
         }
     }
 }
