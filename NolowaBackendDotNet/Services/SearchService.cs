@@ -11,8 +11,8 @@ namespace NolowaBackendDotNet.Services
 {
     public interface ISearchService
     {
-        Task<List<string>> GetSearchedKeywordsAsync(long userId);
-        Task<List<AccountDTO>> SearchUsersAsync(string accountName);
+        Task<List<string>> GetSearchedKeywordsAsync(long userID);
+        Task<List<AccountDTO>> SearchUsersAsync(long searchAccountID, string accountName);
     }
 
     public class SearchService : ISearchService
@@ -35,14 +35,35 @@ namespace NolowaBackendDotNet.Services
             return await searchedKeywords.ToListAsync();
         }
 
-        public async Task<List<AccountDTO>> SearchUsersAsync(string accountName)
+        public async Task<List<AccountDTO>> SearchUsersAsync(long userID, string accountName)
         {
             // 대소문자 무시하고 비교
             var searchedUsers = _context.Accounts.Where(x => x.AccountName.Contains(accountName))
                                                  .Include(x => x.ProfileImage)
                                                  .Select(x => x.ToDTO());
 
+
+            await SaveKeyword(userID, accountName);
+
             return await searchedUsers.ToListAsync();
+        }
+
+        private async Task SaveKeyword(long id, string keyword)
+        {
+            try
+            {
+                _context.SearchHistories.Add(new Models.SearchHistory()
+                {
+                    AccountId = id,
+                    Keyword = keyword,
+                });
+
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // what should I do?
+            }
         }
     }
 }
