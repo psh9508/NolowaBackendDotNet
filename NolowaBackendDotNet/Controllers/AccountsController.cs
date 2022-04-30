@@ -11,6 +11,7 @@ using NolowaBackendDotNet.Context;
 using NolowaBackendDotNet.Core;
 using NolowaBackendDotNet.Extensions;
 using NolowaBackendDotNet.Models;
+using NolowaBackendDotNet.Models.DTOs;
 using NolowaBackendDotNet.Services;
 
 namespace NolowaBackendDotNet.Controllers
@@ -39,6 +40,17 @@ namespace NolowaBackendDotNet.Controllers
         public async Task<ActionResult<IEnumerable<Account>>> GetAccounts()
         {
             return await _context.Accounts.ToListAsync();
+        }
+
+        [HttpPost("Save")]
+        public async Task<ActionResult<AccountDTO>> SaveNewAccount([FromBody] Account newAccount)
+        {
+            var savedAccount = await _accountsService.SaveAsync(newAccount);
+
+            if(savedAccount == null)
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+
+            return Ok(savedAccount);
         }
 
         // GET: Accounts/5

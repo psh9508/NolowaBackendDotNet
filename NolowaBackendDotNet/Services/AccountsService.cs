@@ -17,6 +17,7 @@ namespace NolowaBackendDotNet.Services
     {
         Task<AccountDTO> FindAsync(long id);
         Task<AccountDTO> LoginAsync(string email, string password);
+        Task<Account> SaveAsync(Account newAccount);
     }
 
     public class AccountsService : IAccountsService
@@ -47,6 +48,21 @@ namespace NolowaBackendDotNet.Services
             accountDTO.JWTToken = _jwtTokenProvider.GenerateJWTToken(accountDTO);
 
             return accountDTO;
+        }
+
+        public async Task<Account> SaveAsync(Account newAccount)
+        {
+            try
+            {
+                _context.Accounts.Add(newAccount);
+                await _context.SaveChangesAsync();
+
+                return await Task.FromResult(newAccount);
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
 
         private async Task<AccountDTO> FindAsync(Expression<Func<Account, bool>> whereExpression)
