@@ -39,7 +39,7 @@ namespace NolowaBackendDotNet.Services
 
         public async Task<AccountDTO> LoginAsync(string email, string password)
         {
-            var accountDTO = await FindAsync(x => x.Email == email && x.Password == password);
+            var accountDTO = await FindAsync(x => x.Email == email && x.Password == password.ToSha256());
 
             if (accountDTO == null)
                 return null;
