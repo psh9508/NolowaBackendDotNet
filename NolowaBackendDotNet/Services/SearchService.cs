@@ -69,6 +69,19 @@ namespace NolowaBackendDotNet.Services
             }
         }
 
+        private async Task RemoveSameKeyword(long id, string keyword)
+        {
+            var sameKeywords = _context.SearchHistories.Where(x => x.AccountId == id && x.Keyword == keyword);
+
+            if (sameKeywords.Count() > 0)
+            {
+                foreach (var sameKeyword in sameKeywords)
+                    _context.SearchHistories.Remove(sameKeyword);
+                
+                await _context.SaveChangesAsync();
+            }
+        }
+
         private async Task SaveNewKeyword(long id, string keyword)
         {
             _context.SearchHistories.Add(new Models.SearchHistory()
@@ -78,17 +91,6 @@ namespace NolowaBackendDotNet.Services
             });
 
             await _context.SaveChangesAsync();
-        }
-
-        private async Task RemoveSameKeyword(long id, string keyword)
-        {
-            var sameKeyword = _context.SearchHistories.Where(x => x.Id == id && x.Keyword == keyword);
-
-            if (sameKeyword.Count() > 0)
-            {
-                _context.SearchHistories.Remove(sameKeyword.FirstOrDefault());
-                await _context.SaveChangesAsync();
-            }
         }
 
         private async Task RemoveRowsExceedMaxCountAsync(long id)
@@ -106,7 +108,7 @@ namespace NolowaBackendDotNet.Services
 
         private int GetRowCountExceedMaxCount(long id)
         {
-            return _context.SearchHistories.Where(x => x.Id == id).Count() - MAX_SEARCH_COUNT;
+            return _context.SearchHistories.Where(x => x.AccountId == id).Count() - MAX_SEARCH_COUNT;
         }
     }
 }
