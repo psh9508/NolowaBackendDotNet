@@ -17,7 +17,7 @@ namespace NolowaBackendDotNet.Services
     {
         Task<AccountDTO> FindAsync(long id);
         Task<AccountDTO> LoginAsync(string email, string password);
-        Task<Account> SaveAsync(Account newAccount);
+        Task<AccountDTO> SaveAsync(Account newAccount);
     }
 
     public class AccountsService : IAccountsService
@@ -50,14 +50,19 @@ namespace NolowaBackendDotNet.Services
             return accountDTO;
         }
 
-        public async Task<Account> SaveAsync(Account newAccount)
+        public async Task<AccountDTO> SaveAsync(Account newAccount)
         {
             try
             {
+                // The Password must be encoded by SHA256
+                newAccount.Password = newAccount.Password.ToSha256();
+
                 _context.Accounts.Add(newAccount);
                 await _context.SaveChangesAsync();
 
-                return await Task.FromResult(newAccount);
+                var savedAccount = await _context.Accounts.Where(x => x.Id == newAccount.Id).SingleAsync();
+
+                return _mapper.Map<AccountDTO>(savedAccount);
             }
             catch (Exception ex)
             {
