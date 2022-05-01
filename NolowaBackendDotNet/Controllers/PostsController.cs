@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NolowaBackendDotNet.Context;
+using NolowaBackendDotNet.Core;
 using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Services;
 using System;
@@ -11,7 +12,7 @@ namespace NolowaBackendDotNet.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class PostsController : ControllerBase
+    public class PostsController : NolowaController
     {
         private readonly IAccountsService _accountsService;
         private readonly IPostsService _postsService;

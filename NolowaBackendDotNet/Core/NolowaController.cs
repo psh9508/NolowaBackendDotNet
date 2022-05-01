@@ -11,6 +11,12 @@ namespace NolowaBackendDotNet.Core
 {
     public abstract class NolowaController : ControllerBase
     {
+        [HttpGet("Alive")]
+        public ActionResult Alive()
+        {
+            return Ok($"[{DateTime.Now}] IT'S WORKING!!");
+        }
+
         protected long GetLoggedInUserAccountIDFromToken()
         {
             bool tryResult = Request.Headers.TryGetValue("Authorization", out StringValues values);

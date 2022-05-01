@@ -18,7 +18,7 @@ namespace NolowaBackendDotNet.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class AccountsController : ControllerBase
+    public class AccountsController : NolowaController
     {
         private readonly NolowaContext _context;
         private readonly IAccountsService _accountsService;
@@ -27,12 +27,6 @@ namespace NolowaBackendDotNet.Controllers
         {
             _context = context;
             _accountsService = accountsService;
-        }
-
-        [HttpGet("Alive")]
-        public ActionResult Alive()
-        {
-            return Ok();
         }
 
         // GET: api/Accounts
