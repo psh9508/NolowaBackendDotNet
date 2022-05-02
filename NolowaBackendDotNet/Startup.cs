@@ -45,8 +45,12 @@ namespace NolowaBackendDotNet
             // Add functionality to inject IOptions<T>
             services.AddOptions();
             services.Configure<JWT>(Configuration.GetSection("JWT"));
+            services.Configure<GoogleLoginConfiguration>(Configuration.GetSection("SNSLoginGroup.GoogleLogin"));
 
             AddScoped(services);
+
+            //services.AddTransient(typeof(IHttpProvider<,>), typeof(HttpProvider<,>));
+            services.AddTransient(typeof(IHttpProvider), typeof(HttpProvider));
 
             var mappingConfig = new MapperConfiguration(mc =>
             {
@@ -65,6 +69,7 @@ namespace NolowaBackendDotNet
         private void AddScoped(IServiceCollection services)
         {
             services.AddScoped<IAccountsService, AccountsService>();
+            services.AddScoped<IAuthenticationService, AuthenticationService>();
             services.AddScoped<IPostsService, PostsService>();
             services.AddScoped<ISearchService, SearchService>();
             services.AddScoped<IJWTTokenProvider, JWTTokenProvider>();

@@ -21,6 +21,9 @@ namespace NolowaBackendDotNet.Extensions
 
         public static string ToSha256(this string src)
         {
+            if (src.IsNull())
+                return null; // null 반환 허용
+
             byte[] bytes = Encoding.ASCII.GetBytes(src);
             var sha256 = SHA256.Create();
 

@@ -55,7 +55,7 @@ namespace NolowaBackendDotNet.Services
             try
             {
                 // The Password must be encoded by SHA256
-                newAccount.Password = newAccount.Password.ToSha256();
+                newAccount.Password = newAccount.Password?.ToSha256();
 
                 _context.Accounts.Add(newAccount);
                 await _context.SaveChangesAsync();
