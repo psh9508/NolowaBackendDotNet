@@ -23,12 +23,6 @@ namespace NolowaBackendDotNet.Controllers
             _postsService = postsService;
         }
 
-        [HttpGet("Alive")]
-        public ActionResult Alive()
-        {
-            return Ok();
-        }
-
         [HttpGet("{loginUserId}/Followers")]
         public async Task<ActionResult<IEnumerable<Post>>> GetFollowerPosts(int loginUserId)
         {
