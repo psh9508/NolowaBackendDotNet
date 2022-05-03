@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using NolowaBackendDotNet.Context;
 using NolowaBackendDotNet.Core;
 using NolowaBackendDotNet.Core.SNSLogin;
@@ -14,6 +15,7 @@ namespace NolowaBackendDotNet.Services
 {
     public interface IAuthenticationService
     {
+        string GetGoogleAuthorizationRequestURI();
         Task CodeCallbackAsync(string code);
         //Task SetAccessTokenAsync(string code);
         //Task<TResponse> GetUserInfoAsync<TResponse>(string uri);
@@ -22,14 +24,16 @@ namespace NolowaBackendDotNet.Services
     public class AuthenticationService : IAuthenticationService
     {
         private readonly NolowaContext _context;
-        private readonly ISNSLogin _snsLoginProvider;
         private readonly IAccountsService _accountService;
+        private readonly IConfiguration _configuration;
+        private ISNSLogin _snsLoginProvider;
 
-        public AuthenticationService(NolowaContext context, IHttpProvider httpProvider, IAccountsService accountsService)
+        public AuthenticationService(NolowaContext context, IHttpProvider httpProvider, IAccountsService accountsService, IConfiguration configuration)
         {
             _context = context;
-            _snsLoginProvider = SNSLoginProviderFactory(SNSType.Google, httpProvider);
             _accountService = accountsService;
+            _configuration = configuration;
+            _snsLoginProvider = SNSLoginProviderFactory(SNSType.Google, httpProvider);
         }
 
         private ISNSLogin SNSLoginProviderFactory(SNSType type, IHttpProvider httpProvider)
@@ -37,14 +41,19 @@ namespace NolowaBackendDotNet.Services
             switch (type)
             {
                 case SNSType.Google:
-                    return new GoogleLoginProvider(httpProvider);
+                    return new GoogleLoginProvider(httpProvider, _configuration);
                 case SNSType.Meta:
                     return null;
                 case SNSType.Kakao:
                     return null;
                 default:
-                    return null;
+                    throw new InvalidOperationException($"알 수 없는 SNSLogin 구분값[{type}]으로 데이터를 만들 수 없습니다.");
             }
+        }
+
+        public string GetGoogleAuthorizationRequestURI()
+        {
+            return _snsLoginProvider.GetGoogleAuthorizationRequestURI();
         }
 
         public async Task CodeCallbackAsync(string code)
@@ -74,7 +83,7 @@ namespace NolowaBackendDotNet.Services
             await _accountService.LoginAsync(userInfo.Email, null);
 
             // Client로 로그인 사실 전달 해야 함.
-        }
+        } 
 
         private async Task SetAccessTokenAsync(string code)
         {

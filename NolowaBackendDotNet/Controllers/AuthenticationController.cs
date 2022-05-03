@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using NolowaBackendDotNet.Core;
 using System;
 using System.Collections.Generic;
@@ -13,11 +14,19 @@ namespace NolowaBackendDotNet.Controllers
     {
         private readonly IHttpProvider _httpProvider;
         private readonly NolowaBackendDotNet.Services.IAuthenticationService _authenticationService;
+        private readonly IConfiguration _configuration;
 
-        public AuthenticationController(IHttpProvider httpProvider, NolowaBackendDotNet.Services.IAuthenticationService authenticationService)
+        public AuthenticationController(IHttpProvider httpProvider, NolowaBackendDotNet.Services.IAuthenticationService authenticationService, IConfiguration configuration)
         {
             _httpProvider = httpProvider;
             _authenticationService = authenticationService;
+            _configuration = configuration;
+        }
+
+        [HttpGet("Social/Google/AuthorizationRequestURI")]
+        public string GetGoogleAuthorizationRequestURI()
+        {
+            return _authenticationService.GetGoogleAuthorizationRequestURI();
         }
 
         /// <summary>

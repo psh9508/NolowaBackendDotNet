@@ -45,7 +45,7 @@ namespace NolowaBackendDotNet
             // Add functionality to inject IOptions<T>
             services.AddOptions();
             services.Configure<JWT>(Configuration.GetSection("JWT"));
-            services.Configure<GoogleLoginConfiguration>(Configuration.GetSection("SNSLoginGroup.GoogleLogin"));
+            services.Configure<GoogleLoginConfiguration>(Configuration.GetSection("SocialLoginGroup:GoogleLoginOption"));
 
             AddScoped(services);
 

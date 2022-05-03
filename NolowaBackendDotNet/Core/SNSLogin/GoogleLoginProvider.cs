@@ -1,18 +1,42 @@
-﻿using NolowaBackendDotNet.Core.SNSLogin.Base;
+﻿using Microsoft.Extensions.Configuration;
+using NolowaBackendDotNet.Core.SNSLogin.Base;
 using NolowaBackendDotNet.Extensions;
 using NolowaBackendDotNet.Models.SNSLogin.Google;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace NolowaBackendDotNet.Core.SNSLogin
 {
     public class GoogleLoginProvider : SNSLoginBase, ISNSLogin
     {
-        public GoogleLoginProvider(IHttpProvider httpProvider) : base(httpProvider)
-        {
+        private readonly IConfiguration _configuration;
 
+        public GoogleLoginProvider(IHttpProvider httpProvider, IConfiguration configuration) : base(httpProvider)
+        {
+            _configuration = configuration;
+        }
+
+        public string GetGoogleAuthorizationRequestURI()
+        {
+            var authorizationRequestBuilder = new StringBuilder();
+
+            authorizationRequestBuilder.Append(@"https://accounts.google.com/o/oauth2/v2/auth");
+            authorizationRequestBuilder.Append("?");
+            authorizationRequestBuilder.Append("response_type=code");
+            authorizationRequestBuilder.Append("&");
+            authorizationRequestBuilder.Append("access_type=offline");
+            authorizationRequestBuilder.Append("&");
+            //authorizationRequestBuilder.Append("scope=email%20profile");
+            authorizationRequestBuilder.Append(@"scope=https://www.googleapis.com/auth/userinfo.email+https://www.googleapis.com/auth/plus.me+https://www.googleapis.com/auth/userinfo.profile");
+            authorizationRequestBuilder.Append("&");
+            authorizationRequestBuilder.Append($"redirect_uri={_configuration.GetValue<string>("SocialLoginGroup:GoogleLoginOption:RedirectURI")}");
+            authorizationRequestBuilder.Append("&");
+            authorizationRequestBuilder.Append($"client_id={_configuration.GetValue<string>("SocialLoginGroup:GoogleLoginOption:ClientID")}");
+
+            return authorizationRequestBuilder.ToString();
         }
 
         public async Task<bool> SetAccessTokenAsync(string code)
@@ -20,13 +44,13 @@ namespace NolowaBackendDotNet.Core.SNSLogin
             var response = await _httpProvider.PostAsync<GoogleLoginAccessResponse, GoogleLoginAccessRequest>(@"https://oauth2.googleapis.com/token", new GoogleLoginAccessRequest()
             {
                 Code = code,
-                ClientID = "설정파일에서 가져올 수 있도록 할 예정",
-                ClientSecret = "설정파일에서 가져올 수 있도록 할 예정",
-                RedirectUrl = "설정파일에서 가져올 수 있도록 할 예정",
+                ClientID = _configuration.GetValue<string>("SocialLoginGroup:GoogleLoginOption:ClientID"),
+                ClientSecret = _configuration.GetValue<string>("SocialLoginGroup:GoogleLoginOption:Secret"),
+                RedirectUrl = _configuration.GetValue<string>("SocialLoginGroup:GoogleLoginOption:RedirectURI"),
             });
 
             if (response.IsNull())
-                return false;
+                return false; // AccessToken을 받아오는대 실패했습니다.
 
             _httpProvider.AddHeader("Authorization", $"Bearer {response.AccessToken}");
             
