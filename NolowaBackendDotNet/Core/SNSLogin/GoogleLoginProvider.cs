@@ -14,9 +14,9 @@ namespace NolowaBackendDotNet.Core.SNSLogin
     {
         private readonly IConfiguration _configuration;
 
-        public GoogleLoginProvider(IHttpProvider httpProvider, IConfiguration configuration) : base(httpProvider)
+        public GoogleLoginProvider()
         {
-            _configuration = configuration;
+            _configuration = InstanceResolver.Instance.Resolve<IConfiguration>();
         }
 
         public string GetGoogleAuthorizationRequestURI()

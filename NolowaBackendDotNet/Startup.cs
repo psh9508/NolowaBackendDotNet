@@ -64,6 +64,9 @@ namespace NolowaBackendDotNet
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "NolowaBackendDotNet", Version = "v1" });
             });
+
+            // 싱글톤 객체에 복사본을 만들어서 Injection을 할 수 없는 상황에서 Resolve 할 때 사용
+            InstanceResolver.Instance.ServiceProvider = services.BuildServiceProvider(); 
         }
 
         private void AddScoped(IServiceCollection services)

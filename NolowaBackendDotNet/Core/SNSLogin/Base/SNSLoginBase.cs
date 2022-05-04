@@ -16,11 +16,9 @@ namespace NolowaBackendDotNet.Core.SNSLogin.Base
     {
         protected readonly IHttpProvider _httpProvider;
 
-        public SNSLoginBase() {  }
-
-        public SNSLoginBase(IHttpProvider httpProvider)
+        public SNSLoginBase() 
         {
-            _httpProvider = httpProvider;
+            _httpProvider = InstanceResolver.Instance.Resolve<IHttpProvider>();
         }
     }
 }

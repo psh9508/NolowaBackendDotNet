@@ -33,26 +33,12 @@ namespace NolowaBackendDotNet.Services
             _context = context;
             _accountService = accountsService;
             _configuration = configuration;
-            _snsLoginProvider = SNSLoginProviderFactory(SNSType.Google, httpProvider);
-        }
-
-        private ISNSLogin SNSLoginProviderFactory(SNSType type, IHttpProvider httpProvider)
-        {
-            switch (type)
-            {
-                case SNSType.Google:
-                    return new GoogleLoginProvider(httpProvider, _configuration);
-                case SNSType.Meta:
-                    return null;
-                case SNSType.Kakao:
-                    return null;
-                default:
-                    throw new InvalidOperationException($"알 수 없는 SNSLogin 구분값[{type}]으로 데이터를 만들 수 없습니다.");
-            }
         }
 
         public string GetGoogleAuthorizationRequestURI()
         {
+            _snsLoginProvider = new GoogleLoginProvider();
+
             return _snsLoginProvider.GetGoogleAuthorizationRequestURI();
         }
 
