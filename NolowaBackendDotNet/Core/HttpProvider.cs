@@ -39,14 +39,14 @@ namespace NolowaBackendDotNet.Core
         {
             if(isOverried)
             {
-                if (_httpClient.DefaultRequestHeaders.Contains("Authorization"))
-                    _httpClient.DefaultRequestHeaders.Remove("Authorization");
+                if (_httpClient.DefaultRequestHeaders.Contains(name))
+                    _httpClient.DefaultRequestHeaders.Remove(name);
 
                 _httpClient.DefaultRequestHeaders.Add(name, value);
             }
             else
             {
-                if (_httpClient.DefaultRequestHeaders.Contains("Authorization"))
+                if (_httpClient.DefaultRequestHeaders.Contains(name))
                     return;
 
                 _httpClient.DefaultRequestHeaders.Add(name, value);
