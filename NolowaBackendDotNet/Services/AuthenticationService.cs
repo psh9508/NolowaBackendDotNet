@@ -25,14 +25,12 @@ namespace NolowaBackendDotNet.Services
     {
         private readonly NolowaContext _context;
         private readonly IAccountsService _accountService;
-        private readonly IConfiguration _configuration;
         private ISNSLogin _snsLoginProvider;
 
-        public AuthenticationService(NolowaContext context, IHttpProvider httpProvider, IAccountsService accountsService, IConfiguration configuration)
+        public AuthenticationService(NolowaContext context, IHttpProvider httpProvider, IAccountsService accountsService)
         {
             _context = context;
             _accountService = accountsService;
-            _configuration = configuration;
         }
 
         public string GetGoogleAuthorizationRequestURI()
