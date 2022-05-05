@@ -7,6 +7,7 @@ using NolowaBackendDotNet.Core.SNSLogin;
 using NolowaBackendDotNet.Core.SNSLogin.Base;
 using NolowaBackendDotNet.Extensions;
 using NolowaBackendDotNet.Models.SNSLogin.Google;
+using NolowaBackendDotNet.Services.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,15 +23,13 @@ namespace NolowaBackendDotNet.Services
         //Task<TResponse> GetUserInfoAsync<TResponse>(string uri);
     }
 
-    public class AuthenticationService : IAuthenticationService
+    public class AuthenticationService : ServiceBase<AuthenticationService>, IAuthenticationService
     {
-        private readonly NolowaContext _context;
         private readonly IAccountsService _accountService;
         private ISNSLogin _snsLoginProvider;
 
-        public AuthenticationService(NolowaContext context, IAccountsService accountsService)
+        public AuthenticationService(IAccountsService accountsService)
         {
-            _context = context;
             _accountService = accountsService;
         }
 
@@ -43,6 +42,8 @@ namespace NolowaBackendDotNet.Services
 
         public async Task CodeCallbackAsync(string code)
         {
+            _logger.LogStartTrace();
+
             await _snsLoginProvider.SetAccessTokenAsync(code);
 
             var userInfo = await _snsLoginProvider.GetUserInfoAsync<GoogleLoginUserInfoResponse>(@"https://www.googleapis.com/oauth2/v2/userinfo");
@@ -68,11 +69,15 @@ namespace NolowaBackendDotNet.Services
             await _accountService.LoginAsync(userInfo.Email, null);
 
             // Client로 로그인 사실 전달 해야 함.
+            
+            _logger.LogEndTrace();
         } 
 
         private async Task SetAccessTokenAsync(string code)
         {
+            _logger.LogStartTrace();
             await _snsLoginProvider.SetAccessTokenAsync(code);
+            _logger.LogEndTrace();
         }
 
         private async Task<TResponse> GetUserInfoAsync<TResponse>(string uri)
