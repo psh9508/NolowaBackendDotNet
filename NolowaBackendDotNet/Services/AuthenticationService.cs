@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using NolowaBackendDotNet.Context;
 using NolowaBackendDotNet.Core;
 using NolowaBackendDotNet.Core.SNSLogin;
@@ -27,7 +28,7 @@ namespace NolowaBackendDotNet.Services
         private readonly IAccountsService _accountService;
         private ISNSLogin _snsLoginProvider;
 
-        public AuthenticationService(NolowaContext context, IHttpProvider httpProvider, IAccountsService accountsService)
+        public AuthenticationService(NolowaContext context, IAccountsService accountsService)
         {
             _context = context;
             _accountService = accountsService;
