@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NolowaBackendDotNet.Context;
-using NolowaBackendDotNet.Core;
+using NolowaBackendDotNet.Core.Base;
 using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Services;
 using System;

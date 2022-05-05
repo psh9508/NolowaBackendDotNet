@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Logging;
 using Microsoft.OpenApi.Models;
 using NolowaBackendDotNet.Context;
 using NolowaBackendDotNet.Core;
+using NolowaBackendDotNet.Core.Mapper;
 using NolowaBackendDotNet.Models.Configuration;
 using NolowaBackendDotNet.Services;
 using System;

@@ -7,7 +7,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace NolowaBackendDotNet.Core
+namespace NolowaBackendDotNet.Core.Base
 {
     public abstract class NolowaController : ControllerBase
     {

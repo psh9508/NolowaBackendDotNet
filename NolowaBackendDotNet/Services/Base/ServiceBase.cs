@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using NolowaBackendDotNet.Context;
 using NolowaBackendDotNet.Core;
+using NolowaBackendDotNet.Core.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
