@@ -5,6 +5,7 @@ using NolowaBackendDotNet.Core;
 using NolowaBackendDotNet.Extensions;
 using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.DTOs;
+using NolowaBackendDotNet.Services.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,17 +21,13 @@ namespace NolowaBackendDotNet.Services
         Task<AccountDTO> SaveAsync(Account newAccount);
     }
 
-    public class AccountsService : IAccountsService
+    public class AccountsService : ServiceBase<AccountsService>, IAccountsService
     {
-        private readonly NolowaContext _context;
         private readonly IJWTTokenProvider _jwtTokenProvider;
-        private readonly IMapper _mapper;
 
-        public AccountsService(NolowaContext context, IJWTTokenProvider jwtTokenProvider, IMapper mapper)
+        public AccountsService(IJWTTokenProvider jwtTokenProvider)
         {
-            _context = context;
             _jwtTokenProvider = jwtTokenProvider;
-            _mapper = mapper;
         }
 
         public async Task<AccountDTO> FindAsync(long id)

@@ -3,6 +3,7 @@ using NolowaBackendDotNet.Context;
 using NolowaBackendDotNet.Extensions;
 using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.DTOs;
+using NolowaBackendDotNet.Services.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,15 +17,10 @@ namespace NolowaBackendDotNet.Services
         Post InsertPost(Post post);
     }
 
-    public class PostsService : IPostsService
+    public class PostsService : ServiceBase<PostsService>, IPostsService
     {
-        private readonly IMapper _mapper;
-        private readonly NolowaContext _context;
-
-        public PostsService(IMapper mapper, NolowaContext context)
+        public PostsService()
         {
-            _mapper = mapper;
-            _context = context;
         }
 
         public IEnumerable<PostDTO> GetFollowerPosts(AccountDTO loginedUserAccount)

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using NolowaBackendDotNet.Context;
 using NolowaBackendDotNet.Extensions;
 using NolowaBackendDotNet.Models.DTOs;
+using NolowaBackendDotNet.Services.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,17 +17,12 @@ namespace NolowaBackendDotNet.Services
         Task<List<AccountDTO>> SearchUsersAsync(long searchAccountID, string accountName);
     }
 
-    public class SearchService : ISearchService
+    public class SearchService : ServiceBase<SearchService>, ISearchService
     {
         private const int MAX_SEARCH_COUNT = 5;
 
-        private readonly NolowaContext _context;
-        private readonly IMapper _mapper;
-
-        public SearchService(NolowaContext context, IMapper mapper)
+        public SearchService()
         {
-            _context = context;
-            _mapper = mapper;
         }
 
         public async Task<List<string>> GetSearchedKeywordsAsync(long accountId)
