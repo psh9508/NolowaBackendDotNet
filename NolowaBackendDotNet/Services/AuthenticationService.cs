@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 using NolowaBackendDotNet.Context;
 using NolowaBackendDotNet.Core;
 using NolowaBackendDotNet.Core.SNSLogin;
@@ -17,6 +19,8 @@ namespace NolowaBackendDotNet.Services
 {
     public interface IAuthenticationService
     {
+        ISNSLogin SnsLoginProvider { get; set; }
+
         string GetGoogleAuthorizationRequestURI();
         Task CodeCallbackAsync(string code);
         //Task SetAccessTokenAsync(string code);
@@ -26,7 +30,7 @@ namespace NolowaBackendDotNet.Services
     public class AuthenticationService : ServiceBase<AuthenticationService>, IAuthenticationService
     {
         private readonly IAccountsService _accountService;
-        private ISNSLogin _snsLoginProvider;
+        public ISNSLogin SnsLoginProvider { get; set; }
 
         public AuthenticationService(IAccountsService accountsService)
         {
@@ -35,18 +39,16 @@ namespace NolowaBackendDotNet.Services
 
         public string GetGoogleAuthorizationRequestURI()
         {
-            _snsLoginProvider = new GoogleLoginProvider();
-
-            return _snsLoginProvider.GetGoogleAuthorizationRequestURI();
+            return SnsLoginProvider.GetGoogleAuthorizationRequestURI();
         }
 
         public async Task CodeCallbackAsync(string code)
         {
             _logger.LogStartTrace();
 
-            await _snsLoginProvider.SetAccessTokenAsync(code);
+            await SnsLoginProvider.SetAccessTokenAsync(code);
 
-            var userInfo = await _snsLoginProvider.GetUserInfoAsync<GoogleLoginUserInfoResponse>(@"https://www.googleapis.com/oauth2/v2/userinfo");
+            var userInfo = await SnsLoginProvider.GetUserInfoAsync<GoogleLoginUserInfoResponse>(@"https://www.googleapis.com/oauth2/v2/userinfo");
 
             if (userInfo.IsNull())
                 return;
@@ -72,17 +74,5 @@ namespace NolowaBackendDotNet.Services
             
             _logger.LogEndTrace();
         } 
-
-        private async Task SetAccessTokenAsync(string code)
-        {
-            _logger.LogStartTrace();
-            await _snsLoginProvider.SetAccessTokenAsync(code);
-            _logger.LogEndTrace();
-        }
-
-        private async Task<TResponse> GetUserInfoAsync<TResponse>(string uri)
-        {
-            return await _snsLoginProvider.GetUserInfoAsync<TResponse>(@"https://www.googleapis.com/oauth2/v2/userinfo");
-        }
     }
 }

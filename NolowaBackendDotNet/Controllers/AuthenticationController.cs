@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using NolowaBackendDotNet.Core;
 using NolowaBackendDotNet.Core.Base;
+using NolowaBackendDotNet.Core.SNSLogin;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,20 +14,17 @@ namespace NolowaBackendDotNet.Controllers
     [Route("[controller]")]
     public class AuthenticationController : NolowaController
     {
-        private readonly IHttpProvider _httpProvider;
-        private readonly NolowaBackendDotNet.Services.IAuthenticationService _authenticationService;
-        private readonly IConfiguration _configuration;
+        private readonly Services.IAuthenticationService _authenticationService;
 
-        public AuthenticationController(IHttpProvider httpProvider, NolowaBackendDotNet.Services.IAuthenticationService authenticationService, IConfiguration configuration)
+        public AuthenticationController(IHttpHeader httpHeader, Services.IAuthenticationService authenticationService)
         {
-            _httpProvider = httpProvider;
             _authenticationService = authenticationService;
-            _configuration = configuration;
         }
 
         [HttpGet("Social/Google/AuthorizationRequestURI")]
         public string GetGoogleAuthorizationRequestURI()
         {
+            _authenticationService.SnsLoginProvider = new GoogleLoginProvider();
             return _authenticationService.GetGoogleAuthorizationRequestURI();
         }
 
@@ -38,6 +36,7 @@ namespace NolowaBackendDotNet.Controllers
         [HttpGet("Social/Google/Callback/")]
         public async Task GoogleCallback([FromQuery] string code)
         {
+            _authenticationService.SnsLoginProvider = new GoogleLoginProvider();
             await _authenticationService.CodeCallbackAsync(code);
         }
     }
