@@ -9,10 +9,16 @@ using System.Threading.Tasks;
 
 namespace NolowaBackendDotNet.Core
 {
-    public interface IHttpProvider
+    public interface IHttpHeader
     {
         bool HasHeader(string name);
+        bool RemoveHeader(string name);
+        bool TryGetHeaderValue(string name, out string value);
         void AddHeader(string name, string value, bool isOverried = false);
+    }
+
+    public interface IHttpProvider : IHttpHeader
+    {
         Task<TResult> PostAsync<TResult, TRequest>(string uri, TRequest body);
         Task<TResult> GetAsync<TResult>(string uri);
     }
@@ -33,6 +39,30 @@ namespace NolowaBackendDotNet.Core
         public bool HasHeader(string name)
         {
             return _httpClient.DefaultRequestHeaders.Contains(name);
+        }
+
+        public bool RemoveHeader(string name)
+        {
+            if(HasHeader(name))
+            {
+                _httpClient.DefaultRequestHeaders.Remove(name);
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool TryGetHeaderValue(string name, out string value)
+        {
+            value = string.Empty;
+
+            if(HasHeader(name))
+            {
+                value = _httpClient.DefaultRequestHeaders.GetValues(name).Single();
+                return true;
+            }
+
+            return false;
         }
 
         public void AddHeader(string name, string value, bool isOverried = false)

@@ -36,7 +36,7 @@ namespace NolowaBackendDotNet
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers().AddNewtonsoftJson(config => config.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
-                                     
+            services.AddHttpContextAccessor();
 
             services.AddDbContext<NolowaContext>(options =>
             {
@@ -51,6 +51,7 @@ namespace NolowaBackendDotNet
             AddScoped(services);
 
             //services.AddTransient(typeof(IHttpProvider<,>), typeof(HttpProvider<,>));
+            services.AddTransient(typeof(IHttpHeader), typeof(HttpProvider));
             services.AddTransient(typeof(IHttpProvider), typeof(HttpProvider));
 
             var mappingConfig = new MapperConfiguration(mc =>
