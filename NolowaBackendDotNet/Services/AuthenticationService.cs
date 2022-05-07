@@ -8,6 +8,7 @@ using NolowaBackendDotNet.Core;
 using NolowaBackendDotNet.Core.SNSLogin;
 using NolowaBackendDotNet.Core.SNSLogin.Base;
 using NolowaBackendDotNet.Extensions;
+using NolowaBackendDotNet.Models.DTOs;
 using NolowaBackendDotNet.Models.SNSLogin.Google;
 using NolowaBackendDotNet.Services.Base;
 using System;
@@ -22,7 +23,7 @@ namespace NolowaBackendDotNet.Services
         ISNSLogin SnsLoginProvider { get; set; }
 
         string GetGoogleAuthorizationRequestURI();
-        Task CodeCallbackAsync(string code);
+        Task<AccountDTO> CodeCallbackAsync(string code);
         //Task SetAccessTokenAsync(string code);
         //Task<TResponse> GetUserInfoAsync<TResponse>(string uri);
     }
@@ -42,7 +43,7 @@ namespace NolowaBackendDotNet.Services
             return SnsLoginProvider.GetGoogleAuthorizationRequestURI();
         }
 
-        public async Task CodeCallbackAsync(string code)
+        public async Task<AccountDTO> CodeCallbackAsync(string code)
         {
             _logger.LogStartTrace();
 
@@ -51,11 +52,11 @@ namespace NolowaBackendDotNet.Services
             var userInfo = await SnsLoginProvider.GetUserInfoAsync<GoogleLoginUserInfoResponse>(@"https://www.googleapis.com/oauth2/v2/userinfo");
 
             if (userInfo.IsNull())
-                return;
+                return null;
 
-            var hasUserInDB = _context.Accounts.Any(x => x.Email == userInfo.Email);
+            var userInDB = _context.Accounts.Where(x => x.Email == userInfo.Email).FirstOrDefault()?.ToDTO();
 
-            if(hasUserInDB == false)
+            if (userInDB.IsNull())
             {
                 var savedAccount = await _accountService.SaveAsync(new Models.Account()
                 {
@@ -65,14 +66,12 @@ namespace NolowaBackendDotNet.Services
                 });
 
                 if (savedAccount.IsNull())
-                    return;
+                    return null;
+
+                userInDB = savedAccount;
             }
 
-            await _accountService.LoginAsync(userInfo.Email, null);
-
-            // Client로 로그인 사실 전달 해야 함.
-            
-            _logger.LogEndTrace();
-        } 
+            return userInDB;
+        }
     }
 }

@@ -31,7 +31,7 @@ namespace NolowaBackendDotNet.Controllers
             var posts = _postsService.GetFollowerPosts(logindedUser);
 
             if (posts.Count() <= 0)
-                return NotFound();
+                return NotFound(posts);
 
             return Ok(posts);
         }

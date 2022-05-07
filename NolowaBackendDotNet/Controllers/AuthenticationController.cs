@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using NolowaBackendDotNet.Core;
 using NolowaBackendDotNet.Core.Base;
 using NolowaBackendDotNet.Core.SNSLogin;
+using NolowaBackendDotNet.Models.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,11 +34,11 @@ namespace NolowaBackendDotNet.Controllers
         /// </summary>
         /// <param name="code">구글에게 AccessToken을 요청할 때 필요한 구글에서 발행한 code</param>
         /// <returns></returns>
-        [HttpGet("Social/Google/Callback/")]
-        public async Task GoogleCallback([FromQuery] string code)
+        [HttpGet("Social/Google/Login")]
+        public async Task<AccountDTO> GoogleCallback([FromQuery] string code)
         {
             _authenticationService.SnsLoginProvider = new GoogleLoginProvider();
-            await _authenticationService.CodeCallbackAsync(code);
+            return await _authenticationService.CodeCallbackAsync(code);
         }
     }
 }
