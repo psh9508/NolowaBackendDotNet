@@ -4,6 +4,8 @@ using NolowaBackendDotNet.Core;
 using NolowaBackendDotNet.Core.Base;
 using NolowaBackendDotNet.Core.SNSLogin;
 using NolowaBackendDotNet.Models.DTOs;
+using NolowaBackendDotNet.Models.SNSLogin.Google;
+using NolowaBackendDotNet.Models.SNSLogin.Kakao;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +28,7 @@ namespace NolowaBackendDotNet.Controllers
         public string GetGoogleAuthorizationRequestURI()
         {
             _authenticationService.SnsLoginProvider = new GoogleLoginProvider();
-            return _authenticationService.GetGoogleAuthorizationRequestURI();
+            return _authenticationService.GetAuthorizationRequestURI();
         }
 
         /// <summary>
@@ -38,7 +40,21 @@ namespace NolowaBackendDotNet.Controllers
         public async Task<AccountDTO> GoogleCallback([FromQuery] string code)
         {
             _authenticationService.SnsLoginProvider = new GoogleLoginProvider();
-            return await _authenticationService.CodeCallbackAsync(code);
+            return await _authenticationService.CodeCallbackAsync<GoogleLoginUserInfoResponse>(code, @"https://www.googleapis.com/oauth2/v2/userinfo");
+        }
+
+        [HttpGet("Social/Kakao/AuthorizationRequestURI")]
+        public string GetKakaoAuthorizationRequestURI()
+        {
+            _authenticationService.SnsLoginProvider = new KakaoLoginProvider();
+            return _authenticationService.GetAuthorizationRequestURI();
+        }
+
+        [HttpGet("Social/Kakao/Login")]
+        public async Task<AccountDTO> KakaoSocialLogin([FromQuery] string code)
+        {
+            _authenticationService.SnsLoginProvider = new KakaoLoginProvider();
+            return await _authenticationService.CodeCallbackAsync<KakaoLoginUserInfoResponse>(code, @"https://kapi.kakao.com/v2/user/me");
         }
     }
 }

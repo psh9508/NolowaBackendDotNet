@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NolowaBackendDotNet.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -19,7 +20,7 @@ namespace NolowaBackendDotNet.Core
 
     public interface IHttpProvider : IHttpHeader
     {
-        Task<TResult> PostAsync<TResult, TRequest>(string uri, TRequest body);
+        Task<TResult> PostAsync<TResult, TRequest>(string uri, TRequest body, string contentType = "application/json");
         Task<TResult> GetAsync<TResult>(string uri);
     }
 
@@ -83,23 +84,69 @@ namespace NolowaBackendDotNet.Core
             }
         }
 
+        public async Task<TResult> GetAsync<TResult>(string uri)
+        {
+            try
+            {
+                var result = await _httpClient.GetAsync(uri);
+
+                var debug = await result.Content.ReadAsStringAsync();
+
+                return await result.Content.ReadFromJsonAsync<TResult>();
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
         public async Task<TResult> PostAsync<TResult, TRequest>(string uri, TRequest body)
+        {
+            return await DoPostBodyAsync<TResult>(async () =>
+            {
+                var debugBody = JsonSerializer.Serialize(body);
+
+                return await _httpClient.PostAsJsonAsync(uri, body);
+            });
+        }
+
+        public async Task<TResult> PostAsync<TResult, TRequest>(string uri, TRequest body, string contentType = "application/json")
+        {
+            if (contentType == "application/x-www-form-urlencoded")
+            {
+                return await PostWithURLEncoding<TResult, TRequest>(uri, body);
+            }
+            else
+            {
+                return await PostWithJsonEncoding<TResult, TRequest>(uri, body);
+            }
+        }
+
+        private async Task<TResult> PostWithJsonEncoding<TResult, TRequest>(string uri, TRequest body)
         {
             return await DoPostBodyAsync<TResult>(async () =>
             {
                 var debug = JsonSerializer.Serialize(body);
 
-                return await _httpClient.PostAsJsonAsync($"{uri}", body);
+                return await _httpClient.PostAsJsonAsync(uri, body);
             });
         }
 
-        public async Task<TResult> GetAsync<TResult>(string uri)
+        private async Task<TResult> PostWithURLEncoding<TResult, TRequest>(string uri, TRequest body)
         {
-            var result = await _httpClient.GetAsync(uri);
+            return await DoPostBodyAsync<TResult>(async () =>
+            {
+                var values = body.ToDictionary();
 
-            var debug = await result.Content.ReadAsStringAsync();
+                using (var content = new FormUrlEncodedContent(values))
+                {
+                    content.Headers.Clear();
+                    content.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
 
-            return await result.Content.ReadFromJsonAsync<TResult>();
+                    return await _httpClient.PostAsync(uri, content);
+                }
+            });
         }
 
         private async Task<TResult> DoPostBodyAsync<TResult>(Func<Task<HttpResponseMessage>> postAsync)

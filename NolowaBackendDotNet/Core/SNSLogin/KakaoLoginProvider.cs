@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using NolowaBackendDotNet.Core.SNSLogin.Base;
 using NolowaBackendDotNet.Extensions;
-using NolowaBackendDotNet.Models.SNSLogin.Google;
+using NolowaBackendDotNet.Models.SNSLogin.Kakao;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,42 +10,42 @@ using System.Threading.Tasks;
 
 namespace NolowaBackendDotNet.Core.SNSLogin
 {
-    public class GoogleLoginProvider : SNSLoginBase, ISNSLogin
+    public class KakaoLoginProvider : SNSLoginBase, ISNSLogin
     {
         private readonly IConfiguration _configuration;
 
-        public GoogleLoginProvider()
+        public KakaoLoginProvider()
         {
             _configuration = InstanceResolver.Instance.Resolve<IConfiguration>();
         }
 
         public string GetAuthorizationRequestURI()
         {
-            return GetQueryString("https://accounts.google.com/o/oauth2/v2/auth", new Dictionary<string, string>()
+            return GetQueryString("https://kauth.kakao.com/oauth/authorize", new Dictionary<string, string>()
             {
                 ["response_type"] = "code",
-                ["access_type"] = "offline",
-                ["scope"] = @"https://www.googleapis.com/auth/userinfo.email+https://www.googleapis.com/auth/plus.me+https://www.googleapis.com/auth/userinfo.profile",
-                ["redirect_uri"] = _configuration.GetValue<string>("SocialLoginGroup:GoogleLoginOption:RedirectURI"),
-                ["client_id"] = _configuration.GetValue<string>("SocialLoginGroup:GoogleLoginOption:ClientID"),
+                ["client_id"] = _configuration.GetValue<string>("SocialLoginGroup:KakaoLoginOption:RestAPIKey"),
+                ["redirect_uri"] = _configuration.GetValue<string>("SocialLoginGroup:KakaoLoginOption:RedirectURI"),
             });
         }
 
         public async Task<bool> SetAccessTokenAsync(string code)
         {
-            var response = await _httpProvider.PostAsync<GoogleLoginAccessResponse, GoogleLoginAccessRequest>(@"https://oauth2.googleapis.com/token", new GoogleLoginAccessRequest()
+            if (code.IsNull())
+                return false;
+
+            var response = await _httpProvider.PostAsync<KakaoLoginAccessResponse, KakaoLoginAccessRequest>(@"https://kauth.kakao.com/oauth/token", new KakaoLoginAccessRequest()
             {
                 Code = code,
-                ClientID = _configuration.GetValue<string>("SocialLoginGroup:GoogleLoginOption:ClientID"),
-                ClientSecret = _configuration.GetValue<string>("SocialLoginGroup:GoogleLoginOption:Secret"),
-                RedirectUrl = _configuration.GetValue<string>("SocialLoginGroup:GoogleLoginOption:RedirectURI"),
-            });
+                ClientID = _configuration.GetValue<string>("SocialLoginGroup:KakaoLoginOption:RestAPIKey"),
+                RedirectUrl = _configuration.GetValue<string>("SocialLoginGroup:KakaoLoginOption:RedirectURI"),
+            }, "application/x-www-form-urlencoded");
 
             if (response.IsNull())
                 return false; // AccessToken을 받아오는대 실패했습니다.
 
             _httpProvider.AddHeader("Authorization", $"Bearer {response.AccessToken}");
-            
+
             return true;
         }
 

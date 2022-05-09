@@ -7,7 +7,7 @@ namespace NolowaBackendDotNet.Core.SNSLogin.Base
 {
     public interface ISNSLogin
     {
-        string GetGoogleAuthorizationRequestURI();
+        string GetAuthorizationRequestURI();
         Task<bool> SetAccessTokenAsync(string code);
         Task<TResponse> GetUserInfoAsync<TResponse>(string uri);
     }

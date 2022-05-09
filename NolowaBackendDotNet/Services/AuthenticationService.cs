@@ -9,7 +9,9 @@ using NolowaBackendDotNet.Core.SNSLogin;
 using NolowaBackendDotNet.Core.SNSLogin.Base;
 using NolowaBackendDotNet.Extensions;
 using NolowaBackendDotNet.Models.DTOs;
+using NolowaBackendDotNet.Models.SNSLogin;
 using NolowaBackendDotNet.Models.SNSLogin.Google;
+using NolowaBackendDotNet.Models.SNSLogin.Kakao;
 using NolowaBackendDotNet.Services.Base;
 using System;
 using System.Collections.Generic;
@@ -22,8 +24,8 @@ namespace NolowaBackendDotNet.Services
     {
         ISNSLogin SnsLoginProvider { get; set; }
 
-        string GetGoogleAuthorizationRequestURI();
-        Task<AccountDTO> CodeCallbackAsync(string code);
+        string GetAuthorizationRequestURI();
+        Task<AccountDTO> CodeCallbackAsync<TResponse>(string code, string userInfoURI) where TResponse : SNSUserResponseBase;
         //Task SetAccessTokenAsync(string code);
         //Task<TResponse> GetUserInfoAsync<TResponse>(string uri);
     }
@@ -38,18 +40,18 @@ namespace NolowaBackendDotNet.Services
             _accountService = accountsService;
         }
 
-        public string GetGoogleAuthorizationRequestURI()
+        public string GetAuthorizationRequestURI()
         {
-            return SnsLoginProvider.GetGoogleAuthorizationRequestURI();
+            return SnsLoginProvider.GetAuthorizationRequestURI();
         }
 
-        public async Task<AccountDTO> CodeCallbackAsync(string code)
+        public async Task<AccountDTO> CodeCallbackAsync<TResponse>(string code, string userInfoURI) where TResponse : SNSUserResponseBase
         {
             _logger.LogStartTrace();
 
             await SnsLoginProvider.SetAccessTokenAsync(code);
 
-            var userInfo = await SnsLoginProvider.GetUserInfoAsync<GoogleLoginUserInfoResponse>(@"https://www.googleapis.com/oauth2/v2/userinfo");
+            var userInfo = await SnsLoginProvider.GetUserInfoAsync<TResponse>(userInfoURI);
 
             if (userInfo.IsNull())
                 return null;
