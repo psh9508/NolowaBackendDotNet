@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using NolowaBackendDotNet.Core.SNSLogin.Base;
 using NolowaBackendDotNet.Extensions;
+using NolowaBackendDotNet.Models.Configuration;
 using NolowaBackendDotNet.Models.SNSLogin.Google;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,9 @@ namespace NolowaBackendDotNet.Core.SNSLogin
 {
     public class GoogleLoginProvider : SNSLoginBase, ISNSLogin
     {
+        protected override string AccessTokenURI => @"https://accounts.google.com/o/oauth2/v2/auth";
+        protected override string UserInfoURI => @"https://www.googleapis.com/oauth2/v2/userinfo";
+
         private readonly IConfiguration _configuration;
 
         public GoogleLoginProvider()
@@ -33,7 +37,7 @@ namespace NolowaBackendDotNet.Core.SNSLogin
 
         public async Task<bool> SetAccessTokenAsync(string code)
         {
-            var response = await _httpProvider.PostAsync<GoogleLoginAccessResponse, GoogleLoginAccessRequest>(@"https://oauth2.googleapis.com/token", new GoogleLoginAccessRequest()
+            var response = await _httpProvider.PostAsync<GoogleLoginAccessResponse, GoogleLoginAccessRequest>(AccessTokenURI, new GoogleLoginAccessRequest()
             {
                 Code = code,
                 ClientID = _configuration.GetValue<string>("SocialLoginGroup:GoogleLoginOption:ClientID"),
@@ -41,22 +45,12 @@ namespace NolowaBackendDotNet.Core.SNSLogin
                 RedirectUrl = _configuration.GetValue<string>("SocialLoginGroup:GoogleLoginOption:RedirectURI"),
             });
 
-            if (response.IsNull())
+            if (response.IsSuccess == false)
                 return false; // AccessToken을 받아오는대 실패했습니다.
 
-            _httpProvider.AddHeader("Authorization", $"Bearer {response.AccessToken}");
+            _httpProvider.AddHeader("Authorization", $"Bearer {response.Body.AccessToken}");
             
             return true;
-        }
-
-        public async Task<TResponse> GetUserInfoAsync<TResponse>(string uri)
-        {
-            if (_httpProvider.HasHeader("Authorization") == false)
-                throw new InvalidOperationException("AccessToken을 먼저 발급 받아야 합니다.");
-
-            var userInfo = await _httpProvider.GetAsync<TResponse>(uri);
-
-            return userInfo;
         }
     }
 }

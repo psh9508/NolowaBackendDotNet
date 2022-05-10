@@ -25,7 +25,7 @@ namespace NolowaBackendDotNet.Services
         ISNSLogin SnsLoginProvider { get; set; }
 
         string GetAuthorizationRequestURI();
-        Task<AccountDTO> CodeCallbackAsync<TResponse>(string code, string userInfoURI) where TResponse : SNSUserResponseBase;
+        Task<AccountDTO> LoginWithUserInfo<TResponse>(string code) where TResponse : SNSUserResponseBase;
         //Task SetAccessTokenAsync(string code);
         //Task<TResponse> GetUserInfoAsync<TResponse>(string uri);
     }
@@ -45,13 +45,16 @@ namespace NolowaBackendDotNet.Services
             return SnsLoginProvider.GetAuthorizationRequestURI();
         }
 
-        public async Task<AccountDTO> CodeCallbackAsync<TResponse>(string code, string userInfoURI) where TResponse : SNSUserResponseBase
+        public async Task<AccountDTO> LoginWithUserInfo<TResponse>(string code) where TResponse : SNSUserResponseBase
         {
             _logger.LogStartTrace();
 
-            await SnsLoginProvider.SetAccessTokenAsync(code);
+            bool hasAccessToken = await SnsLoginProvider.SetAccessTokenAsync(code);
 
-            var userInfo = await SnsLoginProvider.GetUserInfoAsync<TResponse>(userInfoURI);
+            if(hasAccessToken == false)
+                return null;
+
+            var userInfo = await SnsLoginProvider.GetUserInfoAsync<TResponse>();
 
             if (userInfo.IsNull())
                 return null;

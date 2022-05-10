@@ -9,6 +9,6 @@ namespace NolowaBackendDotNet.Core.SNSLogin.Base
     {
         string GetAuthorizationRequestURI();
         Task<bool> SetAccessTokenAsync(string code);
-        Task<TResponse> GetUserInfoAsync<TResponse>(string uri);
+        Task<TResponse> GetUserInfoAsync<TResponse>();
     }
 }

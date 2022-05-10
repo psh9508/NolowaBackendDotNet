@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using NolowaBackendDotNet.Core.SNSLogin.Base;
 using NolowaBackendDotNet.Extensions;
+using NolowaBackendDotNet.Models.Configuration;
 using NolowaBackendDotNet.Models.SNSLogin.Kakao;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,9 @@ namespace NolowaBackendDotNet.Core.SNSLogin
 {
     public class KakaoLoginProvider : SNSLoginBase, ISNSLogin
     {
+        protected override string AccessTokenURI => @"https://kauth.kakao.com/oauth/authorize";
+        protected override string UserInfoURI => @"https://kapi.kakao.com/v2/user/me";
+
         private readonly IConfiguration _configuration;
 
         public KakaoLoginProvider()
@@ -31,32 +35,19 @@ namespace NolowaBackendDotNet.Core.SNSLogin
 
         public async Task<bool> SetAccessTokenAsync(string code)
         {
-            if (code.IsNull())
-                return false;
-
-            var response = await _httpProvider.PostAsync<KakaoLoginAccessResponse, KakaoLoginAccessRequest>(@"https://kauth.kakao.com/oauth/token", new KakaoLoginAccessRequest()
+            var response = await _httpProvider.PostAsync<KakaoLoginAccessResponse, KakaoLoginAccessRequest>(AccessTokenURI, new KakaoLoginAccessRequest()
             {
                 Code = code,
                 ClientID = _configuration.GetValue<string>("SocialLoginGroup:KakaoLoginOption:RestAPIKey"),
                 RedirectUrl = _configuration.GetValue<string>("SocialLoginGroup:KakaoLoginOption:RedirectURI"),
             }, "application/x-www-form-urlencoded");
 
-            if (response.IsNull())
+            if (response.IsSuccess == false)
                 return false; // AccessToken을 받아오는대 실패했습니다.
 
-            _httpProvider.AddHeader("Authorization", $"Bearer {response.AccessToken}");
+            _httpProvider.AddHeader("Authorization", $"Bearer {response.Body.AccessToken}");
 
             return true;
-        }
-
-        public async Task<TResponse> GetUserInfoAsync<TResponse>(string uri)
-        {
-            if (_httpProvider.HasHeader("Authorization") == false)
-                throw new InvalidOperationException("AccessToken을 먼저 발급 받아야 합니다.");
-
-            var userInfo = await _httpProvider.GetAsync<TResponse>(uri);
-
-            return userInfo;
         }
     }
 }

@@ -19,7 +19,7 @@ namespace NolowaBackendDotNet.Controllers
     {
         private readonly Services.IAuthenticationService _authenticationService;
 
-        public AuthenticationController(IHttpHeader httpHeader, Services.IAuthenticationService authenticationService)
+        public AuthenticationController(Services.IAuthenticationService authenticationService)
         {
             _authenticationService = authenticationService;
         }
@@ -31,16 +31,11 @@ namespace NolowaBackendDotNet.Controllers
             return _authenticationService.GetAuthorizationRequestURI();
         }
 
-        /// <summary>
-        /// 구글 Auth를 통해 Access를 요청하면 이곳으로 콜백이 들어온다.
-        /// </summary>
-        /// <param name="code">구글에게 AccessToken을 요청할 때 필요한 구글에서 발행한 code</param>
-        /// <returns></returns>
         [HttpGet("Social/Google/Login")]
-        public async Task<AccountDTO> GoogleCallback([FromQuery] string code)
+        public async Task<AccountDTO> GoogleSocialLogin([FromQuery] string code)
         {
             _authenticationService.SnsLoginProvider = new GoogleLoginProvider();
-            return await _authenticationService.CodeCallbackAsync<GoogleLoginUserInfoResponse>(code, @"https://www.googleapis.com/oauth2/v2/userinfo");
+            return await _authenticationService.LoginWithUserInfo<GoogleLoginUserInfoResponse>(code);
         }
 
         [HttpGet("Social/Kakao/AuthorizationRequestURI")]
@@ -54,7 +49,7 @@ namespace NolowaBackendDotNet.Controllers
         public async Task<AccountDTO> KakaoSocialLogin([FromQuery] string code)
         {
             _authenticationService.SnsLoginProvider = new KakaoLoginProvider();
-            return await _authenticationService.CodeCallbackAsync<KakaoLoginUserInfoResponse>(code, @"https://kapi.kakao.com/v2/user/me");
+            return await _authenticationService.LoginWithUserInfo<KakaoLoginUserInfoResponse>(code);
         }
     }
 }

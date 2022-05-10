@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using NolowaBackendDotNet.Models.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,15 +9,11 @@ using System.Threading.Tasks;
 
 namespace NolowaBackendDotNet.Core.SNSLogin.Base
 {
-    public enum SNSType
+    public abstract class SNSLoginBase
     {
-        Google,
-        Meta,
-        Kakao,
-    }
+        abstract protected string AccessTokenURI { get; }
+        abstract protected string UserInfoURI { get; }
 
-    public class SNSLoginBase 
-    {
         protected readonly IHttpProvider _httpProvider;
 
         public SNSLoginBase() 
@@ -22,7 +21,7 @@ namespace NolowaBackendDotNet.Core.SNSLogin.Base
             _httpProvider = InstanceResolver.Instance.Resolve<IHttpProvider>();
         }
 
-        protected string GetQueryString(string uri, Dictionary<string, string> values)
+        public string GetQueryString(string uri, Dictionary<string, string> values)
         {
             if (uri[^1] == '/')
                 uri = uri.Remove(uri.Length - 1);
@@ -39,6 +38,19 @@ namespace NolowaBackendDotNet.Core.SNSLogin.Base
             }
 
             return sb.ToString();
+        }
+
+        public async Task<TResponse> GetUserInfoAsync<TResponse>()
+        {
+            if (_httpProvider.HasHeader("Authorization") == false)
+                throw new InvalidOperationException("AccessToken을 먼저 발급 받아야 합니다.");
+
+            var userInfoResponse = await _httpProvider.GetAsync<TResponse>(UserInfoURI);
+
+            if(userInfoResponse.IsSuccess == false)
+                return default(TResponse);
+
+            return userInfoResponse.Body;
         }
     }
 }

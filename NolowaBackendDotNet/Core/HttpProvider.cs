@@ -20,8 +20,8 @@ namespace NolowaBackendDotNet.Core
 
     public interface IHttpProvider : IHttpHeader
     {
-        Task<TResult> PostAsync<TResult, TRequest>(string uri, TRequest body, string contentType = "application/json");
-        Task<TResult> GetAsync<TResult>(string uri);
+        Task<(bool IsSuccess, TResult Body)> PostAsync<TResult, TRequest>(string uri, TRequest body, string contentType = "application/json");
+        Task<(bool IsSuccess, TResult Body)> GetAsync<TResult>(string uri);
     }
 
     public class HttpProvider : IHttpProvider
@@ -84,7 +84,7 @@ namespace NolowaBackendDotNet.Core
             }
         }
 
-        public async Task<TResult> GetAsync<TResult>(string uri)
+        public async Task<(bool IsSuccess, TResult Body)> GetAsync<TResult>(string uri)
         {
             try
             {
@@ -92,16 +92,15 @@ namespace NolowaBackendDotNet.Core
 
                 var debug = await result.Content.ReadAsStringAsync();
 
-                return await result.Content.ReadFromJsonAsync<TResult>();
+                return (true, await result.Content.ReadFromJsonAsync<TResult>());
             }
             catch (Exception ex)
             {
-
                 throw;
             }
         }
 
-        public async Task<TResult> PostAsync<TResult, TRequest>(string uri, TRequest body)
+        public async Task<(bool IsSuccess, TResult Body)> PostAsync<TResult, TRequest>(string uri, TRequest body)
         {
             return await DoPostBodyAsync<TResult>(async () =>
             {
@@ -111,7 +110,7 @@ namespace NolowaBackendDotNet.Core
             });
         }
 
-        public async Task<TResult> PostAsync<TResult, TRequest>(string uri, TRequest body, string contentType = "application/json")
+        public async Task<(bool IsSuccess, TResult Body)> PostAsync<TResult, TRequest>(string uri, TRequest body, string contentType = "application/json")
         {
             if (contentType == "application/x-www-form-urlencoded")
             {
@@ -123,7 +122,7 @@ namespace NolowaBackendDotNet.Core
             }
         }
 
-        private async Task<TResult> PostWithJsonEncoding<TResult, TRequest>(string uri, TRequest body)
+        private async Task<(bool IsSuccess, TResult Body)> PostWithJsonEncoding<TResult, TRequest>(string uri, TRequest body)
         {
             return await DoPostBodyAsync<TResult>(async () =>
             {
@@ -133,7 +132,7 @@ namespace NolowaBackendDotNet.Core
             });
         }
 
-        private async Task<TResult> PostWithURLEncoding<TResult, TRequest>(string uri, TRequest body)
+        private async Task<(bool IsSuccess, TResult Body)> PostWithURLEncoding<TResult, TRequest>(string uri, TRequest body)
         {
             return await DoPostBodyAsync<TResult>(async () =>
             {
@@ -149,7 +148,7 @@ namespace NolowaBackendDotNet.Core
             });
         }
 
-        private async Task<TResult> DoPostBodyAsync<TResult>(Func<Task<HttpResponseMessage>> postAsync)
+        private async Task<(bool IsSuccess, TResult Body)> DoPostBodyAsync<TResult>(Func<Task<HttpResponseMessage>> postAsync)
         {
             try
             {
@@ -158,17 +157,17 @@ namespace NolowaBackendDotNet.Core
                 var debug = await response.Content.ReadAsStringAsync();
 
                 if(response.IsSuccessStatusCode == false)
-                    return default(TResult);
+                    return (false, default(TResult));
 
-                return await response.Content.ReadFromJsonAsync<TResult>();
+                return (true, await response.Content.ReadFromJsonAsync<TResult>());
             }
             catch (NotSupportedException) // When content type is not valid
             {
-                return default(TResult);
+                return (false, default(TResult));
             }
             catch (JsonException ex) // Invalid JSON
             {
-                return default(TResult);
+                return (false, default(TResult));
             }
         }
     }

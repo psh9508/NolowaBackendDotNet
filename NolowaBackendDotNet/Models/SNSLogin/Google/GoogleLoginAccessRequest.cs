@@ -7,10 +7,8 @@ using System.Threading.Tasks;
 
 namespace NolowaBackendDotNet.Models.SNSLogin.Google
 {
-    public class GoogleLoginAccessRequest : ISNSRequestModel
+    public class GoogleLoginAccessRequest
     {
-        public string URI => "https://oauth2.googleapis.com/token";
-
         [JsonPropertyName("code")]
         public string Code { get; set; } = string.Empty;
 
