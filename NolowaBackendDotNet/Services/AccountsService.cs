@@ -5,6 +5,7 @@ using NolowaBackendDotNet.Core;
 using NolowaBackendDotNet.Extensions;
 using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.DTOs;
+using NolowaBackendDotNet.Models.IF;
 using NolowaBackendDotNet.Services.Base;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,9 @@ namespace NolowaBackendDotNet.Services
         Task<AccountDTO> FindAsync(long id);
         Task<AccountDTO> LoginAsync(string email, string password);
         Task<AccountDTO> SaveAsync(Account newAccount);
+        Task<bool> HasFollowedAsync(IFFollowModel data);
+        Task<bool> FollowAsync(IFFollowModel data);
+        Task<bool> UnFollowAsync(IFFollowModel data);
     }
 
     public class AccountsService : ServiceBase<AccountsService>, IAccountsService
@@ -66,11 +70,10 @@ namespace NolowaBackendDotNet.Services
                 return null;
             }
         }
-
         private async Task<AccountDTO> FindAsync(Expression<Func<Account, bool>> whereExpression)
         {
             var account = await _context.Accounts.Where(whereExpression)
-                                               .Include(account => account.FollowerSourceAccounts) 
+                                               .Include(account => account.FollowerSourceAccounts)
                                                .Include(account => account.ProfileImage)
                                                .FirstOrDefaultAsync();
             if (account == null)
@@ -88,6 +91,52 @@ namespace NolowaBackendDotNet.Services
             }
 
             return _mapper.Map<AccountDTO>(account);
+        }
+
+        public Task<bool> HasFollowedAsync(IFFollowModel data)
+        {
+            return _context.Followers.AnyAsync(x => x.SourceAccountId == data.SourceID && x.DestinationAccountId == data.DestID);
+        }
+
+        public async Task<bool> FollowAsync(IFFollowModel data)
+        {
+            try
+            {
+                var newFollowRow = new Follower()
+                {
+                    SourceAccountId = data.SourceID,
+                    DestinationAccountId = data.DestID,
+                };
+
+                await _context.Followers.AddAsync(newFollowRow);
+                var chagedRowNum = await _context.SaveChangesAsync();
+
+                return chagedRowNum > 0;
+            }
+            catch (Exception ex)
+            {   
+                return false;
+            }
+        }
+
+        public async Task<bool> UnFollowAsync(IFFollowModel data)
+        {
+            try
+            {
+                var unfollowData = await _context.Followers.FirstOrDefaultAsync(x => x.SourceAccountId == data.SourceID && x.DestinationAccountId == data.DestID);
+
+                if (unfollowData.IsNull())
+                    throw new InvalidOperationException("삭제할 팔로우 상태가 없습니다.");
+
+                _context.Followers.Remove(unfollowData);
+                var chagedRowNum = await _context.SaveChangesAsync();
+
+                return chagedRowNum > 0;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
     }
 }

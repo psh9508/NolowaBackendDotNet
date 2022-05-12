@@ -12,6 +12,7 @@ using NolowaBackendDotNet.Core.Base;
 using NolowaBackendDotNet.Extensions;
 using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.DTOs;
+using NolowaBackendDotNet.Models.IF;
 using NolowaBackendDotNet.Services;
 
 namespace NolowaBackendDotNet.Controllers
@@ -134,6 +135,15 @@ namespace NolowaBackendDotNet.Controllers
             }
 
             return Ok(account);
+        }
+
+        [HttpPost("Follow")]
+        public async Task<ActionResult<bool>> ChangeFollowState([FromBody] IFFollowModel data)
+        {
+            bool result = await _accountsService.HasFollowedAsync(data) ? await _accountsService.UnFollowAsync(data) 
+                                                                        : await _accountsService.FollowAsync(data);
+
+            return result ? Ok(result) : BadRequest(result);
         }
 
         private bool AccountExists(long id)
