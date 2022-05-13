@@ -140,8 +140,12 @@ namespace NolowaBackendDotNet.Controllers
         [HttpPost("Follow")]
         public async Task<ActionResult<bool>> ChangeFollowState([FromBody] IFFollowModel data)
         {
-            bool result = await _accountsService.HasFollowedAsync(data) ? await _accountsService.UnFollowAsync(data) 
-                                                                        : await _accountsService.FollowAsync(data);
+            bool result;
+
+            if (await _accountsService.HasFollowedAsync(data))
+                result = await _accountsService.UnFollowAsync(data);
+            else
+                result = await _accountsService.FollowAsync(data);
 
             return result ? Ok(result) : BadRequest(result);
         }
