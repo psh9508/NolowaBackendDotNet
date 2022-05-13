@@ -32,7 +32,7 @@ namespace NolowaBackendDotNet.Controllers
 
         // GET: api/Accounts
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Account>>> GetAccounts()
+        public async Task<ActionResult<IEnumerable<Account>>> GetAccountsAsync()
         {
             return await _context.Accounts.ToListAsync();
         }
@@ -50,7 +50,7 @@ namespace NolowaBackendDotNet.Controllers
 
         // GET: Accounts/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Account>> GetAccount(long id)
+        public async Task<ActionResult<Account>> GetAccountAsync(long id)
         {
             var account = await _context.Accounts.FindAsync(id);
 
@@ -65,7 +65,7 @@ namespace NolowaBackendDotNet.Controllers
         // PUT: Accounts/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAccount(long id, Account account)
+        public async Task<IActionResult> PutAccountAsync(long id, Account account)
         {
             if (id != account.Id)
             {
@@ -122,7 +122,7 @@ namespace NolowaBackendDotNet.Controllers
 
         [HttpPost("Login")]
         [AllowAnonymous]
-        public async Task<ActionResult<Account>> Login([FromBody] Newtonsoft.Json.Linq.JObject jsonData)
+        public async Task<ActionResult<Account>> LoginAsync([FromBody] Newtonsoft.Json.Linq.JObject jsonData)
         {
             var id = jsonData.Value<string>("id");
             var password = jsonData.Value<string>("password");
@@ -138,7 +138,7 @@ namespace NolowaBackendDotNet.Controllers
         }
 
         [HttpPost("Follow")]
-        public async Task<ActionResult<bool>> ChangeFollowState([FromBody] IFFollowModel data)
+        public async Task<ActionResult<bool>> ChangeFollowStateAsync([FromBody] IFFollowModel data)
         {
             bool result;
 
