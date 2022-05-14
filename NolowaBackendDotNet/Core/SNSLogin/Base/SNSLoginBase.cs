@@ -11,6 +11,7 @@ namespace NolowaBackendDotNet.Core.SNSLogin.Base
 {
     public abstract class SNSLoginBase
     {
+        abstract protected string AuthenticationPageURI { get; }
         abstract protected string AccessTokenURI { get; }
         abstract protected string UserInfoURI { get; }
 
@@ -23,6 +24,7 @@ namespace NolowaBackendDotNet.Core.SNSLogin.Base
 
         public string GetQueryString(string uri, Dictionary<string, string> values)
         {
+            // When It's ended with '/'
             if (uri[^1] == '/')
                 uri = uri.Remove(uri.Length - 1);
 

@@ -13,7 +13,8 @@ namespace NolowaBackendDotNet.Core.SNSLogin
 {
     public class KakaoLoginProvider : SNSLoginBase, ISNSLogin
     {
-        protected override string AccessTokenURI => @"https://kauth.kakao.com/oauth/authorize";
+        protected override string AuthenticationPageURI => @"https://kauth.kakao.com/oauth/authorize";
+        protected override string AccessTokenURI => @"https://kauth.kakao.com/oauth/token";
         protected override string UserInfoURI => @"https://kapi.kakao.com/v2/user/me";
 
         private readonly IConfiguration _configuration;

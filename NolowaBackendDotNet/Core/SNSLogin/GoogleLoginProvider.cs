@@ -13,7 +13,8 @@ namespace NolowaBackendDotNet.Core.SNSLogin
 {
     public class GoogleLoginProvider : SNSLoginBase, ISNSLogin
     {
-        protected override string AccessTokenURI => @"https://accounts.google.com/o/oauth2/v2/auth";
+        protected override string AuthenticationPageURI => @"https://accounts.google.com/o/oauth2/v2/auth";
+        protected override string AccessTokenURI => @"https://oauth2.googleapis.com/token";
         protected override string UserInfoURI => @"https://www.googleapis.com/oauth2/v2/userinfo";
 
         private readonly IConfiguration _configuration;
@@ -25,7 +26,7 @@ namespace NolowaBackendDotNet.Core.SNSLogin
 
         public string GetAuthorizationRequestURI()
         {
-            return GetQueryString("https://accounts.google.com/o/oauth2/v2/auth", new Dictionary<string, string>()
+            return GetQueryString(AuthenticationPageURI, new Dictionary<string, string>()
             {
                 ["response_type"] = "code",
                 ["access_type"] = "offline",
