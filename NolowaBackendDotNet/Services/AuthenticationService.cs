@@ -76,6 +76,8 @@ namespace NolowaBackendDotNet.Services
                 userInDB = savedAccount;
             }
 
+            userInDB.JWTToken = _jwtTokenProvider.GenerateJWTToken(userInDB);
+
             return userInDB;
         }
     }

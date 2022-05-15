@@ -14,11 +14,13 @@ namespace NolowaBackendDotNet.Services.Base
     {
         protected readonly NolowaContext _context;
         protected readonly IMapper _mapper;
+        protected readonly IJWTTokenProvider _jwtTokenProvider;
 
         public ServiceBase()
         {
             _context = InstanceResolver.Instance.Resolve<NolowaContext>();
             _mapper = InstanceResolver.Instance.Resolve<IMapper>();
+            _jwtTokenProvider = InstanceResolver.Instance.Resolve<IJWTTokenProvider>();
         }
     }
 }
