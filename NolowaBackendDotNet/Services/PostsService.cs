@@ -25,14 +25,10 @@ namespace NolowaBackendDotNet.Services
 
         public IEnumerable<PostDTO> GetFollowerPosts(AccountDTO loginedUserAccount)
         {
-            var followerIds = new List<long>() {
-                loginedUserAccount.Id,
-            };
+            var followerIds = new List<long>();
 
-            foreach (var item in loginedUserAccount.Followers)
-            {
-                followerIds.Add(item.Id);
-            }
+            followerIds.Add(loginedUserAccount.Id);
+            followerIds.AddRange(loginedUserAccount.Followers.Select(x => x.Id));
 
             var followersPosts = _context.Posts.Where(x => followerIds.Contains(x.AccountId)).AsEnumerable();
 
