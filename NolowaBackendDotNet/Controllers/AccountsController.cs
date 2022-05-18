@@ -138,16 +138,16 @@ namespace NolowaBackendDotNet.Controllers
         }
 
         [HttpPost("Follow")]
-        public async Task<ActionResult<bool>> ChangeFollowStateAsync([FromBody] IFFollowModel data)
+        public async Task<ActionResult<FollowerDTO>> ChangeFollowStateAsync([FromBody] IFFollowModel data)
         {
-            bool result;
+            FollowerDTO result;
 
             if (await _accountsService.HasFollowedAsync(data))
                 result = await _accountsService.UnFollowAsync(data);
             else
                 result = await _accountsService.FollowAsync(data);
 
-            return result ? Ok(result) : BadRequest(result);
+            return result.IsNotNull() ? Ok(result) : BadRequest(result);
         }
 
         private bool AccountExists(long id)

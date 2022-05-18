@@ -21,8 +21,8 @@ namespace NolowaBackendDotNet.Services
         Task<AccountDTO> LoginAsync(string email, string password);
         Task<AccountDTO> SaveAsync(Account newAccount);
         Task<bool> HasFollowedAsync(IFFollowModel data);
-        Task<bool> FollowAsync(IFFollowModel data);
-        Task<bool> UnFollowAsync(IFFollowModel data);
+        Task<FollowerDTO> FollowAsync(IFFollowModel data);
+        Task<FollowerDTO> UnFollowAsync(IFFollowModel data);
     }
 
     public class AccountsService : ServiceBase<AccountsService>, IAccountsService
@@ -98,7 +98,7 @@ namespace NolowaBackendDotNet.Services
             return _context.Followers.AnyAsync(x => x.SourceAccountId == data.SourceID && x.DestinationAccountId == data.DestID);
         }
 
-        public async Task<bool> FollowAsync(IFFollowModel data)
+        public async Task<FollowerDTO> FollowAsync(IFFollowModel data)
         {
             try
             {
@@ -109,17 +109,19 @@ namespace NolowaBackendDotNet.Services
                 };
 
                 await _context.Followers.AddAsync(newFollowRow);
-                var chagedRowNum = await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
 
-                return chagedRowNum > 0;
+                var savedData = await _context.Followers.FirstAsync(x => x.Id == newFollowRow.Id);
+
+                return _mapper.Map<FollowerDTO>(savedData);
             }
             catch (Exception ex)
             {   
-                return false;
+                return null;
             }
         }
 
-        public async Task<bool> UnFollowAsync(IFFollowModel data)
+        public async Task<FollowerDTO> UnFollowAsync(IFFollowModel data)
         {
             try
             {
@@ -131,11 +133,14 @@ namespace NolowaBackendDotNet.Services
                 _context.Followers.Remove(unfollowData);
                 var chagedRowNum = await _context.SaveChangesAsync();
 
-                return chagedRowNum > 0;
+                if (chagedRowNum <= 0)
+                    return null;
+
+                return _mapper.Map<FollowerDTO>(unfollowData);
             }
             catch (Exception ex)
             {
-                return false;
+                return null;
             }
         }
     }
