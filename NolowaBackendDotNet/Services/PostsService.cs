@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using NolowaBackendDotNet.Context;
 using NolowaBackendDotNet.Extensions;
 using NolowaBackendDotNet.Models;
@@ -30,7 +31,10 @@ namespace NolowaBackendDotNet.Services
             followerIds.Add(loginedUserAccount.Id);
             followerIds.AddRange(loginedUserAccount.Followers.Select(x => x.Id));
 
-            var followersPosts = _context.Posts.Where(x => followerIds.Contains(x.AccountId)).AsEnumerable();
+            var followersPosts = _context.Posts.Where(x => followerIds.Contains(x.AccountId))
+                                               .Include(x => x.Account)
+                                               .ThenInclude(x => x.ProfileImage)
+                                               .AsEnumerable();
 
             return _mapper.Map<List<PostDTO>>(followersPosts);
         }

@@ -41,6 +41,7 @@ namespace NolowaBackendDotNet
             services.AddDbContext<NolowaContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("NolowaContext"));
+                options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             });
 
             // Add functionality to inject IOptions<T>
