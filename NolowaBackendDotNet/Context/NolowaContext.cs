@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
-using NolowaBackendDotNet.Models;
+using NolowaBackendDotNet;
 
 #nullable disable
 
@@ -22,13 +22,14 @@ namespace NolowaBackendDotNet.Context
         public virtual DbSet<Follower> Followers { get; set; }
         public virtual DbSet<Post> Posts { get; set; }
         public virtual DbSet<ProfileImage> ProfileImages { get; set; }
+        public virtual DbSet<ProfileInfo> ProfileInfos { get; set; }
         public virtual DbSet<SearchHistory> SearchHistories { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("Name=NolowaContext");
+                optionsBuilder.UseSqlServer("name=connectionstrings:NolowaContext");
             }
         }
 
@@ -86,6 +87,9 @@ namespace NolowaBackendDotNet.Context
             {
                 entity.ToTable("Follower");
 
+                entity.HasIndex(e => new { e.SourceAccountId, e.DestinationAccountId }, "UQ__Follower__SOURCE,DEST")
+                    .IsUnique();
+
                 entity.Property(e => e.Id).HasColumnName("ID");
 
                 entity.Property(e => e.DestinationAccountId).HasColumnName("DESTINATION_ACCOUNT_ID");
@@ -132,7 +136,7 @@ namespace NolowaBackendDotNet.Context
 
             modelBuilder.Entity<ProfileImage>(entity =>
             {
-                entity.ToTable("Profile_Image");
+                entity.ToTable("ProfileImage");
 
                 entity.Property(e => e.Id).HasColumnName("ID");
 
@@ -146,9 +150,24 @@ namespace NolowaBackendDotNet.Context
                     .HasColumnName("URL");
             });
 
+            modelBuilder.Entity<ProfileInfo>(entity =>
+            {
+                entity.ToTable("ProfileInfo");
+
+                entity.Property(e => e.BackgroundImg).HasMaxLength(500);
+
+                entity.Property(e => e.Message).HasMaxLength(255);
+
+                entity.HasOne(d => d.Account)
+                    .WithMany(p => p.ProfileInfos)
+                    .HasForeignKey(d => d.AccountId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_ProfileInfo_Account");
+            });
+
             modelBuilder.Entity<SearchHistory>(entity =>
             {
-                entity.ToTable("Search_History");
+                entity.ToTable("SearchHistory");
 
                 entity.Property(e => e.Id).HasColumnName("ID");
 

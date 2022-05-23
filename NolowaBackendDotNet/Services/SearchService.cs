@@ -80,7 +80,7 @@ namespace NolowaBackendDotNet.Services
 
         private async Task SaveNewKeyword(long id, string keyword)
         {
-            _context.SearchHistories.Add(new Models.SearchHistory()
+            _context.SearchHistories.Add(new SearchHistory()
             {
                 AccountId = id,
                 Keyword = keyword,

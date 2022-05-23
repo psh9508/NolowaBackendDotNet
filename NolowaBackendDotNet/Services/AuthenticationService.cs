@@ -63,7 +63,7 @@ namespace NolowaBackendDotNet.Services
 
             if (userInDB.IsNull())
             {
-                var savedAccount = await _accountService.SaveAsync(new Models.Account()
+                var savedAccount = await _accountService.SaveAsync(new Account()
                 {
                     Email = userInfo.Email,
                     AccountName = userInfo.Name,
