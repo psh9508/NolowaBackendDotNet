@@ -28,7 +28,7 @@ namespace NolowaBackendDotNet.Controllers
         [HttpGet("Social/{snsProviderName}/AuthorizationRequestURI")]
         public string GetGoogleAuthorizationRequestURI(string snsProviderName)
         {
-            _authenticationService.SnsLoginProvider = GetSNSLoginProvider(snsProviderName);
+            _authenticationService.SnsLoginProvider = SNSLoginProviderFactory(snsProviderName);
             return _authenticationService.GetAuthorizationRequestURI();
         }
 
@@ -46,7 +46,7 @@ namespace NolowaBackendDotNet.Controllers
             return await _authenticationService.LoginWithUserInfo<KakaoLoginUserInfoResponse>(code);
         }
 
-        private ISNSLogin GetSNSLoginProvider(string snsProviderName)
+        private ISNSLogin SNSLoginProviderFactory(string snsProviderName)
         {
             switch (snsProviderName.ToLower())
             {
