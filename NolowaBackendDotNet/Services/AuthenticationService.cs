@@ -26,8 +26,6 @@ namespace NolowaBackendDotNet.Services
 
         string GetAuthorizationRequestURI();
         Task<AccountDTO> LoginWithUserInfo<TResponse>(string code) where TResponse : SNSUserResponseBase;
-        //Task SetAccessTokenAsync(string code);
-        //Task<TResponse> GetUserInfoAsync<TResponse>(string uri);
     }
 
     public class AuthenticationService : ServiceBase<AuthenticationService>, IAuthenticationService
