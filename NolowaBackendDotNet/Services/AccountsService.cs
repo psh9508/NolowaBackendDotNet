@@ -93,9 +93,9 @@ namespace NolowaBackendDotNet.Services
             return _mapper.Map<AccountDTO>(account);
         }
 
-        public Task<bool> HasFollowedAsync(IFFollowModel data)
+        public async Task<bool> HasFollowedAsync(IFFollowModel data)
         {
-            return _context.Followers.AnyAsync(x => x.SourceAccountId == data.SourceID && x.DestinationAccountId == data.DestID);
+            return await _context.Followers.AnyAsync(x => x.SourceAccountId == data.SourceID && x.DestinationAccountId == data.DestID);
         }
 
         public async Task<FollowerDTO> FollowAsync(IFFollowModel data)
@@ -131,9 +131,9 @@ namespace NolowaBackendDotNet.Services
                     throw new InvalidOperationException("삭제할 팔로우 상태가 없습니다.");
 
                 _context.Followers.Remove(unfollowData);
-                var chagedRowNum = await _context.SaveChangesAsync();
+                var changedRowNum = await _context.SaveChangesAsync();
 
-                if (chagedRowNum <= 0)
+                if (changedRowNum <= 0)
                     return null;
 
                 return _mapper.Map<FollowerDTO>(unfollowData);
