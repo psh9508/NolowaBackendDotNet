@@ -8,6 +8,7 @@ using NolowaBackendDotNet.Core;
 using NolowaBackendDotNet.Core.SNSLogin;
 using NolowaBackendDotNet.Core.SNSLogin.Base;
 using NolowaBackendDotNet.Extensions;
+using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.DTOs;
 using NolowaBackendDotNet.Models.SNSLogin;
 using NolowaBackendDotNet.Models.SNSLogin.Google;
@@ -65,7 +66,7 @@ namespace NolowaBackendDotNet.Services
                 {
                     Email = userInfo.Email,
                     AccountName = userInfo.Name,
-                    AccountId = $"@{userInfo.Name}", // temp
+                    UserId = $"@{userInfo.Name}", // temp
                 });
 
                 if (savedAccount.IsNull())

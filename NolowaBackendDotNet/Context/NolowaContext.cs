@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
-using NolowaBackendDotNet;
+using NolowaBackendDotNet.Models;
 
 #nullable disable
 
@@ -49,11 +49,6 @@ namespace NolowaBackendDotNet.Context
 
                 entity.Property(e => e.Id).HasColumnName("ID");
 
-                entity.Property(e => e.AccountId)
-                    .IsRequired()
-                    .HasMaxLength(255)
-                    .HasColumnName("ACCOUNT_ID");
-
                 entity.Property(e => e.AccountName)
                     .IsRequired()
                     .HasMaxLength(255)
@@ -75,6 +70,11 @@ namespace NolowaBackendDotNet.Context
                     .HasColumnName("PASSWORD");
 
                 entity.Property(e => e.ProfileImageId).HasColumnName("PROFILE_IMAGE_ID");
+
+                entity.Property(e => e.UserId)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnName("USER_ID");
 
                 entity.HasOne(d => d.ProfileImage)
                     .WithMany(p => p.Accounts)
