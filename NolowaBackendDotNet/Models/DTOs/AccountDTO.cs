@@ -9,7 +9,7 @@ namespace NolowaBackendDotNet.Models.DTOs
     public class AccountDTO
     {
         public long Id { get; set; }
-        public string AccountId { get; set; } = string.Empty;
+        public string UserId { get; set; } = string.Empty;
         [JsonProperty("name")]
         public string AccountName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
