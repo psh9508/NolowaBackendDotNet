@@ -69,18 +69,17 @@ namespace NolowaBackendDotNet.Context
                     .IsUnicode(false)
                     .HasColumnName("PASSWORD");
 
-                entity.Property(e => e.ProfileImageId).HasColumnName("PROFILE_IMAGE_ID");
+                entity.Property(e => e.ProfileInfoId).HasColumnName("PROFILE_INFO_ID");
 
                 entity.Property(e => e.UserId)
                     .IsRequired()
                     .HasMaxLength(255)
                     .HasColumnName("USER_ID");
 
-                entity.HasOne(d => d.ProfileImage)
+                entity.HasOne(d => d.ProfileInfo)
                     .WithMany(p => p.Accounts)
-                    .HasForeignKey(d => d.ProfileImageId)
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .HasConstraintName("FK_PROFILE_IMAGE_ID");
+                    .HasForeignKey(d => d.ProfileInfoId)
+                    .HasConstraintName("FK_ACCOUNT_PROFILEINFO");
             });
 
             modelBuilder.Entity<Follower>(entity =>
@@ -154,15 +153,17 @@ namespace NolowaBackendDotNet.Context
             {
                 entity.ToTable("ProfileInfo");
 
-                entity.Property(e => e.BackgroundImg).HasMaxLength(500);
-
                 entity.Property(e => e.Message).HasMaxLength(255);
 
-                entity.HasOne(d => d.Account)
-                    .WithMany(p => p.ProfileInfos)
-                    .HasForeignKey(d => d.AccountId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_ProfileInfo_Account");
+                entity.HasOne(d => d.BackgroundImg)
+                    .WithMany(p => p.ProfileInfoBackgroundImgs)
+                    .HasForeignKey(d => d.BackgroundImgId)
+                    .HasConstraintName("FK_ProfileInfo_BackgroundImg");
+
+                entity.HasOne(d => d.ProfileImg)
+                    .WithMany(p => p.ProfileInfoProfileImgs)
+                    .HasForeignKey(d => d.ProfileImgId)
+                    .HasConstraintName("FK_ProfileInfo_ProfileImg");
             });
 
             modelBuilder.Entity<SearchHistory>(entity =>

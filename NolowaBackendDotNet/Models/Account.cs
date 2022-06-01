@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 #nullable disable
@@ -13,7 +12,6 @@ namespace NolowaBackendDotNet.Models
             FollowerDestinationAccounts = new HashSet<Follower>();
             FollowerSourceAccounts = new HashSet<Follower>();
             Posts = new HashSet<Post>();
-            ProfileInfos = new HashSet<ProfileInfo>();
             SearchHistories = new HashSet<SearchHistory>();
         }
 
@@ -22,15 +20,13 @@ namespace NolowaBackendDotNet.Models
         public string AccountName { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
-        public long? ProfileImageId { get; set; }
+        public long? ProfileInfoId { get; set; }
         public DateTime InsertDate { get; set; }
 
-        [JsonProperty("profileImage")]
-        public virtual ProfileImage ProfileImage { get; set; }
+        public virtual ProfileInfo ProfileInfo { get; set; }
         public virtual ICollection<Follower> FollowerDestinationAccounts { get; set; }
         public virtual ICollection<Follower> FollowerSourceAccounts { get; set; }
         public virtual ICollection<Post> Posts { get; set; }
-        public virtual ICollection<ProfileInfo> ProfileInfos { get; set; }
         public virtual ICollection<SearchHistory> SearchHistories { get; set; }
     }
 }

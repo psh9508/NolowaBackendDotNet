@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 #nullable disable
@@ -13,7 +12,6 @@ namespace NolowaBackendDotNet.Models
         public DateTime? InsertDate { get; set; }
         public long AccountId { get; set; }
 
-        [JsonProperty("postedUser")]
         public virtual Account Account { get; set; }
     }
 }
