@@ -39,7 +39,8 @@ namespace NolowaBackendDotNet.Services
         {
             // 대소문자 무시하고 비교
             var searchedUsers = _context.Accounts.Where(x => x.AccountName.Contains(accountName))
-                                                 .Include(x => x.ProfileImage)
+                                                 .Include(x => x.ProfileInfo)
+                                                 .ThenInclude(x => x.ProfileImg)
                                                  .Select(x => _mapper.Map<AccountDTO>(x));
 
             await DeleteAndSaveKeywordAsync(userID, accountName);

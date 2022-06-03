@@ -33,7 +33,8 @@ namespace NolowaBackendDotNet.Services
 
             var followersPosts = _context.Posts.Where(x => followerIds.Contains(x.AccountId))
                                                .Include(x => x.Account)
-                                               .ThenInclude(x => x.ProfileImage)
+                                               .ThenInclude(x => x.ProfileInfo)
+                                               .ThenInclude(x => x.ProfileImg)
                                                .AsEnumerable();
 
             return _mapper.Map<List<PostDTO>>(followersPosts);

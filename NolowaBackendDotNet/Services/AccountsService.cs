@@ -74,7 +74,8 @@ namespace NolowaBackendDotNet.Services
         {
             var account = await _context.Accounts.Where(whereExpression)
                                                .Include(account => account.FollowerSourceAccounts)
-                                               .Include(account => account.ProfileImage)
+                                               .Include(account => account.ProfileInfo)
+                                               .ThenInclude(profileInfo => profileInfo.ProfileImg)
                                                .FirstOrDefaultAsync();
             if (account == null)
                 return null;
@@ -84,7 +85,8 @@ namespace NolowaBackendDotNet.Services
             {
                 var followerPost = _context.Posts.Where(x => x.AccountId == follower.DestinationAccountId)
                                                  .Include(x => x.Account)
-                                                 .ThenInclude(x => x.ProfileImage)
+                                                 .ThenInclude(x => x.ProfileInfo)
+                                                 .ThenInclude(profileInfo => profileInfo.ProfileImg)
                                                  .OrderByDescending(x => x.InsertDate).Take(10);
 
                 account.Posts.AddRnage(followerPost);
