@@ -8,9 +8,7 @@ namespace NolowaBackendDotNet.Models.DTOs
 {
     public class ProfileInfoDTO
     {
-        [JsonProperty("profileImg")]
         public ProfileImageDTO ProfileImage { get; set; } = new ProfileImageDTO();
-        [JsonProperty("backgroundImg")]
         public ProfileImageDTO BackgroundImage { get; set; } = new ProfileImageDTO();
     }
 }

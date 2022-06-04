@@ -13,11 +13,19 @@ namespace NolowaBackendDotNet.Core.Mapper
         public MappingProfile()
         {
             CreateMap<Account, AccountDTO>()
-                .ForMember(d => d.ProfileImage, o => o.NullSubstitute(new ProfileImage()
+                .ForMember(d => d.ProfileInfo, o => o.NullSubstitute(new ProfileInfo()
                 {
-                    FileHash = "ProfilePicture", // default profile Image name
-                }))
+                    ProfileImg = new ProfileImage()
+                    {
+                        FileHash = "ProfilePicture", // default profile Image name
+                    }
+                }))                
                 .ForMember(d => d.Followers, o => o.MapFrom(s => s.FollowerSourceAccounts))
+                .ReverseMap();
+
+            CreateMap<ProfileInfo, ProfileInfoDTO>()
+                .ForMember(d => d.ProfileImage, o => o.MapFrom(s => s.ProfileImg))
+                .ForMember(d => d.BackgroundImage, o => o.MapFrom(s => s.BackgroundImg))
                 .ReverseMap();
 
             CreateMap<Post, PostDTO>().ReverseMap();
