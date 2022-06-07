@@ -76,6 +76,7 @@ namespace NolowaBackendDotNet.Services
                                                .Include(account => account.FollowerSourceAccounts)
                                                .Include(account => account.ProfileInfo)
                                                .ThenInclude(profileInfo => profileInfo.ProfileImg)
+                                               .AsNoTracking()
                                                .FirstOrDefaultAsync();
             if (account == null)
                 return null;
@@ -87,6 +88,7 @@ namespace NolowaBackendDotNet.Services
                                                  .Include(x => x.Account)
                                                  .ThenInclude(x => x.ProfileInfo)
                                                  .ThenInclude(profileInfo => profileInfo.ProfileImg)
+                                                 .AsNoTracking()
                                                  .OrderByDescending(x => x.InsertDate).Take(10);
 
                 account.Posts.AddRnage(followerPost);
