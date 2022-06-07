@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.DTOs;
+using NolowaBackendDotNet.Models.IF;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,6 +38,10 @@ namespace NolowaBackendDotNet.Core.Mapper
             CreateMap<Follower, FollowerDTO>()
                 .ForMember(d => d.Id, o => o.MapFrom(s => s.DestinationAccountId))
                 .ReverseMap();
+
+            #region IF
+            CreateMap<IFSignUpUser, Account>();
+            #endregion
         }
     }
 }

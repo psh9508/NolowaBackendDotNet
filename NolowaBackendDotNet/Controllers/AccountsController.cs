@@ -38,11 +38,11 @@ namespace NolowaBackendDotNet.Controllers
         }
 
         [HttpPost("Save")]
-        public async Task<ActionResult<AccountDTO>> SaveNewAccount([FromBody] Account newAccount)
+        public async Task<ActionResult<AccountDTO>> SaveNewAccount([FromBody] IFSignUpUser newAccount)
         {
             var savedAccount = await _accountsService.SaveAsync(newAccount);
 
-            if(savedAccount == null)
+            if (savedAccount == null)
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
 
             return Ok(savedAccount);

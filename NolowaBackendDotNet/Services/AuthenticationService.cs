@@ -62,11 +62,10 @@ namespace NolowaBackendDotNet.Services
 
             if (userInDB.IsNull())
             {
-                var savedAccount = await _accountService.SaveAsync(new Account()
+                var savedAccount = await _accountService.SaveAsync(new Models.IF.IFSignUpUser()
                 {
                     Email = userInfo.Email,
                     AccountName = userInfo.Name,
-                    UserId = $"@{userInfo.Name}", // temp
                 });
 
                 if (savedAccount.IsNull())

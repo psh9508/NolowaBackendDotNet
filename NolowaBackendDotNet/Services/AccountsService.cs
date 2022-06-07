@@ -19,7 +19,7 @@ namespace NolowaBackendDotNet.Services
     {
         Task<AccountDTO> FindAsync(long id);
         Task<AccountDTO> LoginAsync(string email, string password);
-        Task<AccountDTO> SaveAsync(Account newAccount);
+        Task<AccountDTO> SaveAsync(IFSignUpUser newAccount);
         Task<bool> HasFollowedAsync(IFFollowModel data);
         Task<FollowerDTO> FollowAsync(IFFollowModel data);
         Task<FollowerDTO> UnFollowAsync(IFFollowModel data);
@@ -51,25 +51,48 @@ namespace NolowaBackendDotNet.Services
             return accountDTO;
         }
 
-        public async Task<AccountDTO> SaveAsync(Account newAccount)
+        public async Task<AccountDTO> SaveAsync(IFSignUpUser signUpUserIFModel)
         {
+            using var transaction = _context.Database.BeginTransaction();
+
             try
             {
-                // The Password must be encoded by SHA256
-                newAccount.Password = newAccount.Password?.ToSha256();
+                var beInsertedUser = _mapper.Map<Account>(signUpUserIFModel);
 
-                _context.Accounts.Add(newAccount);
+                // The Password must be encoded by SHA256
+                beInsertedUser.Password = beInsertedUser.Password?.ToSha256();
+                beInsertedUser.UserId = "RandomID";
+
+                if (HasProfileImage(signUpUserIFModel))
+                {
+                    await SaveProfileImageFileToPhysicalLayer(signUpUserIFModel.ProfileImage);
+
+                    beInsertedUser.ProfileInfo = new ProfileInfo()
+                    {
+                        ProfileImg = new ProfileImage()
+                        {
+                            FileHash = signUpUserIFModel.ProfileImage.ToSha256(),
+                            Url = "newUrl",
+                        },
+                    };
+                }
+
+                _context.Accounts.Add(beInsertedUser);
                 await _context.SaveChangesAsync();
 
-                var savedAccount = await _context.Accounts.Where(x => x.Id == newAccount.Id).SingleAsync();
+                transaction.Commit();
+
+                var savedAccount = await _context.Accounts.Where(x => x.Id == beInsertedUser.Id).SingleAsync();
 
                 return _mapper.Map<AccountDTO>(savedAccount);
             }
             catch (Exception ex)
             {
+                transaction.Rollback();
                 return null;
             }
         }
+
         private async Task<AccountDTO> FindAsync(Expression<Func<Account, bool>> whereExpression)
         {
             var account = await _context.Accounts.Where(whereExpression)
@@ -78,6 +101,7 @@ namespace NolowaBackendDotNet.Services
                                                .ThenInclude(profileInfo => profileInfo.ProfileImg)
                                                .AsNoTracking()
                                                .FirstOrDefaultAsync();
+
             if (account == null)
                 return null;
 
@@ -120,7 +144,7 @@ namespace NolowaBackendDotNet.Services
                 return _mapper.Map<FollowerDTO>(savedData);
             }
             catch (Exception ex)
-            {   
+            {
                 return null;
             }
         }
@@ -145,6 +169,21 @@ namespace NolowaBackendDotNet.Services
             catch (Exception ex)
             {
                 return null;
+            }
+        }
+
+        private static bool HasProfileImage(IFSignUpUser signUpUserIFModel)
+        {
+            return signUpUserIFModel.ProfileImage.Length > 0;
+
+        }
+
+        private static async Task SaveProfileImageFileToPhysicalLayer(byte[] profileImage)
+        {
+            using (var filestream = System.IO.File.Create(Constant.PROFILE_IMAGE_ROOT_PATH + @$"{profileImage.ToSha256()}.jpg"))
+            {
+                await filestream.WriteAsync(profileImage, 0, profileImage.Length);
+                filestream.Flush();
             }
         }
     }
