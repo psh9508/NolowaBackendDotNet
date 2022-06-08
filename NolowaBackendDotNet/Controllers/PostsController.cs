@@ -44,5 +44,13 @@ namespace NolowaBackendDotNet.Controllers
                 return _postsService.InsertPost(newPost);
             });
         }
+
+        [HttpGet("{userId}/Posts")]
+        public async Task<ActionResult<IEnumerable<Post>>> GetUserPosts(int userId)
+        {
+            var userPosts = await _postsService.GetUserPostsAsync(userId);
+
+            return Ok(userPosts);
+        }
     }
 }

@@ -14,6 +14,7 @@ namespace NolowaBackendDotNet.Services
 {
     public interface IPostsService
     {
+        Task<IEnumerable<PostDTO>> GetUserPostsAsync(long userId);
         IEnumerable<PostDTO> GetFollowerPosts(AccountDTO loginedUserAccount);
         Post InsertPost(Post post);
     }
@@ -22,6 +23,20 @@ namespace NolowaBackendDotNet.Services
     {
         public PostsService()
         {
+        }
+
+        public async Task<IEnumerable<PostDTO>> GetUserPostsAsync(long userId)
+        {
+            var dbDatas = await _context.Posts.Where(x => x.AccountId == userId)
+                                              .Include(x => x.Account)
+                                              .ThenInclude(x => x.ProfileInfo)
+                                              .ThenInclude(x => x.ProfileImg)
+                                              .OrderByDescending(x => x.InsertDate)
+                                              .Take(10)
+                                              .AsNoTracking()
+                                              .ToListAsync();
+
+            return _mapper.Map<IEnumerable<PostDTO>>(dbDatas);
         }
 
         public IEnumerable<PostDTO> GetFollowerPosts(AccountDTO loginedUserAccount)
