@@ -23,6 +23,7 @@ namespace NolowaBackendDotNet.Services
         Task<bool> HasFollowedAsync(IFFollowModel data);
         Task<FollowerDTO> FollowAsync(IFFollowModel data);
         Task<FollowerDTO> UnFollowAsync(IFFollowModel data);
+        Task<bool> ChangeProfileInfoAsync(ProfileInfoDTO data);
     }
 
     public class AccountsService : ServiceBase<AccountsService>, IAccountsService
@@ -169,6 +170,28 @@ namespace NolowaBackendDotNet.Services
             catch (Exception ex)
             {
                 return null;
+            }
+        }
+
+        public async Task<bool> ChangeProfileInfoAsync(ProfileInfoDTO data)
+        {
+            using var transaction = _context.Database.BeginTransaction();
+
+            try
+            {
+                // 1차적으로 메시지만 변경한다.
+                _context.ProfileInfos.Single(x => x.Id == data.Id).Message = data.Message;
+                await _context.SaveChangesAsync();
+
+                transaction.Commit();
+                
+                return true;
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+
+                return false;
             }
         }
 
