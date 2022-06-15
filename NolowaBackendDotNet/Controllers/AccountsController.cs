@@ -150,8 +150,8 @@ namespace NolowaBackendDotNet.Controllers
             return result.IsNotNull() ? Ok(result) : BadRequest(result);
         }
 
-        [HttpPut("{ProfileInfo/Change}")]
-        public async Task<ActionResult<bool>> UpdateProfileInfo([FromBody] ProfileInfoDTO data)
+        [HttpPut("ProfileInfo/Change/{id}")]
+        public async Task<ActionResult<bool>> UpdateProfileInfo(long id, [FromBody] ProfileInfoDTO data)
         {
             return await _accountsService.ChangeProfileInfoAsync(data);
         }

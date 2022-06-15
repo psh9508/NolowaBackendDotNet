@@ -179,8 +179,18 @@ namespace NolowaBackendDotNet.Services
 
             try
             {
-                // 1차적으로 메시지만 변경한다.
-                _context.ProfileInfos.Single(x => x.Id == data.Id).Message = data.Message;
+                var beUpdatedData = await _context.ProfileInfos.SingleAsync(x => x.Id == data.Id);
+
+                // 이렇게 하는게 맞는건가? //
+                // FK가 변경 된다. //
+                beUpdatedData.ProfileImg = _mapper.Map<ProfileImage>(data.ProfileImage);
+                beUpdatedData.BackgroundImg = _mapper.Map<ProfileImage>(data.BackgroundImage);
+                beUpdatedData.Message = data.Message;
+
+                // 이렇게 하는게 맞는가? //
+                //var test = _mapper.Map<ProfileInfo>(data);
+                //beUpdatedData = test;
+
                 await _context.SaveChangesAsync();
 
                 transaction.Commit();
