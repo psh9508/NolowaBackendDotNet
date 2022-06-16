@@ -100,11 +100,12 @@ namespace NolowaBackendDotNet.Services
                                                .Include(account => account.FollowerSourceAccounts)
                                                .Include(account => account.ProfileInfo)
                                                .ThenInclude(profileInfo => profileInfo.ProfileImg)
-                                               .AsNoTracking()
                                                .FirstOrDefaultAsync();
 
             if (account == null)
                 return null;
+
+            var accountDTO = _mapper.Map<AccountDTO>(account);
 
             // 본인 아이디가 키인 데이터를 가져와서 그 데이터에 DestinationID로 Follower의 Post를 가져와야한다. 그래서 SourceAccount를 가져와 반복문을 도는 것임.
             foreach (var follower in account.FollowerSourceAccounts)
@@ -113,13 +114,14 @@ namespace NolowaBackendDotNet.Services
                                                  .Include(x => x.Account)
                                                  .ThenInclude(x => x.ProfileInfo)
                                                  .ThenInclude(profileInfo => profileInfo.ProfileImg)
-                                                 .AsNoTracking()
-                                                 .OrderByDescending(x => x.InsertDate).Take(10);
+                                                 .OrderByDescending(x => x.InsertDate)
+                                                 .Select(x => _mapper.Map<PostDTO>(x))
+                                                 .Take(10);
 
-                account.Posts.AddRnage(followerPost);
+                accountDTO.Posts.ToList().AddRnage(followerPost);
             }
 
-            return _mapper.Map<AccountDTO>(account);
+            return accountDTO;
         }
 
         public async Task<bool> HasFollowedAsync(IFFollowModel data)
