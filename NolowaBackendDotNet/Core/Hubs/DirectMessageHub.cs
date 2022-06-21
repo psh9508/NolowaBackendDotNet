@@ -8,9 +8,9 @@ namespace NolowaBackendDotNet.Core.Hubs
 {
     public class DirectMessageHub : Hub
     {
-        public async Task SendMessage(string user, string message)
+        public async Task SendMessage(long user, string message)
         {
-            await Clients.Caller.SendAsync("ReceiveDirectMessage", "serverUser", "serverMessage");
+            await Clients.Caller.SendAsync("ReceiveDirectMessage", user, message);
         }
     }
 }
