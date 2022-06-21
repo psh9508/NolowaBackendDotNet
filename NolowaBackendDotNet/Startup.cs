@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Logging;
 using Microsoft.OpenApi.Models;
 using NolowaBackendDotNet.Context;
 using NolowaBackendDotNet.Core;
+using NolowaBackendDotNet.Core.Hubs;
 using NolowaBackendDotNet.Core.Mapper;
 using NolowaBackendDotNet.Models.Configuration;
 using NolowaBackendDotNet.Services;
@@ -42,6 +43,8 @@ namespace NolowaBackendDotNet
             {
                 options.UseSqlServer(Configuration.GetConnectionString("NolowaContext"));
             });
+
+            services.AddSignalR();
 
             // Add functionality to inject IOptions<T>
             services.AddOptions();
@@ -100,6 +103,7 @@ namespace NolowaBackendDotNet
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<DirectMessageHub>("/DirectMessage");
             });
         }
     }
