@@ -19,6 +19,7 @@ namespace NolowaBackendDotNet.Context
         }
 
         public virtual DbSet<Account> Accounts { get; set; }
+        public virtual DbSet<DirectMessage> DirectMessages { get; set; }
         public virtual DbSet<Follower> Followers { get; set; }
         public virtual DbSet<Post> Posts { get; set; }
         public virtual DbSet<ProfileImage> ProfileImages { get; set; }
@@ -29,7 +30,7 @@ namespace NolowaBackendDotNet.Context
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("name=connectionstrings:NolowaContext");
+                optionsBuilder.UseSqlServer("name=ConnectionStrings:NolowaContext");
             }
         }
 
@@ -80,6 +81,25 @@ namespace NolowaBackendDotNet.Context
                     .WithMany(p => p.Accounts)
                     .HasForeignKey(d => d.ProfileInfoId)
                     .HasConstraintName("FK_ACCOUNT_PROFILEINFO");
+            });
+
+            modelBuilder.Entity<DirectMessage>(entity =>
+            {
+                entity.ToTable("DirectMessage");
+
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.InsertTime)
+                    .HasColumnType("date")
+                    .HasColumnName("INSERT_TIME");
+
+                entity.Property(e => e.Message)
+                    .IsRequired()
+                    .HasColumnName("MESSAGE");
+
+                entity.Property(e => e.ReceiverId).HasColumnName("RECEIVER_ID");
+
+                entity.Property(e => e.SenderId).HasColumnName("SENDER_ID");
             });
 
             modelBuilder.Entity<Follower>(entity =>
