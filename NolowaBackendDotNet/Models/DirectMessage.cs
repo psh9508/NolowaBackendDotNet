@@ -11,6 +11,6 @@ namespace NolowaBackendDotNet.Models
         public long SenderId { get; set; }
         public long ReceiverId { get; set; }
         public string Message { get; set; }
-        public DateTime InsertTime { get; set; }
+        public string InsertTime { get; set; }
     }
 }

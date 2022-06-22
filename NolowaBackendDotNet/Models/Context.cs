@@ -1,19 +1,18 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
-using NolowaBackendDotNet.Models;
 
 #nullable disable
 
-namespace NolowaBackendDotNet.Context
+namespace NolowaBackendDotNet.Models
 {
-    public partial class NolowaContext : DbContext
+    public partial class Context : DbContext
     {
-        public NolowaContext()
+        public Context()
         {
         }
 
-        public NolowaContext(DbContextOptions<NolowaContext> options)
+        public Context(DbContextOptions<Context> options)
             : base(options)
         {
         }
@@ -39,8 +38,7 @@ namespace NolowaBackendDotNet.Context
                 entity.Property(e => e.Id).HasColumnName("ID");
 
                 entity.Property(e => e.InsertTime)
-                    .IsRequired()
-                    .HasMaxLength(30)
+                    .HasColumnType("date")
                     .HasColumnName("INSERT_TIME");
 
                 entity.Property(e => e.Message)
