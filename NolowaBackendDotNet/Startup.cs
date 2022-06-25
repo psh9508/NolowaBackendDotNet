@@ -12,7 +12,7 @@ using Microsoft.IdentityModel.Logging;
 using Microsoft.OpenApi.Models;
 using NolowaBackendDotNet.Context;
 using NolowaBackendDotNet.Core;
-using NolowaBackendDotNet.Core.Hubs;
+using NolowaBackendDotNet.Core.SignalR.Hubs;
 using NolowaBackendDotNet.Core.Mapper;
 using NolowaBackendDotNet.Models.Configuration;
 using NolowaBackendDotNet.Services;
@@ -21,6 +21,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR;
+using NolowaBackendDotNet.Core.SignalR;
 
 namespace NolowaBackendDotNet
 {
@@ -45,6 +47,7 @@ namespace NolowaBackendDotNet
             });
 
             services.AddSignalR();
+            services.AddSingleton<IUserIdProvider, UserIdProvider>();
 
             // Add functionality to inject IOptions<T>
             services.AddOptions();

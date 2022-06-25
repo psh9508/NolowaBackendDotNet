@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace NolowaBackendDotNet.Core.Hubs
+namespace NolowaBackendDotNet.Core.SignalR.Hubs
 {
     public class DirectMessageHub : Hub
     {
@@ -32,6 +32,7 @@ namespace NolowaBackendDotNet.Core.Hubs
             // 저장 후 리턴 함
             await Clients.Caller.SendAsync("ReceiveDirectMessage", senderId, receiverId, message);
             //await Clients.User(receiverId.ToString()).SendAsync("ReceiveDirectMessage", senderId, message);
+            //await Clients.All.SendAsync("ReceiveDirectMessage", senderId, message);
         }
     }
 }
