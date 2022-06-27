@@ -209,7 +209,7 @@ namespace NolowaBackendDotNet.Services
 
         private static bool HasProfileImage(IFSignUpUser signUpUserIFModel)
         {
-            return signUpUserIFModel.ProfileImage.Length > 0;
+            return signUpUserIFModel.ProfileImage?.Length > 0;
 
         }
 
