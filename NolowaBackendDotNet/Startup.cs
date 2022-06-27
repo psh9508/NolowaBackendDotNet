@@ -47,7 +47,6 @@ namespace NolowaBackendDotNet
             });
 
             services.AddSignalR();
-            services.AddSingleton<IUserIdProvider, UserIdProvider>();
 
             // Add functionality to inject IOptions<T>
             services.AddOptions();

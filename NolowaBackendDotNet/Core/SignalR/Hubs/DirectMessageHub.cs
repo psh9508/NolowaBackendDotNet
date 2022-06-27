@@ -10,10 +10,22 @@ namespace NolowaBackendDotNet.Core.SignalR.Hubs
     public class DirectMessageHub : Hub
     {
         private readonly NolowaContext _context;
+        private readonly HubConnectionManager _hubConnectionManager;
 
         public DirectMessageHub(NolowaContext context)
         {
             _context = context;
+            _hubConnectionManager = new HubConnectionManager();
+        }
+
+        public bool Login(long userId)
+        {
+            return _hubConnectionManager.AddChatConnection(userId, Context.ConnectionId);
+        }
+
+        public bool Logout(long userId)
+        {
+            return _hubConnectionManager.RemoveConnection(userId);
         }
 
         public async Task SendMessage(long senderId, long receiverId, string message)
@@ -29,10 +41,19 @@ namespace NolowaBackendDotNet.Core.SignalR.Hubs
 
             _context.SaveChanges();
 
-            // 저장 후 리턴 함
-            await Clients.Caller.SendAsync("ReceiveDirectMessage", senderId, receiverId, message);
-            //await Clients.User(receiverId.ToString()).SendAsync("ReceiveDirectMessage", senderId, message);
-            //await Clients.All.SendAsync("ReceiveDirectMessage", senderId, message);
+            string receiverConnectionId = _hubConnectionManager.GetChatConnection(receiverId);
+
+            if(String.IsNullOrEmpty(receiverConnectionId))
+            {
+                await Clients.Caller.SendAsync("ReceiveDirectMessage", senderId, receiverId, "받는 사람이 없을 경우의 callback입니다.");
+                // 알람 줘야 함.
+            }
+            else
+            {
+                // Invoke them at the same time
+                Clients.Caller.SendAsync("ReceiveDirectMessage", senderId, receiverId, message);
+                Clients.Client(receiverConnectionId).SendAsync("ReceiveDirectMessage", senderId, receiverId, message);
+            }
         }
     }
 }
