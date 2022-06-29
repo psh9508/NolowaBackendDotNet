@@ -9,8 +9,6 @@ using System.Threading.Tasks;
 
 namespace NolowaBackendDotNet.Core.SignalR
 {
-
-
     public class HubConnectionManager 
     {
         private static readonly ConcurrentDictionary<long, string> _chatConnections = new ConcurrentDictionary<long, string>();
@@ -22,6 +20,9 @@ namespace NolowaBackendDotNet.Core.SignalR
 
         public bool AddChatConnection(long userId, string connectionId)
         {
+            if (_chatConnections.ContainsKey(userId))
+                _chatConnections.TryRemove(userId, out string _);
+
             return _chatConnections.TryAdd(userId, connectionId);
         }
 
