@@ -45,14 +45,14 @@ namespace NolowaBackendDotNet.Core.SignalR.Hubs
 
             if(String.IsNullOrEmpty(receiverConnectionId))
             {
-                await Clients.Caller.SendAsync("ReceiveDirectMessage", senderId, receiverId, "받는 사람이 없을 경우의 callback입니다.");
+                await Clients.Caller.SendAsync("ReceiveDirectMessage", senderId, receiverId, "받는 사람이 없을 경우의 callback입니다.", "Time");
                 // 알람 줘야 함.
             }
             else
             {
                 // Invoke them at the same time
-                Clients.Caller.SendAsync("ReceiveDirectMessage", senderId, receiverId, message);
-                Clients.Client(receiverConnectionId).SendAsync("ReceiveDirectMessage", senderId, receiverId, message);
+                Clients.Caller.SendAsync("ReceiveDirectMessage", senderId, receiverId, message, DateTime.Now.ToString("yyyy년 MM월 dd일 HH:mm:ss"));
+                Clients.Client(receiverConnectionId).SendAsync("ReceiveDirectMessage", senderId, receiverId, message, DateTime.Now.ToString("yyyy년 MM월 dd일 HH:mm:ss"));
             }
         }
     }
