@@ -23,9 +23,9 @@ namespace NolowaBackendDotNet.Controllers
         }
 
         [HttpGet("chat/dialog/{senderId}/{receiverId}")]
-        public IEnumerable<DirectMessage> GetDialog(long senderId, long receiverId)
+        public async Task<IEnumerable<DirectMessage>> GetDialogAsync(long senderId, long receiverId)
         {
-            return _signalRService.GetDialog(senderId, receiverId);
+            return await _signalRService.GetDialogAsync(senderId, receiverId);
         }
     }
 }

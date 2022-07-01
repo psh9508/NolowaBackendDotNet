@@ -15,7 +15,7 @@ namespace NolowaBackendDotNet.Services
 {
     public interface ISignalRService
     {
-        IEnumerable<DirectMessage> GetDialog(long senderId, long receiverId);
+        Task<IEnumerable<DirectMessage>> GetDialogAsync(long senderId, long receiverId);
     }
 
     public class SignalRService : ServiceBase<SignalRService>, ISignalRService
@@ -27,27 +27,24 @@ namespace NolowaBackendDotNet.Services
             this.context = context;
         }
 
-        public IEnumerable<DirectMessage> GetDialog(long senderId, long receiverId)
+        public async Task<IEnumerable<DirectMessage>> GetDialogAsync(long senderId, long receiverId)
         {
-            var senderDialog = _context.DirectMessages.Where(x => x.SenderId == senderId && x.ReceiverId == receiverId)
-                                                       .OrderByDescending(x => x.InsertTime)
-                                                       .Take(10)
-                                                       .ToListAsync();
+            var senderDialog = await _context.DirectMessages.Where(x => x.SenderId == senderId && x.ReceiverId == receiverId)
+                                                            .OrderByDescending(x => x.InsertTime)
+                                                            .Take(10)
+                                                            .ToListAsync();
 
-            var receiverDialog = _context.DirectMessages.Where(x => x.SenderId == receiverId && receiverId == senderId)
-                                                        .OrderByDescending(x => x.InsertTime)
-                                                        .Take(10)
-                                                        .ToListAsync();
+            var receiverDialog = await _context.DirectMessages.Where(x => x.SenderId == receiverId && x.ReceiverId == senderId)
+                                                              .OrderByDescending(x => x.InsertTime)
+                                                              .Take(10)
+                                                              .ToListAsync();
 
-            Task.WaitAll(new Task[] {
-                senderDialog, receiverDialog
-            });
+            var senderReceiverDialog = senderDialog.Concat(receiverDialog)
+                                                   .OrderByDescending(x => x.InsertTime)
+                                                   .Take(10)
+                                                   .AsEnumerable();
 
-            var senderReceiverDialog = senderDialog.Result.Concat(receiverDialog.Result)
-                                                          .OrderByDescending(x => x.InsertTime)
-                                                          .Take(10)
-                                                          .AsEnumerable();
-            return senderReceiverDialog;
+            return senderReceiverDialog.OrderBy(x => x.InsertTime);
         }
     }
 }
