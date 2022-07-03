@@ -16,6 +16,7 @@ namespace NolowaBackendDotNet.Services
     public interface ISignalRService
     {
         Task<IEnumerable<DirectMessage>> GetDialogAsync(long senderId, long receiverId);
+        Task<IEnumerable<PreviousDialogListItem>> GetPreviousDialogList(long senderId);
     }
 
     public class SignalRService : ServiceBase<SignalRService>, ISignalRService
@@ -45,6 +46,52 @@ namespace NolowaBackendDotNet.Services
                                                    .AsEnumerable();
 
             return senderReceiverDialog.OrderBy(x => x.InsertTime);
+        }
+
+        public async Task<IEnumerable<PreviousDialogListItem>> GetPreviousDialogList(long senderId)
+        {
+            //SELECT *
+            //FROM[Nolowa].[dbo].[DirectMessage]
+            //WHERE ID IN(SELECT MAX(ID)
+            //            FROM[Nolowa].[dbo].[DirectMessage]
+            //            WHERE SENDER_ID = 2
+            //            GROUP BY RECEIVER_ID)
+
+            var previousDialogList = await _context.DirectMessages.Where(x => x.SenderId == senderId)
+                                                                  .GroupBy(x => x.ReceiverId)
+                                                                  .Select(x => new
+                                                                  {
+                                                                      Id = x.Max(x => x.Id),
+                                                                  })
+                                                                  .Join(_context.DirectMessages, x => x.Id, g => g.Id, (x, g) =>
+                                                                      new
+                                                                      {
+                                                                          ReceiverId = g.ReceiverId,
+                                                                          Message = g.Message,
+                                                                          Time = g.InsertTime,
+                                                                      }
+                                                                  ).Join(_context.Accounts, x => x.ReceiverId, a => a.Id, (x, a) =>
+                                                                      new
+                                                                      {
+                                                                          Account = new Account() {
+                                                                              Id = a.Id,
+                                                                              AccountName = a.AccountName,
+                                                                              ProfileInfo = new ProfileInfo() {
+                                                                                  ProfileImg = a.ProfileInfo.ProfileImg,
+                                                                              },
+                                                                          },
+                                                                          Message = x.Message,
+                                                                          Time = x.Time,
+                                                                      }
+                                                                  ).Select(x => new PreviousDialogListItem()
+                                                                  {
+                                                                      Account = x.Account,
+                                                                      Message = x.Message,
+                                                                      Time = x.Time,
+                                                                  })
+                                                                  .ToListAsync();
+
+            return previousDialogList;
         }
     }
 }

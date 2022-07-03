@@ -3,6 +3,7 @@ using NolowaBackendDotNet.Context;
 using NolowaBackendDotNet.Core.Base;
 using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.DTOs;
+using NolowaBackendDotNet.Models.IF;
 using NolowaBackendDotNet.Services;
 using System;
 using System.Collections.Generic;
@@ -27,5 +28,12 @@ namespace NolowaBackendDotNet.Controllers
         {
             return await _signalRService.GetDialogAsync(senderId, receiverId);
         }
+
+        [HttpGet("chat/previousDialogList/{senderId}")]
+        public async Task<IEnumerable<PreviousDialogListItem>> GetPreviousDialogListAsync(long senderId)
+        {
+            return await _signalRService.GetPreviousDialogList(senderId);
+        }
+
     }
 }
