@@ -71,25 +71,20 @@ namespace NolowaBackendDotNet.Services
                                                                           Time = g.InsertTime,
                                                                       }
                                                                   ).Join(_context.Accounts, x => x.ReceiverId, a => a.Id, (x, a) =>
-                                                                      new
+                                                                      new PreviousDialogListItem()
                                                                       {
-                                                                          Account = new Account() {
+                                                                          Account = _mapper.Map<AccountDTO>(new Account()
+                                                                          {
                                                                               Id = a.Id,
                                                                               AccountName = a.AccountName,
                                                                               ProfileInfo = new ProfileInfo() {
                                                                                   ProfileImg = a.ProfileInfo.ProfileImg,
                                                                               },
-                                                                          },
+                                                                          }),
                                                                           Message = x.Message,
                                                                           Time = x.Time,
                                                                       }
-                                                                  ).Select(x => new PreviousDialogListItem()
-                                                                  {
-                                                                      Account = x.Account,
-                                                                      Message = x.Message,
-                                                                      Time = x.Time,
-                                                                  })
-                                                                  .ToListAsync();
+                                                                  ).ToListAsync();
 
             return previousDialogList;
         }
