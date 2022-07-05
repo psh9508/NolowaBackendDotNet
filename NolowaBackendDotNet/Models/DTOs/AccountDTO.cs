@@ -10,7 +10,6 @@ namespace NolowaBackendDotNet.Models.DTOs
     {
         public long Id { get; set; }
         public string UserId { get; set; } = string.Empty;
-        [JsonProperty("name")]
         public string AccountName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public DateTime InsertDate { get; set; }
