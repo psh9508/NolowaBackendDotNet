@@ -57,34 +57,114 @@ namespace NolowaBackendDotNet.Services
             //            WHERE SENDER_ID = 2
             //            GROUP BY RECEIVER_ID)
 
-            var previousDialogList = await _context.DirectMessages.Where(x => x.SenderId == senderId)
-                                                                  .GroupBy(x => x.ReceiverId)
-                                                                  .Select(x => new
-                                                                  {
-                                                                      Id = x.Max(x => x.Id),
-                                                                  })
-                                                                  .Join(_context.DirectMessages, x => x.Id, g => g.Id, (x, g) =>
-                                                                      new
-                                                                      {
-                                                                          ReceiverId = g.ReceiverId,
-                                                                          Message = g.Message,
-                                                                          Time = g.InsertTime,
-                                                                      }
-                                                                  ).Join(_context.Accounts, x => x.ReceiverId, a => a.Id, (x, a) =>
-                                                                      new PreviousDialogListItem()
-                                                                      {
-                                                                          Account = _mapper.Map<AccountDTO>(new Account()
-                                                                          {
-                                                                              Id = a.Id,
-                                                                              AccountName = a.AccountName,
-                                                                              ProfileInfo = new ProfileInfo() {
-                                                                                  ProfileImg = a.ProfileInfo.ProfileImg,
-                                                                              },
-                                                                          }),
-                                                                          Message = x.Message,
-                                                                          Time = x.Time,
-                                                                      }
-                                                                  ).ToListAsync();
+            //var previousDialogList = await _context.DirectMessages.Where(x => x.SenderId == senderId || x.ReceiverId == senderId)
+            //                                                      .GroupBy(x => x.ReceiverId)
+            //                                                      .Select(x => new
+            //                                                      {
+            //                                                          Id = x.Max(x => x.Id),
+            //                                                      })
+            //                                                      .Join(_context.DirectMessages, x => x.Id, g => g.Id, (x, g) =>
+            //                                                          new
+            //                                                          {
+            //                                                              ReceiverId = g.ReceiverId,
+            //                                                              Message = g.Message,
+            //                                                              Time = g.InsertTime,
+            //                                                          }
+            //                                                      ).Join(_context.Accounts, x => x.ReceiverId, a => a.Id, (x, a) =>
+            //                                                          new PreviousDialogListItem()
+            //                                                          {
+            //                                                              Account = _mapper.Map<AccountDTO>(new Account()
+            //                                                              {
+            //                                                                  Id = a.Id,
+            //                                                                  UserId = a.UserId,
+            //                                                                  AccountName = a.AccountName,
+            //                                                                  ProfileInfo = new ProfileInfo()
+            //                                                                  {
+            //                                                                      ProfileImg = a.ProfileInfo.ProfileImg,
+            //                                                                  },
+            //                                                              }),
+            //                                                              Message = x.Message,
+            //                                                              Time = x.Time,
+            //                                                          }
+            //                                                      ).ToListAsync();
+
+            var previousDialogList = new List<PreviousDialogListItem>();
+
+            var receivers = _context.DirectMessages.Where(x => x.SenderId == senderId)
+                                                   .Select(x => x.ReceiverId)
+                                                   .Distinct().ToList();
+
+            foreach (var receiver in receivers)
+            {
+                var send = _context.DirectMessages.Where(x => x.SenderId == senderId && x.ReceiverId == receiver)
+                                                            .GroupBy(dm => dm.ReceiverId)
+                                                            .Select(x => new
+                                                            {
+                                                                Id = x.Max(x => x.Id),
+                                                            })
+                                                            .Join(_context.DirectMessages, x => x.Id, g => g.Id, (x, g) =>
+                                                                new
+                                                                {
+                                                                    ReceiverId = g.ReceiverId,
+                                                                    Message = g.Message,
+                                                                    Time = g.InsertTime,
+                                                                }
+                                                            ).Join(_context.Accounts, x => x.ReceiverId, a => a.Id, (x, a) =>
+                                                                new PreviousDialogListItem()
+                                                                {
+                                                                    Account = _mapper.Map<AccountDTO>(new Account()
+                                                                    {
+                                                                        Id = a.Id,
+                                                                        UserId = a.UserId,
+                                                                        AccountName = a.AccountName,
+                                                                        ProfileInfo = new ProfileInfo()
+                                                                        {
+                                                                            ProfileImg = a.ProfileInfo.ProfileImg,
+                                                                        },
+                                                                    }),
+                                                                    Message = x.Message,
+                                                                    Time = x.Time,
+                                                                }
+                                                            ).ToList().SingleOrDefault();
+
+                var received = _context.DirectMessages.Where(x => x.SenderId == receiver && x.ReceiverId == senderId)
+                                                        .GroupBy(dm => dm.SenderId)
+                                                        .Select(x => new
+                                                        {
+                                                            Id = x.Max(x => x.Id),
+                                                        })
+                                                        .Join(_context.DirectMessages, x => x.Id, g => g.Id, (x, g) =>
+                                                            new
+                                                            {
+                                                                SenderId = g.SenderId,
+                                                                Message = g.Message,
+                                                                Time = g.InsertTime,
+                                                            }
+                                                        ).Join(_context.Accounts, x => x.SenderId, a => a.Id, (x, a) =>
+                                                            new PreviousDialogListItem()
+                                                            {
+                                                                Account = _mapper.Map<AccountDTO>(new Account()
+                                                                {
+                                                                    Id = a.Id,
+                                                                    UserId = a.UserId,
+                                                                    AccountName = a.AccountName,
+                                                                    ProfileInfo = new ProfileInfo()
+                                                                    {
+                                                                        ProfileImg = a.ProfileInfo.ProfileImg,
+                                                                    },
+                                                                }),
+                                                                Message = x.Message,
+                                                                Time = x.Time,
+                                                            }
+                                                        ).ToList().SingleOrDefault();
+
+                var sendTime = send?.Time;
+                var receivedTime = received?.Time;
+
+                var addedData = sendTime.CompareTo(receivedTime) > 0 ? send : received;
+
+                previousDialogList.Add(addedData);
+            }
 
             return previousDialogList;
         }
