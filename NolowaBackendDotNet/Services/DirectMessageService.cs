@@ -13,17 +13,17 @@ using System.Threading.Tasks;
 
 namespace NolowaBackendDotNet.Services
 {
-    public interface ISignalRService
+    public interface IDirectMessageService
     {
         Task<IEnumerable<DirectMessage>> GetDialogAsync(long senderId, long receiverId);
         Task<IEnumerable<PreviousDialogListItem>> GetPreviousDialogList(long senderId);
     }
 
-    public class SignalRService : ServiceBase<SignalRService>, ISignalRService
+    public class DirectMessageService : ServiceBase<DirectMessageService>, IDirectMessageService
     {
         private readonly NolowaContext context;
 
-        public SignalRService(NolowaContext context)
+        public DirectMessageService(NolowaContext context)
         {
             this.context = context;
         }
