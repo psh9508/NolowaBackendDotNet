@@ -94,6 +94,8 @@ namespace NolowaBackendDotNet.Context
                     .HasMaxLength(30)
                     .HasColumnName("INSERT_TIME");
 
+                entity.Property(e => e.IsRead).HasColumnName("IS_READ");
+
                 entity.Property(e => e.Message)
                     .IsRequired()
                     .HasColumnName("MESSAGE");
