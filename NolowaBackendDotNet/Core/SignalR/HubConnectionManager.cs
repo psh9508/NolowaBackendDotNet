@@ -11,11 +11,20 @@ namespace NolowaBackendDotNet.Core.SignalR
 {
     public class HubConnectionManager 
     {
+        private static readonly ConcurrentDictionary<long, string> _longConnections = new ConcurrentDictionary<long, string>();
         private static readonly ConcurrentDictionary<long, string> _chatConnections = new ConcurrentDictionary<long, string>();
 
         public HubConnectionManager()
         {
 
+        }
+
+        public bool AddLoginConnection(long userId, string connectionId)
+        {
+            if (_longConnections.ContainsKey(userId))
+                _longConnections.TryRemove(userId, out string _);
+
+            return _longConnections.TryAdd(userId, connectionId);
         }
 
         public bool AddChatConnection(long userId, string connectionId)

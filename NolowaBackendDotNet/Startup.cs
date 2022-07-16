@@ -106,7 +106,7 @@ namespace NolowaBackendDotNet
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<DirectMessageHub>("/DirectMessage");
+                endpoints.MapHub<DirectMessageHub>("/NolowaSocket");
             });
         }
     }
