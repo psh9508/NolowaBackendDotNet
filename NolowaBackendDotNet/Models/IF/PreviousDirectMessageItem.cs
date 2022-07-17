@@ -14,5 +14,7 @@ namespace NolowaBackendDotNet.Models.IF
         public string Message { get; set; } = string.Empty;
 
         public string Time { get; set; } = string.Empty;
+
+        public int NewMessageCount { get; set; }
     }
 }
