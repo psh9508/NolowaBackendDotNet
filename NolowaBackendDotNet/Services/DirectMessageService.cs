@@ -39,24 +39,48 @@ namespace NolowaBackendDotNet.Services
                                                               .OrderByDescending(x => x.InsertTime)
                                                               .Take(10)
                                                               .ToListAsync();
-
+            
             var senderReceiverDialog = senderDialog.Concat(receiverDialog)
-                                                   .OrderByDescending(x => x.InsertTime)
-                                                   .Take(10)
-                                                   .AsEnumerable();
+                                                   .OrderByDescending(x => x.InsertTime);
 
-            return senderReceiverDialog.OrderBy(x => x.InsertTime);
+            // 메시지 읽음 표시
+            senderReceiverDialog.Foreach(x => {
+                x.IsRead = true;
+            });
+
+            await _context.SaveChangesAsync();
+
+            var unreadMessageCount = senderReceiverDialog.Count(x => x.IsRead == false);
+
+            return senderReceiverDialog.Take(unreadMessageCount + 10)
+                                       .AsEnumerable()
+                                       .OrderBy(x => x.InsertTime);
         }
 
         public async Task<IEnumerable<PreviousDialogListItem>> GetPreviousDialogList(long senderId)
         {
-            //SELECT G.*	  
-	        //FROM (SELECT MAX(ID) AS ID
-			//           , SUM(CASE(IS_READ) WHEN 1 THEN 0 ELSE 1 END) AS NEW_MESSAGE_CNT
-		    //      FROM[Nolowa].[dbo].[DirectMessage]
-		    //      WHERE SENDER_ID = 2
-		    //      GROUP BY RECEIVER_ID) AS G
-	        //JOIN [Nolowa].[dbo].[DirectMessage] AS M ON M.ID = G.ID
+            //SELECT TOP 10 *
+		    //FROM ( SELECT MAIN.ID, MAIN.INSERT_TIME
+		    //       FROM (SELECT G.*, RECEIVER_ID, SENDER_ID, INSERT_TIME	  	
+	        //             FROM (SELECT MAX(ID) AS ID
+		    //       	             , SUM(CASE(IS_READ) WHEN 1 THEN 0 ELSE 1 END) AS NEW_MESSAGE_CNT
+		    //                   FROM[Nolowa].[dbo].[DirectMessage]
+		    //                   WHERE SENDER_ID = 2
+		    //                   GROUP BY RECEIVER_ID) AS G
+	        //             JOIN [Nolowa].[dbo].[DirectMessage] AS M ON M.ID = G.ID AND M.RECEIVER_ID = 3) AS MAIN
+		    //       JOIN [dbo].[Account] AS A ON A.ID = MAIN.RECEIVER_ID			
+	        //	   UNION ALL
+		    //	   SELECT MAIN.ID, MAIN.INSERT_TIME
+		    //       FROM (SELECT G.*, RECEIVER_ID, SENDER_ID, INSERT_TIME	  
+	        //             FROM (SELECT MAX(ID) AS ID
+		    //       	             , SUM(CASE(IS_READ) WHEN 1 THEN 0 ELSE 1 END) AS NEW_MESSAGE_CNT
+		    //                   FROM[Nolowa].[dbo].[DirectMessage]
+		    //                   WHERE SENDER_ID = 2
+		    //                   GROUP BY RECEIVER_ID) AS G
+	        //             LEFT JOIN [Nolowa].[dbo].[DirectMessage] AS M ON M.ID = G.ID AND M.SENDER_ID = 2) AS MAIN
+		    //       JOIN [dbo].[Account] AS A ON A.ID = MAIN.SENDER_ID
+		    //	  ) LAST
+		    //ORDER BY INSERT_TIME DESC
 
             var previousDialogList = new List<PreviousDialogListItem>();
 
