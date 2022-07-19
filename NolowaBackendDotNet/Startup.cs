@@ -41,6 +41,12 @@ namespace NolowaBackendDotNet
             services.AddControllers().AddNewtonsoftJson(config => config.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
             services.AddHttpContextAccessor();
 
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = Configuration.GetConnectionString("Redis");
+                options.InstanceName = "Nolowa_";
+            });
+
             services.AddDbContext<NolowaContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("NolowaContext"));
@@ -84,6 +90,7 @@ namespace NolowaBackendDotNet
             services.AddScoped<ISearchService, SearchService>();
             services.AddScoped<IJWTTokenProvider, JWTTokenProvider>();
             services.AddScoped<IDirectMessageService, DirectMessageService>();
+            services.AddScoped<ICacheService, CacheService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
