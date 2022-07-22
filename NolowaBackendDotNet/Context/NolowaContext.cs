@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Configuration;
 using NolowaBackendDotNet.Models;
 
 #nullable disable
@@ -30,7 +31,12 @@ namespace NolowaBackendDotNet.Context
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("name=ConnectionStrings:NolowaContext");
+                IConfigurationRoot configuration = new ConfigurationBuilder()
+                                                    .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                                                    .AddJsonFile("appsettings.json")
+                                                    .Build();
+
+                optionsBuilder.UseSqlServer(configuration.GetConnectionString("NolowaContext"));
             }
         }
 

@@ -23,8 +23,9 @@ namespace NolowaBackendDotNet.Services
     public class CacheService : ICacheService
     {
         private readonly IDistributedCache _cache;
-        private static readonly ConcurrentQueue<dynamic> _queue = new ConcurrentQueue<dynamic>();
+        private readonly ConcurrentQueue<dynamic> _queue = new ConcurrentQueue<dynamic>();
         private readonly NolowaContext _context;
+        private bool _isQueueThreadStarted;
 
 
         public CacheService(IDistributedCache cache, NolowaContext context)
@@ -32,8 +33,8 @@ namespace NolowaBackendDotNet.Services
             _cache = cache;
             _context = context;
 
-            // 생성자가 여러번 호출 됨.
-            StartInsertThread();
+            if (_isQueueThreadStarted == false)
+                StartInsertThread();
         }
 
         public async Task SaveAndQueueToSaveDisk<T>(T data)
@@ -43,10 +44,10 @@ namespace NolowaBackendDotNet.Services
             // 캐시에 저장되면 바로 리턴
             await _cache.SetRecoredAsync(randomId, data);
 
-            QueueToSaveDisk(data);
+            await QueueToSaveDisk(data);
         }
 
-        private void QueueToSaveDisk<T>(T data)
+        private async Task QueueToSaveDisk<T>(T data)
         {
             _queue.Enqueue(data);
         }
@@ -55,6 +56,8 @@ namespace NolowaBackendDotNet.Services
         {
             Task.Run(async () =>    
             {
+                _isQueueThreadStarted = true;
+
                 while (true)
                 {
                     try
@@ -62,20 +65,23 @@ namespace NolowaBackendDotNet.Services
                         bool hasSavedData = false;
                         await Task.Delay(TimeSpan.FromSeconds(10));
 
-                        for (int i = 0; i < _queue.Count; i++)
+                        using(var context = new NolowaContext())
                         {
-                            if (_queue.TryDequeue(out dynamic data))
+                            for (int i = 0; i < _queue.Count; i++)
                             {
-                                // 다형성으로 해결할 수 없을까?
-                                if (data is DirectMessage)
-                                    _context.DirectMessages.AddRange(data);
+                                if (_queue.TryDequeue(out dynamic data))
+                                {
+                                    // 다형성으로 해결할 수 없을까?
+                                    if (data is DirectMessage)
+                                        context.DirectMessages.AddRange(data);
 
-                                hasSavedData = true;
+                                    hasSavedData = true;
+                                }
                             }
-                        }
 
-                        if(hasSavedData)
-                            await _context.SaveChangesAsync();
+                            if (hasSavedData)
+                                await context.SaveChangesAsync();
+                        }
                     }
                     catch (Exception ex)
                     {

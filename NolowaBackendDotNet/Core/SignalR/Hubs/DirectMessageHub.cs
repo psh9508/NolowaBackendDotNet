@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using NolowaBackendDotNet.Context;
+using NolowaBackendDotNet.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,10 +12,12 @@ namespace NolowaBackendDotNet.Core.SignalR.Hubs
     {
         private readonly NolowaContext _context;
         private readonly HubConnectionManager _hubConnectionManager;
+        private readonly ICacheService _cacheService;
 
-        public DirectMessageHub(NolowaContext context)
+        public DirectMessageHub(NolowaContext context, ICacheService cacheService)
         {
             _context = context;
+            _cacheService = cacheService;
             _hubConnectionManager = new HubConnectionManager();
         }
 
@@ -30,16 +33,13 @@ namespace NolowaBackendDotNet.Core.SignalR.Hubs
 
         public async Task SendMessage(long senderId, long receiverId, string message)
         {
-            // 1차로 DB에 저장
-            _context.DirectMessages.Add(new Models.DirectMessage()
+            await _cacheService.SaveAndQueueToSaveDisk(new Models.DirectMessage()
             {
                 SenderId = senderId,
                 ReceiverId = receiverId,
                 Message = message,
                 InsertTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"),
             });
-
-            _context.SaveChanges();
 
             string callerConnectionId = _hubConnectionManager.GetChatConnection(senderId);
             string receiverConnectionId = _hubConnectionManager.GetChatConnection(receiverId);
