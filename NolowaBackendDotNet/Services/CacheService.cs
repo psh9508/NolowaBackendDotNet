@@ -15,6 +15,13 @@ using System.Threading.Tasks;
 
 namespace NolowaBackendDotNet.Services
 {
+    public class CacheQueueData
+    {
+        public string Id { get; set; }
+        public dynamic Data { get; set; }
+        public int InsertTryCount { get; set; }
+    }
+
     public interface ICacheService
     {
         Task SaveAndQueueToSaveDisk<T>(T data);
@@ -24,7 +31,7 @@ namespace NolowaBackendDotNet.Services
     {
         private readonly IDistributedCache _cache;
         private readonly NolowaContext _context;
-        private static readonly ConcurrentQueue<dynamic> _queue = new ConcurrentQueue<dynamic>();
+        private static readonly ConcurrentQueue<CacheQueueData> _queue = new ConcurrentQueue<CacheQueueData>();
         private static bool _isQueueThreadStarted;
         private object _lock = new object();
 
@@ -47,10 +54,15 @@ namespace NolowaBackendDotNet.Services
             // 캐시에 저장되면 바로 리턴
             await _cache.SetRecoredAsync(randomId, data);
 
-            QueueToSaveDisk(data);
+            QueueToSaveDisk(new CacheQueueData()
+            {
+                Id = randomId,
+                Data = data,
+                InsertTryCount = 0
+            });
         }
 
-        private void QueueToSaveDisk<T>(T data)
+        private void QueueToSaveDisk(CacheQueueData data)
         {
             _queue.Enqueue(data);
         }
@@ -59,6 +71,7 @@ namespace NolowaBackendDotNet.Services
         {
             // 혹시 Insert 작업이 재진입 시간보다 길어질 때 대비해서 재진입을 조절한다.
             bool isBeingOperated = false;
+            var retryTime = TimeSpan.FromSeconds(10);
 
             Task.Run(async () =>    
             {
@@ -66,15 +79,15 @@ namespace NolowaBackendDotNet.Services
 
                 while (true)
                 {
+                    CacheQueueData beInsertedData = null;
+
                     try
                     {
-                        await Task.Delay(TimeSpan.FromSeconds(10));
+                        await Task.Delay(retryTime);
 
                         if (isBeingOperated == false)
                         {
                             isBeingOperated = true;
-
-                            bool hasSavedData = false;
 
                             try
                             {
@@ -82,18 +95,22 @@ namespace NolowaBackendDotNet.Services
                                 {
                                     for (int i = 0; i < _queue.Count; i++)
                                     {
-                                        if (_queue.TryDequeue(out dynamic data))
+                                        if (_queue.TryDequeue(out beInsertedData))
                                         {
                                             // 다형성으로 해결할 수 없을까?
-                                            if (data is DirectMessage)
-                                                context.DirectMessages.AddRange(data);
+                                            if (beInsertedData.Data is DirectMessage)
+                                            {
+                                                beInsertedData.InsertTryCount++;
+                                                await context.DirectMessages.AddAsync(beInsertedData.Data);
+                                            }
 
-                                            hasSavedData = true;
+                                            if (context.ChangeTracker.HasChanges())
+                                            {
+                                                await context.SaveChangesAsync();
+                                                await _cache.RemoveAsync(beInsertedData.Id); // DB에 저장되면 redis에서 지워준다.
+                                            }
                                         }
                                     }
-
-                                    if (hasSavedData)
-                                        await context.SaveChangesAsync();
                                 }
                             }
                             finally
@@ -104,8 +121,12 @@ namespace NolowaBackendDotNet.Services
                     }
                     catch (Exception ex)
                     {
+                        if(beInsertedData.IsNotNull())
+                        {
+                            _queue.Enqueue(beInsertedData);
+                        }
                         // 이 쓰레드는 절대 죽어선 안된다.
-                        // 실패 데이터는 어딘가 남기고 수동으로 넣어준다.
+                        // beInsertedData 데이터 기록을 남기고 나중에 수동으로라도 넣어준다.
                         // log
                     }
                 }
