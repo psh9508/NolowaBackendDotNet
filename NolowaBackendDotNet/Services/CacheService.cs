@@ -31,6 +31,9 @@ namespace NolowaBackendDotNet.Services
         Task RemoveItem(string key);
     }
 
+    /// <summary>
+    /// 데이터를 cache에 넣은 후 DB에 넣기위해 Channel에 넣는 역할을 한다.
+    /// </summary>
     public class CacheService : ICacheService
     {
         private readonly IDistributedCache _cache;
@@ -64,7 +67,7 @@ namespace NolowaBackendDotNet.Services
 
         private async Task QueueToSaveDisk(CacheQueueData data)
         {
-            await _taskQueue.EnqueueBackgroundWorkItemAsync(data);
+            await _taskQueue.EnqueueAsync(data);
         }
     }
 }
