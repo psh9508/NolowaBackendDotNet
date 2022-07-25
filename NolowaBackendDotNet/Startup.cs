@@ -23,6 +23,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using NolowaBackendDotNet.Core.SignalR;
+using NolowaBackendDotNet.Core.CacheMonitor;
 
 namespace NolowaBackendDotNet
 {
@@ -59,7 +60,11 @@ namespace NolowaBackendDotNet
             services.Configure<JWT>(Configuration.GetSection("JWT"));
             services.Configure<GoogleLoginConfiguration>(Configuration.GetSection("SocialLoginGroup:GoogleLoginOption"));
 
+            services.AddSingleton<IBackgroundCacheToDBTaskQueue, BackgroundCacheToDBTaskQueue>();
+
             AddScoped(services);
+
+            services.AddHostedService<InsertCacheToDBMonitorLoop>();
 
             //services.AddTransient(typeof(IHttpProvider<,>), typeof(HttpProvider<,>));
             services.AddTransient(typeof(IHttpHeader), typeof(HttpProvider));
