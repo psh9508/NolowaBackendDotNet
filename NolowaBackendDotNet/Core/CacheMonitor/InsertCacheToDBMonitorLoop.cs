@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using NolowaBackendDotNet.Context;
@@ -20,39 +22,58 @@ namespace NolowaBackendDotNet.Core.CacheMonitor
    public class InsertCacheToDBMonitorLoop : BackgroundService
     {
         private readonly IBackgroundCacheToDBTaskQueue _taskQueue;
-        //private readonly ICacheService _cacheService;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly ILogger<InsertCacheToDBMonitorLoop> _logger;
 
-        public InsertCacheToDBMonitorLoop(IBackgroundCacheToDBTaskQueue taskQueue/*, ICacheService cacheService*/)
+        public InsertCacheToDBMonitorLoop(IBackgroundCacheToDBTaskQueue taskQueue, IServiceProvider servicesProvider, ILogger<InsertCacheToDBMonitorLoop> logger)
         {
             _taskQueue = taskQueue;
-            //_cacheService = cacheService;
+            _serviceProvider = servicesProvider;
+            _logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            var retryTime = TimeSpan.FromSeconds(10);
+            //var retryTime = TimeSpan.FromSeconds(10);
 
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                await Task.Delay(retryTime);
+            //while (!stoppingToken.IsCancellationRequested)
+            //{
+            //    await Task.Delay(retryTime);
 
-                var cachedData = await _taskQueue.DequeueAsync(stoppingToken);
+                CacheQueueData processingData = null;
+                
+                var cachedDatas = _taskQueue.DequeueAll(stoppingToken);
 
                 try
                 {
                     using (var context = new NolowaContext())
+                    using (var scope = _serviceProvider.CreateScope())
                     {
-                        await context.DirectMessages.AddAsync(cachedData.Data);
-                        await context.SaveChangesAsync();
-                    }
+                        var cacheService = scope.ServiceProvider.GetService<ICacheService>();
 
-                    //await _cacheService.RemoveItem(cachedData.Id);
+                        await foreach (var item in cachedDatas)
+                        {
+                            processingData = item;
+
+                            await context.DirectMessages.AddAsync(item.Data);
+                            await context.SaveChangesAsync();
+                            
+                            await cacheService.RemoveItem(item.Id);
+
+                            _logger.LogDebug($"처리 완료 [{item.Data}]");
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
-                   
+                    await _taskQueue.EnqueueAsync(new CacheQueueData()
+                    {
+                        Id = processingData.Id,
+                        Data = processingData.Data,
+                        InsertTryCount = processingData.InsertTryCount + 1,
+                    });
                 }
-            }
+            //}
         }
 
         public override async Task StopAsync(CancellationToken stoppingToken)

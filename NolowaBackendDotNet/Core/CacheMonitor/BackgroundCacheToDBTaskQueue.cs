@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Text;
 using System.Threading;
@@ -18,21 +19,27 @@ namespace NolowaBackendDotNet.Core.CacheMonitor
 {
     public interface IBackgroundCacheToDBTaskQueue
     {
-        ValueTask EnqueueBackgroundWorkItemAsync(CacheQueueData workItem);
-
+        ValueTask EnqueueAsync(CacheQueueData workItem);
         ValueTask<CacheQueueData> DequeueAsync(CancellationToken cancellationToken);
+        IAsyncEnumerable<CacheQueueData> DequeueAll(CancellationToken cancellationToken);
     }
 
+    /// <summary>
+    /// 멀티쓰레드 구조에 대응하기 위해 Channel을 이용해 멀티쓰레드 환경의 pub/sub 구조를 만든다.
+    /// </summary>
     public class BackgroundCacheToDBTaskQueue : IBackgroundCacheToDBTaskQueue
     {
         private readonly Channel<CacheQueueData> _queue;
 
         public BackgroundCacheToDBTaskQueue()
         {
-            _queue = Channel.CreateUnbounded<CacheQueueData>();
+            _queue = Channel.CreateUnbounded<CacheQueueData>(new UnboundedChannelOptions()
+            {
+                SingleWriter = true,
+            });
         }
-        
-        public async ValueTask EnqueueBackgroundWorkItemAsync(CacheQueueData workItem)
+
+        public async ValueTask EnqueueAsync(CacheQueueData workItem)
         {
             if (workItem == null)
                 throw new ArgumentNullException(nameof(workItem));
@@ -40,11 +47,19 @@ namespace NolowaBackendDotNet.Core.CacheMonitor
             await _queue.Writer.WriteAsync(workItem);
         }
 
-        async ValueTask<CacheQueueData> IBackgroundCacheToDBTaskQueue.DequeueAsync(CancellationToken cancellationToken)
+        public async ValueTask<CacheQueueData> DequeueAsync(CancellationToken cancellationToken)
         {
             var workItem = await _queue.Reader.ReadAsync(cancellationToken);
 
             return workItem;
+        }
+
+        public async IAsyncEnumerable<CacheQueueData> DequeueAll([EnumeratorCancellation]CancellationToken cancellationToken)
+        {
+            await foreach (var item in _queue.Reader.ReadAllAsync(cancellationToken))
+            {
+                yield return item;
+            }
         }
     }
 }
