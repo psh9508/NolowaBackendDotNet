@@ -35,5 +35,10 @@ namespace NolowaBackendDotNet.Controllers
             return await _directMessageService.GetPreviousDialogList(senderId);
         }
 
+        [HttpGet("chat/unreadmessagecount/{userId}")]
+        public async Task<int> GetUnreadMessageCount(long userId)
+        {
+            return await _directMessageService.GetUnreadMessageCount(userId);
+        }
     }
 }

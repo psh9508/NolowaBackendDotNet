@@ -17,6 +17,7 @@ namespace NolowaBackendDotNet.Services
     {
         Task<IEnumerable<DirectMessage>> GetDialogAsync(long senderId, long receiverId);
         Task<IEnumerable<PreviousDialogListItem>> GetPreviousDialogList(long senderId);
+        Task<int> GetUnreadMessageCount(long userId);
     }
 
     public class DirectMessageService : ServiceBase<DirectMessageService>, IDirectMessageService
@@ -167,6 +168,12 @@ namespace NolowaBackendDotNet.Services
             }
 
             return previousDialogList;
+        }
+
+        public async Task<int> GetUnreadMessageCount(long userId)
+        {
+            return await _context.DirectMessages.Where(x => x.ReceiverId == userId && x.IsRead == false)
+                                                .CountAsync();
         }
     }
 }
