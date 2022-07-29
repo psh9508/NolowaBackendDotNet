@@ -59,7 +59,7 @@ namespace NolowaBackendDotNet.Core.CacheMonitor
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 if(processingData.IsNotNull())
                 {
