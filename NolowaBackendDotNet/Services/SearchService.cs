@@ -97,7 +97,7 @@ namespace NolowaBackendDotNet.Services
 
             if (deletedRowCount > 0)
             {
-                var deletedRows = _context.SearchHistories.OrderByDescending(x => x).Take(deletedRowCount);
+                var deletedRows = _context.SearchHistories.OrderBy(x => x).Take(deletedRowCount);
                 _context.SearchHistories.RemoveRange(deletedRows);
 
                 await _context.SaveChangesAsync();
