@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using NolowaBackendDotNet.Context;
+using NolowaBackendDotNet.Extensions;
 using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.Configuration;
 using NolowaBackendDotNet.Models.DTOs;
@@ -34,46 +35,49 @@ namespace NolowaBackendDotNet.Core.CacheMonitor
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            //var retryTime = TimeSpan.FromSeconds(10);
-
-            //while (!stoppingToken.IsCancellationRequested)
-            //{
-            //    await Task.Delay(retryTime);
-
-                CacheQueueData processingData = null;
+            CacheQueueData processingData = null;
                 
-                var cachedDatas = _taskQueue.DequeueAll(stoppingToken);
-
-                try
+            try
+            {
+                using (var context = new NolowaContext())
+                using (var scope = _serviceProvider.CreateScope())
                 {
-                    using (var context = new NolowaContext())
-                    using (var scope = _serviceProvider.CreateScope())
+                    var cacheService = scope.ServiceProvider.GetService<ICacheService>();
+
+                    await foreach (var cachedData in _taskQueue.DequeueAll(stoppingToken))
                     {
-                        var cacheService = scope.ServiceProvider.GetService<ICacheService>();
+                        processingData = cachedData;
 
-                        await foreach (var item in cachedDatas)
-                        {
-                            processingData = item;
+                        //await Task.Delay(1000);
 
-                            await context.DirectMessages.AddAsync(item.Data);
-                            await context.SaveChangesAsync();
+                        await context.DirectMessages.AddAsync(cachedData.Data);
+                        await context.SaveChangesAsync();
                             
-                            await cacheService.RemoveItem(item.Id);
+                        await cacheService.RemoveItem(cachedData.Id);
 
-                            _logger.LogDebug($"처리 완료 [{item.Data}]");
-                        }
+                        _logger.LogDebug($"처리 완료 [{cachedData.Data}]");
                     }
                 }
-                catch (Exception ex)
+            }
+            catch (Exception ex)
+            {
+                if(processingData.IsNotNull())
                 {
-                    await _taskQueue.EnqueueAsync(new CacheQueueData()
+                    if(processingData.InsertTryCount >= 5)
                     {
-                        Id = processingData.Id,
-                        Data = processingData.Data,
-                        InsertTryCount = processingData.InsertTryCount + 1,
-                    });
+                        // Log 남기고 지움
+                    }
+                    else
+                    {
+                        await _taskQueue.EnqueueAsync(new CacheQueueData()
+                        {
+                            Id = processingData.Id,
+                            Data = processingData.Data,
+                            InsertTryCount = processingData.InsertTryCount + 1,
+                        });
+                    }
                 }
-            //}
+            }
         }
 
         public override async Task StopAsync(CancellationToken stoppingToken)
