@@ -33,8 +33,7 @@ namespace NolowaBackendDotNet.Core.CacheMonitor
 
         public BackgroundCacheToDBTaskQueue()
         {
-            _queue = Channel.CreateUnbounded<CacheQueueData>(new UnboundedChannelOptions()
-            {
+            _queue = Channel.CreateUnbounded<CacheQueueData>(new UnboundedChannelOptions() {
                 SingleWriter = true,
             });
         }

@@ -1,0 +1,14 @@
+version : '3'
+services:
+  server:
+    build: .
+    ports:
+    - "5000:80"
+    - "5001:443"
+    environment:
+      ASPNETCORE_URLS: "https://+;http://+"
+      ASPNETCORE_HTTPS_PORT: "5001"
+      ASPNETCORE_ENVIRONMENT: "Development"
+    volumes:
+      - C:\Users\psh02\AppData\Roaming\Microsoft\UserSecrets\:/root/.microsoft/usersecrets
+      - C:\Users\psh02\.aspnet\https:/root/.aspnet/https/

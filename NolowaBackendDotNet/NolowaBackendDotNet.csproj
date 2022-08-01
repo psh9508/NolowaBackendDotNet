@@ -4,6 +4,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+    <UserSecretsId>27380d07-a64a-46b3-9efc-8a4dccf81fb5</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
