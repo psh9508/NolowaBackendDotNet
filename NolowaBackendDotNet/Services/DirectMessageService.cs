@@ -17,7 +17,8 @@ namespace NolowaBackendDotNet.Services
     {
         Task<IEnumerable<DirectMessage>> GetDialogAsync(long senderId, long receiverId);
         Task<IEnumerable<PreviousDialogListItem>> GetPreviousDialogList(long senderId);
-        Task<int> GetUnreadMessageCount(long userId);
+        Task<int> GetUnreadMessageCountAsync(long userId);
+        Task<int> GetUnreadMessageCountAsync(long senderId, long receiverId);
     }
 
     public class DirectMessageService : ServiceBase<DirectMessageService>, IDirectMessageService
@@ -31,29 +32,25 @@ namespace NolowaBackendDotNet.Services
 
         public async Task<IEnumerable<DirectMessage>> GetDialogAsync(long senderId, long receiverId)
         {
-            var senderDialog = await _context.DirectMessages.Where(x => x.SenderId == senderId && x.ReceiverId == receiverId)
-                                                            .OrderByDescending(x => x.InsertTime)
-                                                            .Take(10)
-                                                            .ToListAsync();
+            var unreadMessageIds = _context.DirectMessages.Where(x => x.ReceiverId == senderId && x.IsRead == false).Select(x => x.Id);
 
-            var receiverDialog = await _context.DirectMessages.Where(x => x.SenderId == receiverId && x.ReceiverId == senderId)
-                                                              .OrderByDescending(x => x.InsertTime)
-                                                              .Take(10)
-                                                              .ToListAsync();
-            
+            var senderDialog = _context.DirectMessages.Where(x => x.SenderId == senderId && x.ReceiverId == receiverId)
+                                                      .OrderByDescending(x => x.InsertTime)
+                                                      .Take(unreadMessageIds.Count() >= 10 ? unreadMessageIds.Count() : 10);
+
+            var receiverDialog = _context.DirectMessages.Where(x => x.SenderId == receiverId && x.ReceiverId == senderId)
+                                                        .OrderByDescending(x => x.InsertTime)
+                                                        .Take(unreadMessageIds.Count() >= 10 ? unreadMessageIds.Count() : 10);
+
             var senderReceiverDialog = senderDialog.Concat(receiverDialog)
                                                    .OrderByDescending(x => x.InsertTime);
 
-            // 메시지 읽음 표시
-            senderReceiverDialog.Foreach(x => {
-                x.IsRead = true;
-            });
+            // 메시지 읽음 표시 // 이 함수에서 읽음 표시를 하는게 함수의 이름에서 유추 될 수 있을까?
+            await MakeMessagesReadAsync(senderReceiverDialog, unreadMessageIds);
 
             await _context.SaveChangesAsync();
 
-            var unreadMessageCount = senderReceiverDialog.Count(x => x.IsRead == false);
-
-            return senderReceiverDialog.Take(unreadMessageCount + 10)
+            return senderReceiverDialog.Take(unreadMessageIds.Count() + 10)
                                        .AsEnumerable()
                                        .OrderBy(x => x.InsertTime);
         }
@@ -170,10 +167,31 @@ namespace NolowaBackendDotNet.Services
             return previousDialogList;
         }
 
-        public async Task<int> GetUnreadMessageCount(long userId)
+        public async Task<int> GetUnreadMessageCountAsync(long userId)
         {
-            return await _context.DirectMessages.Where(x => x.ReceiverId == userId && x.IsRead == false)
+            return await _context.DirectMessages.Where(x => x.ReceiverId == userId  // 내가 받은 
+                                                    && x.SenderId != x.ReceiverId   // 내가 나한테 준건 제외
+                                                    && x.IsRead == false)           // 읽지 않은 것
                                                 .CountAsync();
+        }
+
+        public async Task<int> GetUnreadMessageCountAsync(long senderId, long receiverId)
+        {
+            return await _context.DirectMessages.Where(x => x.ReceiverId == senderId && x.SenderId == receiverId && x.IsRead == false)
+                                                .CountAsync();
+        }
+
+        private async Task MakeMessagesReadAsync(IOrderedQueryable<DirectMessage> senderReceiverDialog, IQueryable<long> unreadMessageCountIds)
+        {
+            senderReceiverDialog.Foreach(x => {
+                x.IsRead = true;
+            });
+
+            await _context.DirectMessages.Where(x => unreadMessageCountIds.Contains(x.Id))
+                                         .ForEachAsync(x => x.IsRead = true);
+
+            // 함수 밖에서 한번에 처리
+            //await _context.SaveChangesAsync();
         }
     }
 }

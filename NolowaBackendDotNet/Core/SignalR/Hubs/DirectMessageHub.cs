@@ -13,11 +13,13 @@ namespace NolowaBackendDotNet.Core.SignalR.Hubs
         private readonly NolowaContext _context;
         private readonly HubConnectionManager _hubConnectionManager;
         private readonly ICacheService _cacheService;
+        private readonly IDirectMessageService _directMessageService;
 
-        public DirectMessageHub(NolowaContext context, ICacheService cacheService)
+        public DirectMessageHub(NolowaContext context, ICacheService cacheService, IDirectMessageService directMessageService)
         {
             _context = context;
             _cacheService = cacheService;
+            _directMessageService = directMessageService;
             _hubConnectionManager = new HubConnectionManager();
         }
 
@@ -39,15 +41,24 @@ namespace NolowaBackendDotNet.Core.SignalR.Hubs
                 ReceiverId = receiverId,
                 Message = message,
                 InsertTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"),
+                IsRead = senderId == receiverId, // 나에게 보낸 메시지면 읽음 표시를 바로 한다.
             });
 
             string callerConnectionId = _hubConnectionManager.GetChatConnection(senderId);
             string receiverConnectionId = _hubConnectionManager.GetChatConnection(receiverId);
 
             // Invoke them at the same time
-            //Clients.Caller.SendAsync("ReceiveDirectMessage", senderId, receiverId, message, DateTime.Now.ToString("yyyy년 MM월 dd일 HH:mm:ss"));
-            Clients.Client(callerConnectionId).SendAsync("ReceiveDirectMessage", senderId, receiverId, message, DateTime.Now.ToString("yyyy년 MM월 dd일 HH:mm:ss"));
-            Clients.Client(receiverConnectionId).SendAsync("ReceiveDirectMessage", senderId, receiverId, message, DateTime.Now.ToString("yyyy년 MM월 dd일 HH:mm:ss"));
+            if(senderId != receiverId) // 자기 자신에게 보낸 메세지는 제외한다.
+                _ = Clients.Client(callerConnectionId).SendAsync("ReceiveDirectMessage", senderId, receiverId, message, DateTime.Now.ToString("yyyy년 MM월 dd일 HH:mm:ss"));
+
+            _ = Clients.Client(receiverConnectionId).SendAsync("ReceiveDirectMessage", senderId, receiverId, message, DateTime.Now.ToString("yyyy년 MM월 dd일 HH:mm:ss"));
+        }
+
+        public async Task ReadMessage(long senderId, long receiverId)
+        {
+            var unreadMessageCount = await _directMessageService.GetUnreadMessageCountAsync(senderId, receiverId);
+
+            await Clients.Caller.SendAsync("ReadMessage", unreadMessageCount);
         }
     }
 }
