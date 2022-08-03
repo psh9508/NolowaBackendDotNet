@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  server:
+    build: .
+    ports:
+      - "5000:80"
+      - "5001:433"
+    environment:
+      - ASPNETCORE_URLS: "https://+:443;http://+:80"
+      - ASPNETCORE_HTTPS_PORT: "5001"
+      - ASPNETCORE_ENVIRONMENT: "Development"
+    volumes:
+      - ${APPDATA}\microsoft\usersecrets\:/root/.microsoft/usersecrets
+      - ${USERPROFILE}\.aspnet\https:/root/.aspnet/https/
+  
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    user: root
+    ports:
+      - "1433:1433"
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: my_passw0rd!1
+  
+  cache:
+    image: redis
+    ports:
+      - "6379:6379"
+
