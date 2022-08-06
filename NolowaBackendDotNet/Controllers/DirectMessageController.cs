@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
 using NolowaBackendDotNet.Context;
 using NolowaBackendDotNet.Core.Base;
 using NolowaBackendDotNet.Models;
@@ -41,10 +42,13 @@ namespace NolowaBackendDotNet.Controllers
             return await _directMessageService.GetUnreadMessageCountAsync(userId);
         }
 
-        //[HttpPatch("chat/dialog/readmessage")]
-        //public async Task<bool> SetMessageRead([FromBody]IEnumerable<long> unreadMessageIds)
-        //{
+        [HttpPatch("chat/dialog/readmessage")]
+        public async Task<int> SetReadAllMessage([FromBody] Newtonsoft.Json.Linq.JObject jsonData)
+        {
+            var senderId = jsonData.Value<long>("senderId");
+            var receiverId = jsonData.Value<long>("receiverId");
 
-        //}
+            return await _directMessageService.SetReadAllMessageAsync(senderId, receiverId);
+        }
     }
 }

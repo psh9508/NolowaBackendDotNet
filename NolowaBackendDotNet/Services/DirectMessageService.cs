@@ -19,6 +19,7 @@ namespace NolowaBackendDotNet.Services
         Task<IEnumerable<PreviousDialogListItem>> GetPreviousDialogList(long senderId);
         Task<int> GetUnreadMessageCountAsync(long userId);
         Task<int> GetUnreadMessageCountAsync(long senderId, long receiverId);
+        Task<int> SetReadAllMessageAsync(long senderId, long receiverId);
     }
 
     public class DirectMessageService : ServiceBase<DirectMessageService>, IDirectMessageService
@@ -169,7 +170,7 @@ namespace NolowaBackendDotNet.Services
 
         public async Task<int> GetUnreadMessageCountAsync(long userId)
         {
-            return await _context.DirectMessages.Where(x => x.ReceiverId == userId  // 내가 받은 
+            return await _context.DirectMessages.Where(x => x.ReceiverId == userId  // 내가 받은 것
                                                     && x.SenderId != x.ReceiverId   // 내가 나한테 준건 제외
                                                     && x.IsRead == false)           // 읽지 않은 것
                                                 .CountAsync();
@@ -179,6 +180,16 @@ namespace NolowaBackendDotNet.Services
         {
             return await _context.DirectMessages.Where(x => x.ReceiverId == senderId && x.SenderId == receiverId && x.IsRead == false)
                                                 .CountAsync();
+        }
+
+        public async Task<int> SetReadAllMessageAsync(long senderId, long receiverId)
+        {
+            _context.DirectMessages.Where(x => x.ReceiverId == senderId 
+                                            && x.SenderId == receiverId 
+                                            && x.IsRead == false)
+                                   .Foreach(x => x.IsRead = true);
+
+            return await _context.SaveChangesAsync();
         }
 
         private async Task MakeMessagesReadAsync(IOrderedQueryable<DirectMessage> senderReceiverDialog, IQueryable<long> unreadMessageCountIds)
