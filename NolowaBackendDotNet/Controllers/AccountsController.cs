@@ -156,6 +156,12 @@ namespace NolowaBackendDotNet.Controllers
             return await _accountsService.ChangeProfileInfoAsync(data);
         }
 
+        [HttpGet("users/{id}")]
+        public async Task<ActionResult<AccountDTO>> GetUser(long id)
+        {
+            return await _accountsService.FindAsync(id);
+        }
+
         private bool AccountExists(long id)
         {
             return _context.Accounts.Any(e => e.Id == id);
