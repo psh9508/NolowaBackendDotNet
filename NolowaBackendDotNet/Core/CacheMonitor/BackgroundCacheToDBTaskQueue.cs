@@ -4,6 +4,7 @@ using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.Configuration;
 using NolowaBackendDotNet.Models.DTOs;
 using NolowaBackendDotNet.Services;
+using NolowaBackendDotNet.Services.Base;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;

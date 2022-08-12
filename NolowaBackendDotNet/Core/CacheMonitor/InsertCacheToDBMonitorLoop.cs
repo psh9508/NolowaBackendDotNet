@@ -9,6 +9,7 @@ using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.Configuration;
 using NolowaBackendDotNet.Models.DTOs;
 using NolowaBackendDotNet.Services;
+using NolowaBackendDotNet.Services.Base;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -42,7 +43,7 @@ namespace NolowaBackendDotNet.Core.CacheMonitor
                 using (var context = new NolowaContext())
                 using (var scope = _serviceProvider.CreateScope())
                 {
-                    var cacheService = scope.ServiceProvider.GetService<ICacheService>();
+                    var cacheService = scope.ServiceProvider.GetService<IDirectMessageCacheService>();
 
                     await foreach (var cachedData in _taskQueue.DequeueAll(stoppingToken))
                     {

@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using NolowaBackendDotNet.Core.SignalR;
 using NolowaBackendDotNet.Core.CacheMonitor;
+using NolowaBackendDotNet.Core.Redis;
 
 namespace NolowaBackendDotNet
 {
@@ -42,10 +43,21 @@ namespace NolowaBackendDotNet
             services.AddControllers().AddNewtonsoftJson(config => config.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
             services.AddHttpContextAccessor();
 
-            services.AddStackExchangeRedisCache(options =>
+            //services.AddStackExchangeRedisCache(options =>
+            //{
+            //    options.Configuration = Configuration.GetConnectionString("Redis");
+            //    options.InstanceName = "Nolowa_";
+            //});
+
+            services.Configure<RedisCacheOptions1>(options =>
             {
-                options.Configuration = Configuration.GetConnectionString("Redis");
-                options.InstanceName = "Nolowa_";
+                options.Configuration = Configuration.GetConnectionString("Redis_DM");
+                options.InstanceName = "Nolowa_DM_";
+            });
+            services.Configure<RedisCacheOptions2>(options =>
+            {
+                options.Configuration = Configuration.GetConnectionString("Redis_Post");
+                options.InstanceName = "Nolowa_Post_";
             });
 
             services.AddDbContext<NolowaContext>(options =>
@@ -59,6 +71,13 @@ namespace NolowaBackendDotNet
             services.AddOptions();
             services.Configure<JWT>(Configuration.GetSection("JWT"));
             services.Configure<GoogleLoginConfiguration>(Configuration.GetSection("SocialLoginGroup:GoogleLoginOption"));
+
+            //services.Add(ServiceDescriptor.Singleton<IDirectMessageRedis, DirectMessageRedis>());
+            //services.Add(ServiceDescriptor.Singleton<IPostRedis, PostRedis>());
+            services.AddSingleton<IDirectMessageRedis, DirectMessageRedis>();
+            services.AddSingleton<IPostRedis, PostRedis>();
+            services.AddSingleton<IPostCacheService, PostCacheService>();
+            services.AddSingleton<IDirectMessageCacheService, DirectMessageCacheService>();
 
             services.AddSingleton<IBackgroundCacheToDBTaskQueue, BackgroundCacheToDBTaskQueue>();
 
@@ -95,7 +114,7 @@ namespace NolowaBackendDotNet
             services.AddScoped<ISearchService, SearchService>();
             services.AddScoped<IJWTTokenProvider, JWTTokenProvider>();
             services.AddScoped<IDirectMessageService, DirectMessageService>();
-            services.AddScoped<ICacheService, CacheService>();
+            //services.AddScoped<ICacheService, CacheService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

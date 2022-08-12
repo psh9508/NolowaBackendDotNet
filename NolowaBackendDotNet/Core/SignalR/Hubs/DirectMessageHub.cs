@@ -12,10 +12,10 @@ namespace NolowaBackendDotNet.Core.SignalR.Hubs
     {
         private readonly NolowaContext _context;
         private readonly HubConnectionManager _hubConnectionManager;
-        private readonly ICacheService _cacheService;
+        private readonly IDirectMessageCacheService _cacheService;
         private readonly IDirectMessageService _directMessageService;
 
-        public DirectMessageHub(NolowaContext context, ICacheService cacheService, IDirectMessageService directMessageService)
+        public DirectMessageHub(NolowaContext context, IDirectMessageCacheService cacheService, IDirectMessageService directMessageService)
         {
             _context = context;
             _cacheService = cacheService;

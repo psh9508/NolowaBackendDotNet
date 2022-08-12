@@ -4,6 +4,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Hosting;
 using NolowaBackendDotNet.Context;
 using NolowaBackendDotNet.Core.CacheMonitor;
+using NolowaBackendDotNet.Core.Redis;
 using NolowaBackendDotNet.Extensions;
 using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.DTOs;
@@ -18,30 +19,24 @@ using System.Threading.Tasks;
 
 namespace NolowaBackendDotNet.Services
 {
-    public class CacheQueueData
+    public interface IPostCacheService : ICacheService
     {
-        public string Id { get; set; }
-        public dynamic Data { get; set; }
-        public int InsertTryCount { get; set; }
-    }
-
-    public interface ICacheService
-    {
-        Task SaveAndQueueToSaveDisk<T>(T data);
-        Task RemoveItem(string key);
     }
 
     /// <summary>
     /// 데이터를 cache에 넣은 후 DB에 넣기위해 Channel에 넣는 역할을 한다.
     /// </summary>
-    public class CacheService : ICacheService
+    public class PostCacheService : IPostCacheService
     {
-        private readonly IDistributedCache _cache;
+        //private readonly IDistributedCache _cache;
+        private readonly IDirectMessageRedis _cacheDM;
+        private readonly IPostRedis _cachePoset;
         private readonly IBackgroundCacheToDBTaskQueue _taskQueue;
 
-        public CacheService(IDistributedCache cache, IBackgroundCacheToDBTaskQueue taskQueue)
+        public PostCacheService(IDirectMessageRedis cacheDM, IPostRedis cachePost, IBackgroundCacheToDBTaskQueue taskQueue)
         {
-            _cache = cache;
+            _cacheDM = cacheDM;
+            _cachePoset = cachePost;
             _taskQueue = taskQueue;
         }
 
@@ -50,7 +45,7 @@ namespace NolowaBackendDotNet.Services
             var randomId = Guid.NewGuid().ToString();
 
             // 캐시에 저장되면 바로 리턴
-            await _cache.SetRecoredAsync(randomId, data);
+            await _cacheDM.SetRecoredAsync(randomId, data);
 
             _ = QueueToSaveDisk(new CacheQueueData()
             {
@@ -62,7 +57,7 @@ namespace NolowaBackendDotNet.Services
 
         public async Task RemoveItem(string key)
         {
-            await _cache.RemoveAsync(key);
+            await _cacheDM.RemoveAsync(key);
         }
 
         private async Task QueueToSaveDisk(CacheQueueData data)
