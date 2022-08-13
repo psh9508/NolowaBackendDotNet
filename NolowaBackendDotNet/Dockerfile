@@ -1,4 +1,7 @@
-FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
+# .Net build image
+# 앱을 컴파일 하는 데 필요한 요소 컴파일러 및 다른 .NET 종속성 포함
+# 프로덕션에 이 이미지를 배포하지 않고 빌드에만 사용 함
+FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /app
 
 # Copy everything
@@ -9,7 +12,8 @@ RUN dotnet restore
 RUN dotnet publish -c Release -o out
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim AS base
+# 빌드 이미지가 따로 있다면 여기서 다시 컴파일 할 필요가 없이 빠르게 실행 가능
+FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS base
 WORKDIR /app
 COPY --from=build /app/out .
 ENTRYPOINT ["dotnet", "NolowaBackendDotNet.dll"]
