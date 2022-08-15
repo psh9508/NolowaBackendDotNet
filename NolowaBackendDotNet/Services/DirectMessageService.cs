@@ -91,6 +91,7 @@ namespace NolowaBackendDotNet.Services
 
             var messageDataCollection = new List<DirectMessage>();
 
+            // 내가 주고 받은 메시지를 가져와 최신 시간으로 삽입된 데이터만 추출한다.
             foreach (var ids in idGroups)
             {
                 var message = await _context.DirectMessages.OrderByDescending(x => x.InsertTime)
@@ -116,12 +117,12 @@ namespace NolowaBackendDotNet.Services
                 }
 
                 // 같은 사람끼리 주고 받은 데이터가 있더면 시간순으로 최근 것을 저장하고 기존에 저장되어 있던것을 지워준다.
-                if (message.InsertTime.CompareTo(sameContextMessage.InsertTime) < 0)
+                if (message.InsertTime.CompareTo(sameContextMessage.InsertTime) > 0)
                 {
                     var alreadyInsertedMessage = messageDataCollection.Single(x => x.SenderId == ids.ReceiverId && x.ReceiverId == ids.SenderId);
                     messageDataCollection.Remove(alreadyInsertedMessage);
 
-                    messageDataCollection.Add(sameContextMessage);
+                    messageDataCollection.Add(message);
                 }
             }
 
@@ -144,7 +145,7 @@ namespace NolowaBackendDotNet.Services
                                                          Time = dm.InsertTime,
                                                          NewMessageCount = GetUnreadMessageCountAsync(dm.SenderId, dm.ReceiverId).Result,
                                                      }
-                                                     );
+                                                     ).OrderByDescending(x => x.Time);
 
             return finalDialog;
         }
@@ -159,9 +160,8 @@ namespace NolowaBackendDotNet.Services
 
         public async Task<int> GetUnreadMessageCountAsync(long senderId, long receiverId)
         {
-            //return await _context.DirectMessages.Where(x => x.ReceiverId == senderId && x.SenderId == receiverId && x.IsRead == false)
-            //                                    .CountAsync();
-            return await _context.DirectMessages.Where(x => x.ReceiverId == receiverId && x.SenderId == senderId && x.IsRead == false)
+            return await _context.DirectMessages.Where(x => ((x.ReceiverId == receiverId && x.SenderId == senderId) || (x.ReceiverId == senderId && x.SenderId == receiverId)) 
+                                                            && x.IsRead == false)
                                                .CountAsync();
         }
 
