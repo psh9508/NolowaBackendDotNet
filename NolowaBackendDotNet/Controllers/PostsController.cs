@@ -23,12 +23,28 @@ namespace NolowaBackendDotNet.Controllers
             _postsService = postsService;
         }
 
-        [HttpGet("{loginUserId}/Followers")]
-        public async Task<ActionResult<IEnumerable<Post>>> GetFollowerPosts(int loginUserId)
+        [HttpGet("{loginUserId}/HomePosts/")]
+        public async Task<ActionResult<IEnumerable<Post>>> GetHomePosts(int loginUserId)
         {
             var logindedUser = await _accountsService.FindAsync(loginUserId);
 
-            var posts = _postsService.GetFollowerPosts(logindedUser);
+            var posts = await _postsService.GetHomePostsAsync(logindedUser);
+
+            if (posts.Count() <= 0)
+                return NotFound(posts);
+
+            return Ok(posts);
+        }
+
+        [HttpGet("{loginUserId}/Followers/{pageNumber}")]
+        public async Task<ActionResult<IEnumerable<Post>>> GetMoreHomePostsAsync(int loginUserId, int pageNumber)
+        {
+            if (pageNumber < 0)
+                throw new ArgumentOutOfRangeException("pageNumber는 0보다 작을 수 없습니다.");
+
+            var logindedUser = await _accountsService.FindAsync(loginUserId);
+
+            var posts = await _postsService.GetMoreHomePostsAsync(logindedUser, pageNumber);
 
             if (posts.Count() <= 0)
                 return NotFound(posts);
