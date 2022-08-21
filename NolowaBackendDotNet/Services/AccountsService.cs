@@ -96,32 +96,35 @@ namespace NolowaBackendDotNet.Services
 
         private async Task<AccountDTO> FindAsync(Expression<Func<Account, bool>> whereExpression)
         {
-            var account = await _context.Accounts.Where(whereExpression)
+            using(var context = new NolowaContext())
+            {
+                var account = await context.Accounts.Where(whereExpression)
                                                .Include(account => account.FollowerSourceAccounts)
                                                .Include(account => account.ProfileInfo)
                                                .ThenInclude(profileInfo => profileInfo.ProfileImg)
                                                .FirstOrDefaultAsync();
 
-            if (account == null)
-                return null;
+                if (account == null)
+                    return null;
 
-            var accountDTO = _mapper.Map<AccountDTO>(account);
+                var accountDTO = _mapper.Map<AccountDTO>(account);
 
-            // 본인 아이디가 키인 데이터를 가져와서 그 데이터에 DestinationID로 Follower의 Post를 가져와야한다. 그래서 SourceAccount를 가져와 반복문을 도는 것임.
-            foreach (var follower in account.FollowerSourceAccounts)
-            {
-                var followerPost = _context.Posts.Where(x => x.AccountId == follower.DestinationAccountId)
-                                                 .Include(x => x.Account)
-                                                 .ThenInclude(x => x.ProfileInfo)
-                                                 .ThenInclude(profileInfo => profileInfo.ProfileImg)
-                                                 .OrderByDescending(x => x.InsertDate)
-                                                 .Select(x => _mapper.Map<PostDTO>(x))
-                                                 .Take(10);
+                // 본인 아이디가 키인 데이터를 가져와서 그 데이터에 DestinationID로 Follower의 Post를 가져와야한다. 그래서 SourceAccount를 가져와 반복문을 도는 것임.
+                foreach (var follower in account.FollowerSourceAccounts)
+                {
+                    var followerPost = context.Posts.Where(x => x.AccountId == follower.DestinationAccountId)
+                                                     .Include(x => x.Account)
+                                                     .ThenInclude(x => x.ProfileInfo)
+                                                     .ThenInclude(profileInfo => profileInfo.ProfileImg)
+                                                     .OrderByDescending(x => x.InsertDate)
+                                                     .Select(x => _mapper.Map<PostDTO>(x))
+                                                     .Take(10);
 
-                accountDTO.Posts.ToList().AddRnage(followerPost);
+                    accountDTO.Posts.ToList().AddRnage(followerPost);
+                }
+
+                return accountDTO;
             }
-
-            return accountDTO;
         }
 
         public async Task<bool> HasFollowedAsync(IFFollowModel data)
