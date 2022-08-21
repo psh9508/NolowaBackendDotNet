@@ -10,10 +10,14 @@ using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.DTOs;
 using NolowaBackendDotNet.Models.IF;
 using NolowaBackendDotNet.Services.Base;
+using StackExchange.Redis;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,6 +25,9 @@ namespace NolowaBackendDotNet.Services
 {
     public interface IPostCacheService : ICacheService
     {
+        Task SaveAsync(string userId, string jsonData);
+        Task<T> GetAsync<T>(string userId);
+        Task RemoveAllAsync(string userId);
     }
 
     /// <summary>
@@ -28,41 +35,102 @@ namespace NolowaBackendDotNet.Services
     /// </summary>
     public class PostCacheService : IPostCacheService
     {
-        //private readonly IDistributedCache _cache;
-        private readonly IDirectMessageRedis _cacheDM;
-        private readonly IPostRedis _cachePoset;
+        private readonly IPostRedis _cache;
         private readonly IBackgroundCacheToDBTaskQueue _taskQueue;
 
-        public PostCacheService(IDirectMessageRedis cacheDM, IPostRedis cachePost, IBackgroundCacheToDBTaskQueue taskQueue)
+        public PostCacheService(IPostRedis cache, IBackgroundCacheToDBTaskQueue taskQueue)
         {
-            _cacheDM = cacheDM;
-            _cachePoset = cachePost;
+            _cache = cache;
             _taskQueue = taskQueue;
+        }
+
+        public async Task SaveAsync(string userId, string jsonData)
+        {
+            try
+            {
+                await _cache.SetStringAsync(userId, jsonData);
+            }
+            catch (RedisConnectionException ex) 
+            {
+                throw;
+            }
+        }
+
+        public async Task<T> GetAsync<T>(string userId)
+        {
+            try
+            {
+                var redisJsonData = await _cache.GetStringAsync(userId);
+
+                if (redisJsonData.IsNull())
+                    return default(T);
+
+                await RemoveAllAsync(userId);
+
+                return JsonSerializer.Deserialize<T>(redisJsonData, new JsonSerializerOptions()
+                {
+                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                    WriteIndented = true,
+                    ReferenceHandler = ReferenceHandler.Preserve
+                });
+            }
+            catch (RedisConnectionException ex)
+            {
+                throw;
+            }
         }
 
         public async Task SaveAndQueueToSaveDisk<T>(T data)
         {
-            var randomId = Guid.NewGuid().ToString();
+            //var randomId = Guid.NewGuid().ToString();
 
-            // 캐시에 저장되면 바로 리턴
-            await _cacheDM.SetRecoredAsync(randomId, data);
+            //// 캐시에 저장되면 바로 리턴
+            //await _cacheDM.SetRecoredAsync(randomId, data);
 
-            _ = QueueToSaveDisk(new CacheQueueData()
+            //_ = QueueToSaveDisk(new CacheQueueData()
+            //{
+            //    Id = randomId,
+            //    Data = data,
+            //    InsertTryCount = 0
+            //});
+
+            throw new NotImplementedException();
+        }
+
+        public async Task RemoveAllAsync(string userId)
+        {
+            try
             {
-                Id = randomId,
-                Data = data,
-                InsertTryCount = 0
-            });
+                await _cache.RemoveAsync(userId);
+            }
+            catch (RedisConnectionException ex)
+            {
+                throw;
+            }
         }
 
         public async Task RemoveItem(string key)
         {
-            await _cacheDM.RemoveAsync(key);
+            try
+            {
+                await _cache.RemoveAsync(key);
+            }
+            catch (RedisConnectionException ex)
+            {
+                throw;
+            }
         }
 
         private async Task QueueToSaveDisk(CacheQueueData data)
         {
-            await _taskQueue.EnqueueAsync(data);
+            try
+            {
+                await _taskQueue.EnqueueAsync(data);
+            }
+            catch (RedisConnectionException ex)
+            {
+                throw;
+            }
         }
     }
 }
