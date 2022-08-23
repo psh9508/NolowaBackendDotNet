@@ -18,6 +18,7 @@ namespace NolowaBackendDotNet.Services
 {
     public interface IPostsService
     {
+        Task<IEnumerable<PostDTO>> GetHomePostsAsync(AccountDTO loginedUserAccount);
         Task<IEnumerable<PostDTO>> GetUserPostsAsync(long userId);
         Task<IEnumerable<PostDTO>> GetMoreHomePostsAsync(AccountDTO loginedUserAccount, int pageNumber);
         Post InsertPost(Post post);
@@ -31,6 +32,14 @@ namespace NolowaBackendDotNet.Services
         public PostsService(IPostCacheService cache)
         {
             _cache = cache; 
+        }
+
+        public async Task<IEnumerable<PostDTO>> GetHomePostsAsync(AccountDTO loginedUserAccount)
+        {
+            // 기존에 캐싱 되어있을지도 모르는 데이터를 삭제
+            await _cache.RemoveAllAsync(loginedUserAccount.Id.ToString());
+
+            return await GetMoreHomePostsAsync(loginedUserAccount, pageNumber: 1);
         }
 
         public async Task<IEnumerable<PostDTO>> GetUserPostsAsync(long userId)
@@ -47,6 +56,25 @@ namespace NolowaBackendDotNet.Services
             return _mapper.Map<IEnumerable<PostDTO>>(dbDatas);
         }
 
+        public Post InsertPost(Post post)
+        {
+            try
+            {
+                post.AccountId = post.Account.Id;
+                post.Account = null;
+                
+                _context.Posts.Add(post);
+
+                _context.SaveChanges();
+
+                return post;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
         public async Task<IEnumerable<PostDTO>> GetMoreHomePostsAsync(AccountDTO loginedUserAccount, int pageNumber)
         {
             var cachedNextPageData = await _cache.GetAsync<IEnumerable<PostDTO>>(loginedUserAccount.Id.ToString());
@@ -54,7 +82,7 @@ namespace NolowaBackendDotNet.Services
             if (cachedNextPageData?.Count() > 0)
             {
                 // 다음 페이지 캐싱 하는 쓰레드를 기다리지 않는다.
-                _ = GetRequestedPageAndSaveNextPageToCacheAsync(loginedUserAccount, pageNumber);
+                _ = GetRequestedPageAndSaveNextPageToCacheAsync(loginedUserAccount, 1);
 
                 // 캐싱 된 데이터를 바로 리턴한다.
                 return cachedNextPageData;
@@ -103,24 +131,6 @@ namespace NolowaBackendDotNet.Services
             });
 
             _ = _cache.SaveAsync(loginedUserId, jsonData);
-        }
-
-        public Post InsertPost(Post post)
-        {
-            try
-            {
-                post.AccountId = post.Account.Id; 
-                post.Account = null;
-                _context.Posts.Add(post);
-
-                _context.SaveChanges();
-
-                return post;
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
         }
     }
 }
