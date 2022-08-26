@@ -13,6 +13,7 @@ namespace NolowaTest.Extensions
         [TestCase("a")]
         [TestCase(" a")]
         [TestCase(".")]
+        [TestCase("          .          ")]
         public void IsValid_성공케이스(string src)
         {
             var actual = src.IsValid();
@@ -48,6 +49,7 @@ namespace NolowaTest.Extensions
         [TestCase("a")]
         [TestCase(" a")]
         [TestCase(".")]
+        [TestCase("          .          ")]
         public void IsNotValid_실패케이스(string src)
         {
             var actual = src.IsNotVaild();
