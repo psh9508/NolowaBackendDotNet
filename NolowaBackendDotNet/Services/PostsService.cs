@@ -82,7 +82,7 @@ namespace NolowaBackendDotNet.Services
             if (cachedNextPageData?.Count() > 0)
             {
                 // 다음 페이지 캐싱 하는 쓰레드를 기다리지 않는다.
-                _ = GetRequestedPageAndSaveNextPageToCacheAsync(loginedUserAccount, 1);
+                _ = GetRequestedPageAndSaveNextPageToCacheAsync(loginedUserAccount, pageNumber);
 
                 // 캐싱 된 데이터를 바로 리턴한다.
                 return cachedNextPageData;
