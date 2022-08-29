@@ -29,8 +29,10 @@ namespace NolowaBackendDotNet.Services
         private const int PAGE_POST_COUNT = 5;
         private readonly IPostCacheService _cache;
 
-        public PostsService(IPostCacheService cache)
+        public PostsService(NolowaContext context, IMapper mapper, IPostCacheService cache)
         {
+            _context = context;
+            _mapper = mapper;
             _cache = cache; 
         }
 
