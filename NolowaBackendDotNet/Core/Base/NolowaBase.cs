@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using NolowaBackendDotNet.Core.Test;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,9 @@ namespace NolowaBackendDotNet.Core.Base
 
         public NolowaBase()
         {
+            if (TestHelper.IsTest)
+                return;
+
             _logger = InstanceResolver.Instance.Resolve<ILogger<TClass>>();
         }
     }
