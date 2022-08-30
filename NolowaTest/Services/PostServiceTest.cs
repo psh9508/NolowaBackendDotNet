@@ -150,6 +150,7 @@ namespace NolowaTest.Services
             }
         }
 
+        #region private funcs
         private IEnumerable<FollowerDTO> GetFollowers(long[] followerIds)
         {
             for (int i = 0; i < followerIds.Length; i++)
@@ -384,6 +385,7 @@ namespace NolowaTest.Services
             var mapper = config.CreateMapper();
 
             _postService = new PostsService(mockContext.Object, mapper, mockCache.Object);
-        }
+        } 
+        #endregion
     }
 }
