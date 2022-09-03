@@ -50,16 +50,23 @@ namespace NolowaBackendDotNet
             //    options.InstanceName = "Nolowa_";
             //});
 
+            #region Redis
             services.Configure<RedisCacheOptions1>(options =>
-            {
-                options.Configuration = Configuration.GetConnectionString("Redis_DM");
-                options.InstanceName = "Nolowa_DM_";
-            });
+                {
+                    options.Configuration = Configuration.GetConnectionString("Redis_DM");
+                    options.InstanceName = "Nolowa_DM_";
+                });
             services.Configure<RedisCacheOptions2>(options =>
             {
                 options.Configuration = Configuration.GetConnectionString("Redis_Post");
                 options.InstanceName = "Nolowa_Post_";
             });
+            services.Configure<RedisCacheOptions3>(options =>
+            {
+                options.Configuration = Configuration.GetConnectionString("Redis_Search");
+                options.InstanceName = "Nolowa_Search_";
+            }); 
+            #endregion
 
             services.AddDbContext<NolowaContext>(options =>
             {
