@@ -22,7 +22,7 @@ namespace NolowaBackendDotNet.Services
 {
     public interface ISearchCacheService
     {
-        void IncreaseScore(string key, int value = 1)
+        void IncreaseScore(string key, int value = 1);
         IEnumerable<ScoreInfo> GetTopRanking(int start = 0, int end = 5);
     }
 
