@@ -56,15 +56,15 @@ namespace NolowaBackendDotNet.Services
         {
             IDatabase db = _redis.GetDatabase();
 
-            var list = db.SortedSetRangeByRankWithScores(RANK_KEY, start, end, Order.Descending);
+            var redisDatas = db.SortedSetRangeByRankWithScores(RANK_KEY, start, end, Order.Descending);
 
             var ranks = new List<ScoreInfo>();
 
-            for (int i = 0; i < list.Length; ++i)
+            for (int i = 0; i < redisDatas.Length; ++i)
             {
                 ranks.Add(new ScoreInfo { 
-                    Key = list[i].Element,
-                    Score = (int)list[i].Score,
+                    Key = redisDatas[i].Element,
+                    Score = (int)redisDatas[i].Score,
                 });
             }
 
