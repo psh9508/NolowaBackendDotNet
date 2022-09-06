@@ -22,7 +22,7 @@ namespace NolowaBackendDotNet.Services
 {
     public interface ISearchCacheService
     {
-        void IncreaseScore(string key, int value = 1);
+        Task IncreaseScoreAsync(string key, int value = 1);
         IEnumerable<ScoreInfo> GetTopRanking(int start = 0, int end = 5);
     }
 
@@ -44,12 +44,15 @@ namespace NolowaBackendDotNet.Services
             _cache = cache;
         }
 
-        public void IncreaseScore(string key, int value = 1)
+        public async Task IncreaseScoreAsync(string key, int value = 1)
         {
-            IDatabase db = _redis.GetDatabase();
+            await Task.Run(() =>
+            {
+                IDatabase db = _redis.GetDatabase();
 
-            // 함수가 호출 될 때마다 1씩 올린다.
-            db.SortedSetIncrement(RANK_KEY, key, value);
+                // 함수가 호출 될 때마다 1씩 올린다.
+                db.SortedSetIncrement(RANK_KEY, key, value);
+            });
         }
 
         public IEnumerable<ScoreInfo> GetTopRanking(int start = 0, int end = 5)

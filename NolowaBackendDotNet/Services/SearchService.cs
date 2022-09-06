@@ -21,9 +21,11 @@ namespace NolowaBackendDotNet.Services
     public class SearchService : ServiceBase<SearchService>, ISearchService
     {
         private const int MAX_SEARCH_COUNT = 5;
+        private readonly ISearchCacheService _cache;
 
-        public SearchService()
+        public SearchService(ISearchCacheService cache)
         {
+            _cache = cache;
         }
 
         public async Task<List<string>> GetSearchedKeywordsAsync(long accountId)
@@ -42,6 +44,10 @@ namespace NolowaBackendDotNet.Services
                                                  .Include(x => x.ProfileInfo)
                                                  .ThenInclude(x => x.ProfileImg)
                                                  .Select(x => _mapper.Map<AccountDTO>(x));
+
+            // 다른 쓰레드로 키워드 검색 될 때마다 Redis에 점수를 올려 순위를 기록한다.
+            // 이 쓰레드는 리턴을 기다리지 않고 다음 로직을 탄다.
+            _ = _cache.IncreaseScoreAsync(accountName);
 
             await DeleteAndSaveKeywordAsync(userID, accountName);
 
