@@ -15,7 +15,7 @@ namespace NolowaBackendDotNet.Core.Redis
     {
     }
 
-    public class SearchRedis : RedisCache, IPostRedis
+    public class SearchRedis : RedisCache, ISearchRedis
     {
         public SearchRedis(IOptions<RedisCacheOptions3> optionsAccessor) : base(optionsAccessor)
         {

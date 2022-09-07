@@ -82,10 +82,13 @@ namespace NolowaBackendDotNet
 
             //services.Add(ServiceDescriptor.Singleton<IDirectMessageRedis, DirectMessageRedis>());
             //services.Add(ServiceDescriptor.Singleton<IPostRedis, PostRedis>());
-            services.AddSingleton<IDirectMessageRedis, DirectMessageRedis>();
             services.AddSingleton<IPostRedis, PostRedis>();
+            services.AddSingleton<IDirectMessageRedis, DirectMessageRedis>();
+            services.AddSingleton<ISearchRedis, SearchRedis>();
+
             services.AddSingleton<IPostCacheService, PostCacheService>();
             services.AddSingleton<IDirectMessageCacheService, DirectMessageCacheService>();
+            services.AddSingleton<ISearchCacheService, SearchCacheService>();
 
             services.AddSingleton<IBackgroundCacheToDBTaskQueue, BackgroundCacheToDBTaskQueue>();
 
