@@ -28,7 +28,7 @@ namespace NolowaBackendDotNet.Services
 
     public class ScoreInfo
     {
-        public string Key { get; set; }
+        public string Key { get; set; } = string.Empty;
         public int Score { get; set; }
     }
 
