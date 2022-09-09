@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using NolowaBackendDotNet.Context;
+using NolowaBackendDotNet.Core.Test;
 using NolowaBackendDotNet.Extensions;
 using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.DTOs;
@@ -23,8 +24,10 @@ namespace NolowaBackendDotNet.Services
         private const int MAX_SEARCH_COUNT = 5;
         private readonly ISearchCacheService _cache;
 
-        public SearchService(ISearchCacheService cache)
+        public SearchService(NolowaContext context, IMapper mapper, ISearchCacheService cache)
         {
+            _context = context;
+            _mapper = mapper;
             _cache = cache;
         }
 
