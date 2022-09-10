@@ -80,6 +80,30 @@ namespace NolowaTest.Services
             Assert.That(keywords[7], Is.EqualTo("8"));
         }
 
+        [Test]
+        [TestCase("병아리")]
+        [TestCase("계정명")]
+        [TestCase("키보드")]
+        [TestCase("커피아빠")]
+        [TestCase("시골용사")]
+        [TestCase("흑생")]
+        public async Task SearchUsersAsync_DB에있는값을올바로가져온다(string keyword)
+        {
+            var searchedData = await _searchService.SearchUsersAsync(It.IsAny<long>(), keyword);
+
+            Assert.That(searchedData[0].AccountName, Is.EqualTo(keyword));
+        }
+
+        [Test]
+        public async Task SearchUsersAsync_DB에없는값은EmptyList를반환한다()
+        {
+            string dataNotInDB = "DB에 없는 데이터";
+
+            var searchedData = await _searchService.SearchUsersAsync(It.IsAny<long>(), dataNotInDB);
+
+            Assert.That(searchedData.Count, Is.EqualTo(0));
+        }
+
         /// <summary>
         /// 주의 : 실제 Redis를 이용해서 테스트 하지 않는다.
         ///        Redis를 테스트 할 수 없어 Redis를 가정한 List를 이용해 테스트를 함.
