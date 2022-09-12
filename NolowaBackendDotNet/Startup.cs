@@ -25,6 +25,9 @@ using Microsoft.AspNetCore.SignalR;
 using NolowaBackendDotNet.Core.SignalR;
 using NolowaBackendDotNet.Core.CacheMonitor;
 using NolowaBackendDotNet.Core.Redis;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace NolowaBackendDotNet
 {
@@ -65,8 +68,27 @@ namespace NolowaBackendDotNet
             {
                 options.Configuration = Configuration.GetConnectionString("Redis_Search");
                 options.InstanceName = "Nolowa_Search_";
-            }); 
+            });
             #endregion
+
+            var jwtKey = Configuration.GetSection("JWT:secret").Value;
+
+            services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(x =>
+            {
+                x.RequireHttpsMetadata = false;
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+            });
 
             services.AddDbContext<NolowaContext>(options =>
             {
@@ -143,6 +165,7 @@ namespace NolowaBackendDotNet
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

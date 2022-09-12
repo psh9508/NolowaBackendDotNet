@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NolowaBackendDotNet.Context;
 using NolowaBackendDotNet.Core.Base;
 using NolowaBackendDotNet.Models.DTOs;
@@ -22,6 +23,7 @@ namespace NolowaBackendDotNet.Controllers
         }
 
         [HttpGet("Keywords/{userId}")]
+        [Authorize]
         public async Task<List<string>> GetSearchedKeywordsAsync(long userId)
         {
             return await _serachService.GetSearchedKeywordsAsync(userId);
