@@ -17,6 +17,7 @@ namespace NolowaBackendDotNet.Services
     {
         Task<List<string>> GetSearchedKeywordsAsync(long userID);
         Task<List<AccountDTO>> SearchUsersAsync(long searchAccountID, string accountName);
+        Task<List<ScoreInfo>> GetSearchkeywordRankAsync(int startIndex = 0, int endIndex = 5);
     }
 
     public class SearchService : ServiceBase<SearchService>, ISearchService
@@ -55,6 +56,16 @@ namespace NolowaBackendDotNet.Services
             await DeleteAndSaveKeywordAsync(userID, accountName);
 
             return await searchedUsers.ToListAsync();
+        }
+
+        public async Task<List<ScoreInfo>> GetSearchkeywordRankAsync(int startIndex = 0, int endIndex = 5)
+        {
+            return await Task.Run(() =>
+            {
+                var ranking = _cache.GetTopRanking(startIndex, endIndex);
+
+                return ranking.ToList();
+            });
         }
 
         private async Task DeleteAndSaveKeywordAsync(long id, string keyword)
