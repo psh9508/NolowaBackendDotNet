@@ -13,18 +13,33 @@ services:
       ASPNETCORE_Kestrel__Certificates__Default__Path: "/https/nolowa.pfx"
     volumes:
       - ~/.aspnet/https:/https:ro
+    depends_on:
+     - db
+     - directMessageCache
+     - postCache
+     - searchCache
   
-  # db:
-  #   image: mcr.microsoft.com/mssql/server:2022-latest
-  #   user: root
-  #   ports:
-  #     - "1433:1433"
-  #   environment:
-  #     ACCEPT_EULA: Y
-  #     SA_PASSWORD: my_passw0rd!1
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    user: root
+    ports:
+      - "1433:1433"
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: my_passw0rd!1
   
-  # cache:
-  #   image: redis
-  #   ports:
-  #     - "6379:6379"
+  directMessageCache:
+    image: redis
+    ports:
+      - "5060:6379"
+
+  postCache:
+    image: redis
+    ports:
+      - "5061:6379"
+
+  searchCache:
+    image: redis
+    ports:
+      - "5062:6379"
 

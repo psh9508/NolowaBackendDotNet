@@ -15,20 +15,34 @@ services:
     volumes:
       - ~/.aspnet/https:/https:ro
     depends_on:
-      - db
-      - cache
+     - db
+     - directMessageCache
+     - postCache
+     - searchCache
   
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
     user: root
     ports:
-      - "1433:1433"
+      - "1433:1433"    
     environment:
-      ACCEPT_EULA: "Y"
-      SA_PASSWORD: "my_passw0rd!1"
+      ACCEPT_EULA: Y
+      SA_PASSWORD: my_passw0rd!1
+    volumes:
+      - ./sqldata:/var/opt/mssql/data
   
-  cache:
+  directMessageCache:
     image: redis
     ports:
-      - "6379:6379"
+      - "5060:6379"
+
+  postCache:
+    image: redis
+    ports:
+      - "5061:6379"
+
+  searchCache:
+    image: redis
+    ports:
+      - "5062:6379"
 
