@@ -28,6 +28,13 @@ namespace NolowaBackendDotNet.Controllers
         {
             return await _serachService.GetSearchedKeywordsAsync(userId);
         }
+        
+        [HttpGet("Keywords/Rank/{startIndex}/{endIndex}")]
+        public async Task<List<ScoreInfo>> GetKeywordRank(int startIndex, int endIndex)
+        {
+            return await _serachService.GetSearchkeywordRankAsync(startIndex, endIndex);
+        }
+
 
         [HttpGet("User/{accountName}")]
         public async Task<List<AccountDTO>> SearchUsers(string accountName)
