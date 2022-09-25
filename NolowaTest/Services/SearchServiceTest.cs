@@ -129,20 +129,33 @@ namespace NolowaTest.Services
         /// </summary>
         public class SearchCacheMock : ISearchCacheService
         {
+            public class SearchUser
+            {
+                public string Key { get; set; } = string.Empty;
+                public long TTL { get; set; }
+            }
+
             private const string RANK_KEY = "search-rank";
 
             // Redis 대신 데이터를 담아 Assert 될 메모리 데이터
             public List<ScoreInfo> Datas { get; set; } = new List<ScoreInfo>();
+            public List<SearchUser> SearchUsers { get; set; } = new List<SearchUser>();
 
             public IEnumerable<ScoreInfo> GetTopRanking(int start = 0, int end = 5)
             {
                 throw new NotImplementedException();
             }
 
-            public async Task IncreaseScoreAsync(string key, int value = 1)
+            public async Task IncreaseScoreAsync(string userId, string key, int value = 1)
             {
+                string 검색기록Key = $"{userId}_{key}";
+
                 await Task.Run(() =>
                 {
+                    // 같은 유저가 같은 검색어로 검색했던 기록이 아직 레디스에 남아있으면 검색어를 랭킹을 올려주지 않음
+                    if (SearchUsers.FirstOrDefault(x => x.Key == 검색기록Key) is not null)
+                        return;
+
                     // Redis의 ZINCRBY를 똑같이 구현한다.
                     var data = Datas.FirstOrDefault(x => x.Key == key);
 
@@ -154,6 +167,8 @@ namespace NolowaTest.Services
                     {
                         Datas.Add(new ScoreInfo() { Key = key, Score = value });
                     }
+
+                    SearchUsers.Add(new SearchUser() { Key = 검색기록Key, TTL = 1000 * 60 * 60 });
                 });
             }
         }
