@@ -123,6 +123,25 @@ namespace NolowaTest.Services
         }
 
         /// <summary>
+        /// 주의 : 실제 Redis를 이용해서 테스트 하지 않는다.
+        ///        Redis를 테스트 할 수 없어 Redis를 가정한 List를 이용해 테스트를 함.
+        /// </summary>
+        /// <returns></returns>
+        [Test]
+        public async Task SearchUsersAsync_같은아이디와검색어로계속검색하면검색어랭킹이한번만올라간다()
+        {
+            // 같은 아이디와 검색어로 검색을 여러번해도 
+            await _searchService.SearchUsersAsync(1, "계정명");
+            await _searchService.SearchUsersAsync(1, "계정명");
+            await _searchService.SearchUsersAsync(1, "계정명");
+            await _searchService.SearchUsersAsync(1, "계정명");
+            await _searchService.SearchUsersAsync(1, "계정명");
+
+            Assert.That(_searchCacheMock.Datas[0].Key, Is.EqualTo("계정명"));
+            Assert.That(_searchCacheMock.Datas[0].Score, Is.EqualTo(1)); // 스코어는 1이다.
+        }
+
+        /// <summary>
         /// ISearchCacheService를 구현하는 Search Cache의 Mock이다
         /// 내부적으로 Redis에 접근하는 코드를 메모리 데이터에 접근하는 방식으로 변경해서
         /// 테스트할 수 있는 클래스를 만든다.
