@@ -12,6 +12,7 @@ using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -22,7 +23,7 @@ namespace NolowaBackendDotNet.Services
 {
     public interface ISearchCacheService
     {
-        Task IncreaseScoreAsync(string key, int value = 1);
+        Task IncreaseScoreAsync(string userId, string key, int value = 1);
         IEnumerable<ScoreInfo> GetTopRanking(int start = 0, int end = 5);
     }
 
@@ -44,14 +45,25 @@ namespace NolowaBackendDotNet.Services
             _cache = cache;
         }
 
-        public async Task IncreaseScoreAsync(string key, int value = 1)
+        public async Task IncreaseScoreAsync(string userId, string key, int value = 1)
         {
-            await Task.Run(() =>
+            await Task.Run(async () =>
             {
+                string userAndKeywordKey = $"{userId}_{key}";
+
                 IDatabase db = _redis.GetDatabase();
 
+                bool userWhoHasSearchedTheSameKeyword = (await db.StringGetAsync(userAndKeywordKey)).HasValue;
+
+                if (userWhoHasSearchedTheSameKeyword)
+                    return;
+
                 // 함수가 호출 될 때마다 1씩 올린다.
-                db.SortedSetIncrement(RANK_KEY, key, value);
+                _ = db.SortedSetIncrementAsync(RANK_KEY, key, value);
+
+                // 검색했던 유저와 키워드를 저장해 놓는다. (1시간 후 지워지는 데이터)
+                // 1시간 동안 같은 검색어를 같은 유저가 검색할 수 없도록 한다.
+                _ = db.StringSetAsync(userAndKeywordKey, 1, TimeSpan.FromHours(1));
             });
         }
 

@@ -51,7 +51,7 @@ namespace NolowaBackendDotNet.Services
 
             // 다른 쓰레드로 키워드 검색 될 때마다 Redis에 점수를 올려 순위를 기록한다.
             // 이 쓰레드는 리턴을 기다리지 않고 다음 로직을 탄다.
-            _ = _cache.IncreaseScoreAsync(accountName);
+            _ = _cache.IncreaseScoreAsync(userID.ToString(), accountName);
 
             await DeleteAndSaveKeywordAsync(userID, accountName);
 
