@@ -112,9 +112,9 @@ namespace NolowaTest.Services
         [Test]
         public async Task SearchUsersAsync_검색한수만큼점수가올라야한다()
         {
-            await _searchService.SearchUsersAsync(It.IsAny<long>(), "계정명");
-            await _searchService.SearchUsersAsync(It.IsAny<long>(), "계정명");
-            await _searchService.SearchUsersAsync(It.IsAny<long>(), "피곤한거미");
+            await _searchService.SearchUsersAsync(1, "계정명");
+            await _searchService.SearchUsersAsync(2, "계정명");
+            await _searchService.SearchUsersAsync(3, "피곤한거미");
 
             Assert.That(_searchCacheMock.Datas[0].Key, Is.EqualTo("계정명"));
             Assert.That(_searchCacheMock.Datas[0].Score, Is.EqualTo(2));
