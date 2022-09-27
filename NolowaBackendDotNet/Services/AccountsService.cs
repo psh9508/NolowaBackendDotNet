@@ -66,13 +66,13 @@ namespace NolowaBackendDotNet.Services
 
                 if (HasProfileImage(signUpUserIFModel))
                 {
-                    await SaveProfileImageFileToPhysicalLayer(signUpUserIFModel.ProfileImage);
+                    var savedGuid = await SaveProfileImageFileToPhysicalLayer(signUpUserIFModel.ProfileImage);
 
                     beInsertedUser.ProfileInfo = new ProfileInfo()
                     {
                         ProfileImg = new ProfileImage()
                         {
-                            FileHash = signUpUserIFModel.ProfileImage.ToSha256(),
+                            FileHash = savedGuid.ToString(),
                             Url = "newUrl",
                         },
                     };
@@ -216,13 +216,20 @@ namespace NolowaBackendDotNet.Services
 
         }
 
-        private static async Task SaveProfileImageFileToPhysicalLayer(byte[] profileImage)
+        private static async Task<Guid> SaveProfileImageFileToPhysicalLayer(byte[] profileImage)
         {
-            using (var filestream = System.IO.File.Create(Constant.PROFILE_IMAGE_ROOT_PATH + @$"{profileImage.ToSha256()}.jpg"))
+            // Hash로 파일명을 계산하니 파일명으로 사용할 수 없는 문자도 나와서 임시로 변경
+            //var saveFullPath = Constant.PROFILE_IMAGE_ROOT_PATH + @$"{profileImage.ToSha256()}.jpg";
+            var guid = Guid.NewGuid();
+            var saveFullPath = Constant.PROFILE_IMAGE_ROOT_PATH + @$"{guid}.jpg";
+
+            using (var filestream = System.IO.File.Create(saveFullPath))
             {
                 await filestream.WriteAsync(profileImage, 0, profileImage.Length);
                 filestream.Flush();
             }
+
+            return guid;
         }
     }
 }
