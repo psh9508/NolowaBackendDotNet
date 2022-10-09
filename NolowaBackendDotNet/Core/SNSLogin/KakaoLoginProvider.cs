@@ -19,7 +19,7 @@ namespace NolowaBackendDotNet.Core.SNSLogin
 
         private readonly IConfiguration _configuration;
 
-        public KakaoLoginProvider()
+        public KakaoLoginProvider(IHttpProvider httpProvider) : base(httpProvider)
         {
             _configuration = InstanceResolver.Instance.Resolve<IConfiguration>();
         }

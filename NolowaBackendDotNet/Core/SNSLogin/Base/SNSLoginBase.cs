@@ -17,10 +17,15 @@ namespace NolowaBackendDotNet.Core.SNSLogin.Base
 
         protected readonly IHttpProvider _httpProvider;
 
-        public SNSLoginBase() 
+        //public SNSLoginBase() 
+        //{
+        //    _httpProvider = InstanceResolver.Instance.Resolve<IHttpProvider>();
+        //}
+
+        public SNSLoginBase(IHttpProvider httpProvider)
         {
-            _httpProvider = InstanceResolver.Instance.Resolve<IHttpProvider>();
-        }
+            _httpProvider = httpProvider;
+        }   
 
         public string GetQueryString(string uri, Dictionary<string, string> values)
         {
