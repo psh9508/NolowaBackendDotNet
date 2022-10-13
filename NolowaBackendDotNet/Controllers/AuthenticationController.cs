@@ -18,7 +18,13 @@ namespace NolowaBackendDotNet.Controllers
     [Route("[controller]")]
     public class AuthenticationController : NolowaController
     {
+        private readonly IHttpProvider _httpProvider;
         private readonly Services.IAuthenticationService _authenticationService;
+
+        public AuthenticationController(IHttpProvider httpProvider)
+        {
+            _httpProvider = httpProvider;
+        }
 
         public AuthenticationController(Services.IAuthenticationService authenticationService)
         {
@@ -35,14 +41,14 @@ namespace NolowaBackendDotNet.Controllers
         [HttpGet("Social/Google/Login")]
         public async Task<AccountDTO> GoogleSocialLogin([FromQuery] string code)
         {
-            _authenticationService.SnsLoginProvider = new GoogleLoginProvider();
+            _authenticationService.SnsLoginProvider = new GoogleLoginProvider(_httpProvider);
             return await _authenticationService.LoginWithUserInfo<GoogleLoginUserInfoResponse>(code);
         }
 
         [HttpGet("Social/Kakao/Login")]
         public async Task<AccountDTO> KakaoSocialLogin([FromQuery] string code)
         {
-            _authenticationService.SnsLoginProvider = new KakaoLoginProvider();
+            _authenticationService.SnsLoginProvider = new KakaoLoginProvider(_httpProvider);
             return await _authenticationService.LoginWithUserInfo<KakaoLoginUserInfoResponse>(code);
         }
 
@@ -51,9 +57,9 @@ namespace NolowaBackendDotNet.Controllers
             switch (snsProviderName.ToLower())
             {
                 case "google":
-                    return new GoogleLoginProvider();
+                    return new GoogleLoginProvider(_httpProvider);
                 case "kakao":
-                    return new KakaoLoginProvider();
+                    return new KakaoLoginProvider(_httpProvider);
                 default:
                     throw new InvalidOperationException($"구현되지 않은 [{snsProviderName}] SNS Login Provider의 생성을 시도하였습니다.");
             }
