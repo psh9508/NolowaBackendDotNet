@@ -20,14 +20,10 @@ namespace NolowaBackendDotNet.Controllers
     {
         private readonly IHttpProvider _httpProvider;
         private readonly Services.IAuthenticationService _authenticationService;
-
-        public AuthenticationController(IHttpProvider httpProvider)
+        
+        public AuthenticationController(IHttpProvider httpProvider, Services.IAuthenticationService authenticationService)
         {
             _httpProvider = httpProvider;
-        }
-
-        public AuthenticationController(Services.IAuthenticationService authenticationService)
-        {
             _authenticationService = authenticationService;
         }
 
