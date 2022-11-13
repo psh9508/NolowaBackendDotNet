@@ -63,6 +63,7 @@ namespace NolowaBackendDotNet.Services
             try
             {
                 post.AccountId = post.Account.Id;
+                post.InsertDate = DateTime.Now;
                 post.Account = null;
                 
                 _context.Posts.Add(post);
