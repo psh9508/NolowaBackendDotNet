@@ -91,8 +91,10 @@ namespace NolowaBackendDotNet.Services
                 return cachedNextPageData;
             }
 
+            // 캐싱 되어있는 값이 없으면 요청된 페이지를 리턴하고 그 다음페이지를 캐시하는 함수를 호출
             var requestedPagePosts = await GetRequestedPageAndSaveNextPageToCacheAsync(loginedUserAccount, pageNumber);
 
+            // 다음페이지 리턴
             return requestedPagePosts;
         }
 
@@ -113,10 +115,10 @@ namespace NolowaBackendDotNet.Services
                                                .Select(x => _mapper.Map<PostDTO>(x))
                                                .AsEnumerable();
 
-            var requestedPagePosts = followersPosts.Take(PAGE_POST_COUNT);
-            var cachePagePosts = followersPosts.Skip(PAGE_POST_COUNT).Take(PAGE_POST_COUNT);
+            var requestedPagePosts = followersPosts.Take(PAGE_POST_COUNT); // 요청 페이지
+            var cachePagePosts = followersPosts.Skip(PAGE_POST_COUNT).Take(PAGE_POST_COUNT); // 캐시 될 요청 페이지의 다음 페이지
 
-            await SaveToCache(loginedUserAccount.Id.ToString(), cachePagePosts);
+            await SaveToCache(loginedUserAccount.Id.ToString(), cachePagePosts); // 페이지 캐시
 
             return requestedPagePosts;
         }
@@ -133,6 +135,7 @@ namespace NolowaBackendDotNet.Services
                 ReferenceHandler = ReferenceHandler.Preserve
             });
 
+            // 다른 쓰레드를 이용해서 레디스에 캐시하고 이 쓰레드를 기다리지 않는다.
             _ = _cache.SaveAsync(loginedUserId, jsonData);
         }
     }
