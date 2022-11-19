@@ -71,6 +71,7 @@ namespace NolowaBackendDotNet.Services
         {
             IDatabase db = _redis.GetDatabase();
 
+            // 레디스의 SortedSet을 이용해서 메모리에서 빠르게 랭킹을 계산한다.
             var redisDatas = db.SortedSetRangeByRankWithScores(RANK_KEY, start, end, Order.Descending);
 
             for (int i = 0; i < redisDatas.Length; ++i)
