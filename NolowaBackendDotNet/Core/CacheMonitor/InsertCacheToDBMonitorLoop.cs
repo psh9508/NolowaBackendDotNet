@@ -34,7 +34,7 @@ namespace NolowaBackendDotNet.Core.CacheMonitor
             _logger = logger;
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             CacheQueueData processingData = null;
                 
@@ -45,7 +45,7 @@ namespace NolowaBackendDotNet.Core.CacheMonitor
                 {
                     var cacheService = scope.ServiceProvider.GetService<IDirectMessageCacheService>();
 
-                    await foreach (var cachedData in _taskQueue.DequeueAll(stoppingToken))
+                    await foreach (var cachedData in _taskQueue.DequeueAll(cancellationToken))
                     {
                         processingData = cachedData;
 
