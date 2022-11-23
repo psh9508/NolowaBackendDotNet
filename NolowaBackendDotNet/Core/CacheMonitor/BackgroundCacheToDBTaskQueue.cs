@@ -34,6 +34,7 @@ namespace NolowaBackendDotNet.Core.CacheMonitor
 
         public BackgroundCacheToDBTaskQueue()
         {
+            // 무제한으로 입력을 받을수 있는 'CacheQueueData'타입의 채널을 생성
             _queue = Channel.CreateUnbounded<CacheQueueData>(new UnboundedChannelOptions()
             {
                 SingleWriter = true,
