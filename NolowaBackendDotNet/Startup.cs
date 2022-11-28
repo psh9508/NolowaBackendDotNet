@@ -173,6 +173,8 @@ namespace NolowaBackendDotNet
                 endpoints.MapControllers();
                 endpoints.MapHub<DirectMessageHub>("/NolowaSocket");
             });
+
+            // DB, 레디스등 올바로 동작하는지 확인
         }
     }
 }
