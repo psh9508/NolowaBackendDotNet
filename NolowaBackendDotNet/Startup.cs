@@ -175,6 +175,8 @@ namespace NolowaBackendDotNet
             });
 
             // DB, 레디스등 올바로 동작하는지 확인
+            var redis = InstanceResolver.Instance.Resolve<IPostRedis>();
+            redis.GetAsync("healthCheck");
         }
     }
 }
