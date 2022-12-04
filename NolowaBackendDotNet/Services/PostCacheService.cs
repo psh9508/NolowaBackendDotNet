@@ -26,6 +26,7 @@ namespace NolowaBackendDotNet.Services
     public interface IPostCacheService : ICacheService
     {
         Task SaveAsync(string userId, string jsonData);
+        Task SaveAsync<T>(string key, T value);
         Task<T> GetAsync<T>(string userId);
         Task RemoveAllAsync(string userId);
     }
@@ -54,6 +55,11 @@ namespace NolowaBackendDotNet.Services
             {
                 throw;
             }
+        }
+
+        public Task SaveAsync<T>(string key, T value)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<T> GetAsync<T>(string userId)
