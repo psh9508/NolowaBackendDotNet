@@ -15,6 +15,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -57,9 +58,17 @@ namespace NolowaBackendDotNet.Services
             }
         }
 
-        public Task SaveAsync<T>(string key, T value)
+        public async Task SaveAsync<T>(string key, T value)
         {
-            throw new NotImplementedException();
+            try
+            {
+                byte[] StrByte = Encoding.UTF8.GetBytes(value.ToString());
+                await _cache.SetAsync(key, StrByte);
+            }
+            catch (RedisConnectionException ex)
+            {
+                throw;
+            }
         }
 
         public async Task<T> GetAsync<T>(string userId)
