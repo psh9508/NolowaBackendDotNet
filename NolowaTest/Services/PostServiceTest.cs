@@ -2,7 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using NolowaBackendDotNet.Context;
+using NolowaBackendDotNet.Core.CacheMonitor;
 using NolowaBackendDotNet.Core.Mapper;
+using NolowaBackendDotNet.Core.Redis;
 using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.DTOs;
 using NolowaBackendDotNet.Services;
@@ -17,6 +19,8 @@ namespace NolowaTest.Services
     public class PostServiceTest
     {
         PostsService _postService;
+        PostCacheService _cacheService;
+        Mock<IPostCacheService> _mockCacheService;
 
         [SetUp]
         public void Setup()
@@ -150,8 +154,27 @@ namespace NolowaTest.Services
             }
         }
 
+        //[Test]
+        //public async Task GetMoreHomePostsAsync_올바로다음페이지를캐싱한다()
+        //{
+        //    var 기본테스트데이터 = Get기본테스트데이터();
+
+        //    SetupReturnData(기본테스트데이터);
+
+        //    // 로그인한 유저를 만든다
+        //    var account = new AccountDTO() {
+        //        Id = 1,
+        //        Followers = GetFollowers(2),
+        //    };
+
+        //    await _postService.GetMoreHomePostsAsync(account, 1);
+
+        //    //_mockCacheService.Verify(x => x.GetAsync<IEnumerable<PostDTO>>("1"), Times.Once);
+        //    var test = _cacheService.GetAsync<IEnumerable<PostDTO>>("1");
+        //}
+
         #region private funcs
-        private IEnumerable<FollowerDTO> GetFollowers(long[] followerIds)
+        private IEnumerable<FollowerDTO> GetFollowers(params long[] followerIds)
         {
             for (int i = 0; i < followerIds.Length; i++)
             {
@@ -379,12 +402,14 @@ namespace NolowaTest.Services
             var mockContext = new Mock<NolowaContext>();
             mockContext.Setup(x => x.Posts).Returns(mockSet.Object);
 
-            var mockCache = new Mock<IPostCacheService>();
+            _mockCacheService = new Mock<IPostCacheService>();            
+            _cacheService = new PostCacheService(Mock.Of<IPostRedis>(), Mock.Of<IBackgroundCacheToDBTaskQueue>());
 
             var config = new MapperConfiguration(cfg => cfg.AddProfile<MappingProfile>());
             var mapper = config.CreateMapper();
 
-            _postService = new PostsService(mockContext.Object, mapper, mockCache.Object);
+            //_postService = new PostsService(mockContext.Object, mapper, _mockCacheService.Object);
+            _postService = new PostsService(mockContext.Object, mapper, _cacheService);
         } 
         #endregion
     }
