@@ -175,6 +175,7 @@ namespace NolowaBackendDotNet
             });
 
             // DB, 레디스등 올바로 동작하는지 확인
+            // 여기서 타임아웃까지 기다리지 않도록 처리해야함
             var redis = InstanceResolver.Instance.Resolve<IPostRedis>();
             redis.GetAsync("healthCheck");
         }
