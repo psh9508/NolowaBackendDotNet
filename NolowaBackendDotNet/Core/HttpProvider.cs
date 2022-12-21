@@ -32,7 +32,8 @@ namespace NolowaBackendDotNet.Core
         {
             if (_httpClient.BaseAddress == null)
             {
-                _httpClient.BaseAddress = new Uri("https://localhost:5001/");
+                //_httpClient.BaseAddress = new Uri("https://localhost:5001/");
+                _httpClient.BaseAddress = new Uri("15.165.158.231");
                 _httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
             }
         }
