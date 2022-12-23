@@ -77,7 +77,7 @@ namespace NolowaBackendDotNet.Services
             {
                 var redisJsonData = await _cache.GetStringAsync(userId);
 
-                if (redisJsonData.IsNull())
+                if (redisJsonData.IsNotVaild())
                     return default(T);
 
                 await RemoveAllAsync(userId);
