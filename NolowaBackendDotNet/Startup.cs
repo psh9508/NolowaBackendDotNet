@@ -28,6 +28,7 @@ using NolowaBackendDotNet.Core.Redis;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using NolowaBackendDotNet.Core.MessageQueue;
 
 namespace NolowaBackendDotNet
 {
@@ -113,6 +114,7 @@ namespace NolowaBackendDotNet
             services.AddSingleton<ISearchCacheService, SearchCacheService>();
 
             services.AddSingleton<IBackgroundCacheToDBTaskQueue, BackgroundCacheToDBTaskQueue>();
+            services.AddSingleton<IMessageQueue, MessagePublisher>();
 
             AddScoped(services);
 
