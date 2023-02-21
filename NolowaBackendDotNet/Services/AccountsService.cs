@@ -7,6 +7,7 @@ using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.DTOs;
 using NolowaBackendDotNet.Models.IF;
 using NolowaBackendDotNet.Services.Base;
+using NolowaFrontend.Models.Protos.Generated.prot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +19,8 @@ namespace NolowaBackendDotNet.Services
     public interface IAccountsService
     {
         Task<AccountDTO> FindAsync(long id);
-        Task<AccountDTO> LoginAsync(string email, string password);
+        //Task<AccountDTO> LoginAsync(string email, string password);
+        Task<LoginRes> LoginAsync(string email, string password);
         Task<AccountDTO> SaveAsync(IFSignUpUser newAccount);
         Task<bool> HasFollowedAsync(IFFollowModel data);
         Task<FollowerDTO> FollowAsync(IFFollowModel data);
@@ -40,16 +42,34 @@ namespace NolowaBackendDotNet.Services
             return await FindAsync(x => x.Id == id);
         }
 
-        public async Task<AccountDTO> LoginAsync(string email, string password)
+        //public async Task<AccountDTO> LoginAsync(string email, string password)
+        //{
+        //    var accountDTO = await FindAsync(x => x.Email == email && x.Password == password.ToSha256());
+
+        //    if (accountDTO == null)
+        //        return null;
+
+        //    accountDTO.JWTToken = _jwtTokenProvider.GenerateJWTToken(accountDTO);
+
+        //    return accountDTO;
+        //}
+
+        public async Task<LoginRes> LoginAsync(string email, string password)
         {
             var accountDTO = await FindAsync(x => x.Email == email && x.Password == password.ToSha256());
 
             if (accountDTO == null)
                 return null;
 
-            accountDTO.JWTToken = _jwtTokenProvider.GenerateJWTToken(accountDTO);
+            var loginRes = new LoginRes()
+            {
+                Id = accountDTO.Id,
+                AccountName = accountDTO.AccountName,
+            };
 
-            return accountDTO;
+            loginRes.JwtToken = _jwtTokenProvider.GenerateJWTToken(accountDTO);
+
+            return loginRes;
         }
 
         public async Task<AccountDTO> SaveAsync(IFSignUpUser signUpUserIFModel)

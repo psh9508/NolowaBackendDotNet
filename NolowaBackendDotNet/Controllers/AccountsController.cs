@@ -14,6 +14,7 @@ using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.DTOs;
 using NolowaBackendDotNet.Models.IF;
 using NolowaBackendDotNet.Services;
+using NolowaFrontend.Models.Protos.Generated.prot;
 
 namespace NolowaBackendDotNet.Controllers
 {
@@ -122,14 +123,22 @@ namespace NolowaBackendDotNet.Controllers
 
         [HttpPost("Login")]
         [AllowAnonymous]
-        public async Task<ActionResult<Account>> LoginAsync([FromBody] Newtonsoft.Json.Linq.JObject jsonData)
+        //public async Task<ActionResult<Account>> LoginAsync(LoginReq request) 
+        //{
+        //    var account = await _accountsService.LoginAsync(request.Email, request.PlainPassword);
+
+        //    if (account == null)
+        //    {
+        //        NotFound();
+        //    }
+
+        //    return Ok(account);
+        //}
+        public async Task<ActionResult<LoginRes>> LoginAsync(LoginReq request)
         {
-            var id = jsonData.Value<string>("id");
-            var password = jsonData.Value<string>("password");
+            var account = await _accountsService.LoginAsync(request.Email, request.PlainPassword);
 
-            var account = await _accountsService.LoginAsync(id, password);
-
-            if(account == null)
+            if (account == null)
             {
                 NotFound();
             }

@@ -1,0 +1,38 @@
+﻿// protoc -I=C:\Users\psh02\source\repos\NolowaBackendDotNet\NolowaBackendDotNet\Models\Protos --csharp_out=C:\Users\psh02\source\repos\NolowaBackendDotNet\NolowaBackendDotNet\Models\Protos\Generated.proto C:\Users\psh02\source\repos\NolowaBackendDotNet\NolowaBackendDotNet\Models\Protos\*.proto
+
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "NolowaFrontend.Models.Protos.Generated.prot";
+
+message LoginReq {
+    string email = 1;
+    string plain_password = 2;
+}
+
+message LoginRes {
+    int64 id = 1;
+    string user_id = 2;
+    string account_name = 3;
+    google.protobuf.Timestamp join_date = 4;
+    string password = 5;
+    string email = 6;
+    repeated follower followers = 7;
+    profile_info profile_info = 8;
+    string jwt_token = 9;
+    string profile_image_file = 10;
+}
+
+message follower {
+    int64 id = 1;
+    int64 destination_account_id = 2;
+    int64 source_account_id = 3;
+}
+
+message profile_info {
+    int64 id = 1;
+    //public ProfileImage ProfileImage { get; set; } = new ProfileImage();
+    //public ProfileImage BackgroundImage { get; set; } = new ProfileImage();
+    string message = 2;
+}

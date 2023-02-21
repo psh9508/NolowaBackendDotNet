@@ -39,6 +39,7 @@
 
   <ItemGroup>
     <Folder Include="Core\SignalR\Hubs\" />
+    <Folder Include="Models\Protos\Generated.proto\" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
