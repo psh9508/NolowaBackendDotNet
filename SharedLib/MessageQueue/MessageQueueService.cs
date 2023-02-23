@@ -12,29 +12,28 @@ namespace SharedLib.MessageQueue
         public string HostName { get; set; } = string.Empty;
         public string VirtualHostName { get; set; } = string.Empty;
 
-        public MessageQueueConnectionData()
-        {
-        }
+        public MessageQueueConnectionData(){ }
     }
 
     public interface IMessageQueueService
     {
-        Task<bool> Connection(MessageQueueConnectionData data);
+        Task<bool> ConnectionAsync(MessageQueueConnectionData data);
     }
 
     public class MessageQueueService : IMessageQueueService
     {
         private IModel _channel;
         private string _serverName;
+        private bool _isConnected;
 
         public MessageQueueService(string serverName)
         {
             _serverName = serverName;
         }
 
-        public async Task<bool> Connection(MessageQueueConnectionData data)
+        public async Task<bool> ConnectionAsync(MessageQueueConnectionData data)
         {
-            return await Task.Run(() =>
+            return await Task.Run(async () =>
             {
                 try
                 {
@@ -47,6 +46,8 @@ namespace SharedLib.MessageQueue
                     };
 
                     var connection = connectionFactory.CreateConnection();
+                    _isConnected = true;
+
                     _channel = connection.CreateModel();
                     _channel.QueueDeclare(queue: _serverName, durable: true, exclusive: false);
 
