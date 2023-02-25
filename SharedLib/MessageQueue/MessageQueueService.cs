@@ -1,8 +1,5 @@
 ﻿using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using System.Text;
-
-ㅊusing RabbitMQ.Client.Events;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -64,7 +61,7 @@ namespace SharedLib.MessageQueue
 
                     var consumer = new AsyncEventingBasicConsumer(_channel);
                     consumer.Received += Comsumer_Received;
-
+                    
                     _channel.BasicConsume(queue: data.QueueName, autoAck: true, consumer: consumer);
                     
                     return true;
