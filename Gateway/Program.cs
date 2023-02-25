@@ -6,34 +6,36 @@ namespace Gateway
     {
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
+            var host = CreateHostBuilder(args).Build();
 
-            // Add services to the container.
-            builder.Services.AddAuthorization();
+            var logger = host.Services.GetRequiredService<ILogger<Program>>();
+            logger.LogInformation("The application has been started!");
 
-            var app = builder.Build();
-
-            // Configure the HTTP request pipeline.
-
-            app.UseHttpsRedirection();
-
-            app.UseAuthorization();
-
-            SetServiceEnvironment().Wait(TimeSpan.FromSeconds(10));
-
-            app.Run();
-        }
-
-        private static async Task SetServiceEnvironment()
-        {
-            // Set MessageQueue
-            var messageQueue = new MessageQueueService("gateway");
-            
-            await messageQueue.ConnectionAsync(new MessageQueueConnectionData()
+            var messageQeueu = host.Services.GetRequiredService<IMessageQueueService>();
+            messageQeueu.InitAsync(new MessageQueueConnectionData()
             {
                 HostName = "localhost",
-                VirtualHostName = "/"
-            }).ConfigureAwait(false);
+                VirtualHostName = "/",
+                QueueName = "gateway",
+                ExchangeName = "amq.topic",
+            }).Wait(TimeSpan.FromSeconds(10));
+
+            host.Run();
         }
+
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureLogging((context, logging) =>
+                {
+                    logging.ClearProviders();
+
+                    logging.AddConfiguration(context.Configuration.GetSection("Logging"));
+                    logging.AddDebug();
+                    logging.AddConsole();
+                })
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
     }
 }
