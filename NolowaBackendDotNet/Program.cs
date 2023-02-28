@@ -3,9 +3,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using SharedLib.MessageQueue;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace NolowaBackendDotNet
@@ -15,9 +14,18 @@ namespace NolowaBackendDotNet
         public static void Main(string[] args)
         {
             var host = CreateHostBuilder(args).Build();
+            
             var logger = host.Services.GetRequiredService<ILogger<Program>>();
-
             logger.LogInformation("The application has been started!");
+
+            var messageQeueu = host.Services.GetRequiredService<IMessageQueueService>();
+            messageQeueu.InitAsync(new MessageQueueConnectionData()
+            {
+                HostName = "localhost",
+                VirtualHostName = "/",
+                QueueName = "backend",
+                ExchangeName = "amq.topic",
+            }).Wait(TimeSpan.FromSeconds(10));
 
             host.Run();
         }
