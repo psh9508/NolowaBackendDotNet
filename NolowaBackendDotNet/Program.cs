@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NolowaBackendDotNet.Core.MessageQueue;
 using SharedLib.MessageQueue;
 using System;
 using System.Threading.Tasks;
@@ -23,9 +24,9 @@ namespace NolowaBackendDotNet
             {
                 HostName = "localhost",
                 VirtualHostName = "/",
-                QueueName = "backend",
+                QueueName = "server",
                 ExchangeName = "amq.topic",
-            }).Wait(TimeSpan.FromSeconds(10));
+            }, new MessageHandler()).Wait(TimeSpan.FromSeconds(10));
 
             host.Run();
         }

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 
 namespace SharedLib.MessageQueue
@@ -23,7 +24,7 @@ namespace SharedLib.MessageQueue
 
     public interface IMessageQueueService
     {
-        Task<bool> InitAsync(MessageQueueConnectionData data);
+        Task<bool> InitAsync(MessageQueueConnectionData data, IMessageEventHandler handler);
         Task<bool> SendMessageAsync<T>(string target, T body);
     }
 
@@ -32,13 +33,15 @@ namespace SharedLib.MessageQueue
         private IModel _channel;
         private string _serverName;
         private bool _isConnected;
+        private IMessageEventHandler _messageHandler;
+        private MessageModelMapper _messageMapper = new();
 
         public MessageQueueService()
         {
 
         }
 
-        public async Task<bool> InitAsync(MessageQueueConnectionData data)
+        public async Task<bool> InitAsync(MessageQueueConnectionData data, IMessageEventHandler handler)
         {
             return await Task.Run(() =>
             {
@@ -55,9 +58,9 @@ namespace SharedLib.MessageQueue
                     };
 
                     _serverName = data.QueueName;
+                    _messageHandler = handler;
 
                     var connection = connectionFactory.CreateConnection();
-                    _isConnected = true;
 
                     _channel = connection.CreateModel();
                     _channel.QueueDeclare(queue: _serverName, durable: true, exclusive: false);
@@ -67,7 +70,9 @@ namespace SharedLib.MessageQueue
                     consumer.Received += Consumer_Received;
                     
                     _channel.BasicConsume(queue: _serverName, autoAck: true, consumer: consumer);
-                    
+
+                    _isConnected = true;
+
                     return true;
                 }
                 catch (Exception ex)
@@ -91,17 +96,19 @@ namespace SharedLib.MessageQueue
             if (messageModel is null)
                 throw new ArgumentException(nameof(body));
 
-            if ((MessageDestination)Enum.Parse(typeof(MessageDestination), _serverName, true) == messageModel.Destination)
-            {
-                // 처리
-            }
-            else
+            if ((MessageDestination)Enum.Parse(typeof(MessageDestination), _serverName, true) != messageModel.Destination)
             {
                 messageModel.Source = messageModel.Target.ToString().ToLower();
                 messageModel.Target = messageModel.Destination;
 
-                SendMessage(messageModel);
+                SendMessage(messageModel, body);
+
+                return;
             }
+
+            var modelType = _messageMapper.GetConcreteMessageType(messageModel.Function);
+
+            _messageHandler.HandleMessage(modelType, body);
 
             Console.WriteLine("Received message: {0}", message);
         }
@@ -116,7 +123,20 @@ namespace SharedLib.MessageQueue
             return true;
         }
 
-        public void SendMessage<T>(T body) where T : MessageBase
+        //public void SendMessage<T>(T body) where T : MessageBase
+        //{
+        //    if (body is null)
+        //        throw new ArgumentOutOfRangeException($"{nameof(body)} must not be null");
+
+        //    if (_isConnected == false)
+        //        throw new InvalidOperationException("It hasn't been connected yet");
+
+        //    string routingKey = $"{body.Source}.{body.Target.ToString().ToLower()}.{body.Function}";
+        //    string jsonBody = JsonSerializer.Serialize(body);
+
+        //    _channel.BasicPublish("amq.topic", routingKey, body: Encoding.UTF8.GetBytes(jsonBody));
+        //}
+        public void SendMessage<T>(T model, byte[] body) where T : MessageBase
         {
             if (body is null)
                 throw new ArgumentOutOfRangeException($"{nameof(body)} must not be null");
@@ -124,10 +144,12 @@ namespace SharedLib.MessageQueue
             if (_isConnected == false)
                 throw new InvalidOperationException("It hasn't been connected yet");
 
-            string routingKey = $"{body.Source}.{body.Target.ToString().ToLower()}.{body.Function}";
-            string jsonBody = JsonSerializer.Serialize(body);
+            // 여기서 라우팅키가 body의 것과 다르다
+            string routingKey = $"{model.Source}.{model.Target.ToString().ToLower()}.{model.Function}";
+            //string jsonBody = JsonSerializer.Serialize(body);
 
-            _channel.BasicPublish("amq.topic", routingKey, body: Encoding.UTF8.GetBytes(jsonBody));
+            //_channel.BasicPublish("amq.topic", routingKey, body: Encoding.UTF8.GetBytes(jsonBody));
+            _channel.BasicPublish("amq.topic", routingKey, body: body);
         }
     }
 }

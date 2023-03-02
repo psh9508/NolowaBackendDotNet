@@ -18,7 +18,7 @@ namespace Gateway
                 VirtualHostName = "/",
                 QueueName = "gateway",
                 ExchangeName = "amq.topic",
-            }).Wait(TimeSpan.FromSeconds(10));
+            }, null).Wait(TimeSpan.FromSeconds(10));
 
             host.Run();
         }

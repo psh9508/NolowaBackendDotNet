@@ -125,6 +125,8 @@ namespace NolowaBackendDotNet
             services.AddTransient(typeof(IHttpHeader), typeof(HttpProvider));
             services.AddTransient(typeof(IHttpProvider), typeof(HttpProvider));
 
+            // Message
+
             var mappingConfig = new MapperConfiguration(mc =>
             {
                 mc.AddProfile(new MappingProfile());
