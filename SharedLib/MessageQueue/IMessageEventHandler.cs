@@ -8,6 +8,6 @@ namespace SharedLib.MessageQueue
 {
     public interface IMessageEventHandler
     {
-        public void HandleMessage<T>(T type, byte[] body);
+        public Task HandleMessage<T>(T type, byte[] body);
     }
 }
