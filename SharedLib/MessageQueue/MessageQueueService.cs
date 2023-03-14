@@ -123,6 +123,19 @@ namespace SharedLib.MessageQueue
             return true;
         }
 
+        //public void SendMessage<T>(T body) where T : MessageBase
+        //{
+        //    if (body is null)
+        //        throw new ArgumentOutOfRangeException($"{nameof(body)} must not be null");
+
+        //    if (_isConnected == false)
+        //        throw new InvalidOperationException("It hasn't been connected yet");
+
+        //    string routingKey = $"{body.Source}.{body.Target.ToString().ToLower()}.{body.Function}";
+        //    string jsonBody = JsonSerializer.Serialize(body);
+
+        //    _channel.BasicPublish("amq.topic", routingKey, body: Encoding.UTF8.GetBytes(jsonBody));
+        //}
         public void SendMessage<T>(T model, byte[] body) where T : MessageBase
         {
             if (body is null)
@@ -131,8 +144,11 @@ namespace SharedLib.MessageQueue
             if (_isConnected == false)
                 throw new InvalidOperationException("It hasn't been connected yet");
 
+            // 여기서 라우팅키가 body의 것과 다르다
             string routingKey = $"{model.Source}.{model.Target.ToString().ToLower()}.{model.Function}";
+            //string jsonBody = JsonSerializer.Serialize(body);
 
+            //_channel.BasicPublish("amq.topic", routingKey, body: Encoding.UTF8.GetBytes(jsonBody));
             _channel.BasicPublish("amq.topic", routingKey, body: body);
         }
     }

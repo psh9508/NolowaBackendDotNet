@@ -115,6 +115,7 @@ namespace NolowaBackendDotNet
             services.AddSingleton<ISearchCacheService, SearchCacheService>();
 
             services.AddSingleton<IBackgroundCacheToDBTaskQueue, BackgroundCacheToDBTaskQueue>();
+            services.AddSingleton<IMessageQueueService, MessageQueueService>();
 
             AddScoped(services);
 
@@ -125,8 +126,6 @@ namespace NolowaBackendDotNet
             services.AddTransient(typeof(IHttpProvider), typeof(HttpProvider));
 
             // Message
-            services.AddSingleton<IMessageQueueService, MessageQueueService>();
-            services.AddSingleton<IMessageEventHandler, MessageHandler>();
 
             var mappingConfig = new MapperConfiguration(mc =>
             {
