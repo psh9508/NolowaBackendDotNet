@@ -3,8 +3,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-¤ºusing Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging;
-using NolowaBackendDotNet.Core;
 using NolowaBackendDotNet.Core.MessageQueue;
 using SharedLib.MessageQueue;
 using System;
@@ -21,14 +19,14 @@ namespace NolowaBackendDotNet
             var logger = host.Services.GetRequiredService<ILogger<Program>>();
             logger.LogInformation("The application has been started!");
 
-            var messageQeueue = InstanceResolver.Instance.Resolve<IMessageQueueService>();
-            messageQeueue.InitAsync(new MessageQueueConnectionData()
+            var messageQeueu = host.Services.GetRequiredService<IMessageQueueService>();
+            messageQeueu.InitAsync(new MessageQueueConnectionData()
             {
                 HostName = "localhost",
                 VirtualHostName = "/",
                 QueueName = "server",
                 ExchangeName = "amq.topic",
-            }, InstanceResolver.Instance.Resolve<IMessageEventHandler>()).Wait(TimeSpan.FromSeconds(10));
+            }, new MessageHandler()).Wait(TimeSpan.FromSeconds(10));
 
             host.Run();
         }
