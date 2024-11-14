@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using System.Text;
 using SharedLib.MessageQueue;
+using NolowaNetwork.Protocols.Http;
 
 namespace Gateway
 {
@@ -29,7 +30,11 @@ namespace Gateway
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddControllers();
+            services.AddSwaggerGen();
+
             services.AddSingleton<IMessageQueueService, MessageQueueService>();
+            services.AddSingleton<IHttpProvider, HttpProvider>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -37,8 +42,8 @@ namespace Gateway
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                //app.UseSwagger();
-                //app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "NolowaBackendDotNet v1"));
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Gateway v1"));
                 //IdentityModelEventSource.ShowPII = true;
             }
 
@@ -49,10 +54,10 @@ namespace Gateway
             //app.UseAuthentication();
             //app.UseAuthorization();
 
-            //app.UseEndpoints(endpoints =>
-            //{
-            //    endpoints.MapControllers();
-            //});
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
     }
 }
