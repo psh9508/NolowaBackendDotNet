@@ -19,14 +19,14 @@ namespace NolowaBackendDotNet
             var logger = host.Services.GetRequiredService<ILogger<Program>>();
             logger.LogInformation("The application has been started!");
 
-            var messageQeueu = host.Services.GetRequiredService<IMessageQueueService>();
-            messageQeueu.InitAsync(new MessageQueueConnectionData()
-            {
-                HostName = "localhost",
-                VirtualHostName = "/",
-                QueueName = "server",
-                ExchangeName = "amq.topic",
-            }, new MessageHandler()).Wait(TimeSpan.FromSeconds(10));
+            //var messageQeueu = host.Services.GetRequiredService<IMessageQueueService>();
+            //messageQeueu.InitAsync(new MessageQueueConnectionData()
+            //{
+            //    HostName = "localhost",
+            //    VirtualHostName = "/",
+            //    QueueName = "server",
+            //    ExchangeName = "amq.topic",
+            //}, new MessageHandler()).Wait(TimeSpan.FromSeconds(10));
 
             host.Run();
         }
