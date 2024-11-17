@@ -1,4 +1,10 @@
-using SharedLib.MessageQueue;
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
+using NolowaBackendDotNet.Core.MessageQueue;
+using NolowaNetwork;
+using NolowaNetwork.Module;
+using NolowaNetwork.System.Worker;
+using Serilog;
 
 namespace Gateway
 {
@@ -11,20 +17,35 @@ namespace Gateway
             var logger = host.Services.GetRequiredService<ILogger<Program>>();
             logger.LogInformation("The application has been started!");
 
-            var messageQeueu = host.Services.GetRequiredService<IMessageQueueService>();
-            messageQeueu.InitAsync(new MessageQueueConnectionData()
+            var messageBus = host.Services.GetService<IMessageBus>() ?? throw new Exception();
+            messageBus.Connect(new()
             {
-                HostName = "localhost",
-                VirtualHostName = "/",
-                QueueName = "gateway",
-                ExchangeName = "amq.topic",
-            }, null).Wait(TimeSpan.FromSeconds(10));
+                Address = "localhost",
+                ExchangeName = "nolowa.topic",
+                HostName = "/",
+                ServerName = "gateway",
+            });
 
             host.Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .UseServiceProviderFactory(new AutofacServiceProviderFactory()) // autofac »ç¿ë
+                .ConfigureContainer<ContainerBuilder>(builder =>
+                {
+                    builder.RegisterType<MessageHandler>().As<IMessageHandler>();
+
+                    Log.Logger = new LoggerConfiguration()
+                        .WriteTo.Console()
+                        .CreateLogger();
+
+                    builder.RegisterInstance(Log.Logger);
+                                        
+                    var moudle = new RabbitMQModule();
+                    moudle.RegisterModule(builder);
+                    moudle.SetConfiguration(builder);
+                })
                 .ConfigureLogging((context, logging) =>
                 {
                     logging.ClearProviders();
