@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using NolowaNetwork.Protocols.Http;
+using NolowaFrontend.Models.Protos.Generated.prot;
+using NolowaNetwork.System;
 
 namespace Gateway.Controllers
 {
@@ -7,18 +8,26 @@ namespace Gateway.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IHttpProvider _httpProvider;
+        private readonly IMessageBroker _messageBroker;
+        private readonly IMessageMaker _messageMaker;
 
-        public AuthController(IHttpProvider httpProvider)
+        public AuthController(IMessageBroker messageBroker, IMessageMaker messageMaker)
         {
-            _httpProvider = httpProvider;
+            _messageBroker = messageBroker;
+            _messageMaker = messageMaker;
         }
 
         [HttpPost("v1/login")]
-        public async Task LoginAsync(string temp)
+        public async Task LoginAsync(string id, string password)
         {
-            // rabbitmq로 서버를 들려서 로그인 결과를 받아와야 함
-            
+            var loginMessage = _messageMaker.MakeStartMessage<LoginReq>("gateway", "apiserver");
+
+            var loginResponse = await _messageBroker.TakeMessageAsync<LoginRes>(loginMessage.TakeId, loginMessage, CancellationToken.None);
+
+            if (loginResponse is null)
+            {
+                // 에러
+            }
         }
     }
 }
