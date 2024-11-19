@@ -14,7 +14,7 @@ namespace SharedLib.Messages
         {
             _messageTypeMapper = new Dictionary<string, dynamic>()
             {
-                ["loginmessage"] = new LoginMessage(),
+                ["loginmessage"] = new LoginReq(),
             };
         }
 

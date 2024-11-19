@@ -3,6 +3,7 @@ using Autofac.Extensions.DependencyInjection;
 using NolowaBackendDotNet.Core.MessageQueue;
 using NolowaNetwork;
 using NolowaNetwork.Module;
+using NolowaNetwork.System;
 using NolowaNetwork.System.Worker;
 using Serilog;
 
@@ -40,7 +41,8 @@ namespace Gateway
                 .UseServiceProviderFactory(new AutofacServiceProviderFactory()) // autofac »ç¿ë
                 .ConfigureContainer<ContainerBuilder>(builder =>
                 {
-                    builder.RegisterType<MessageHandler>().As<IMessageHandler>();
+                    builder.RegisterType<Gateway.MessageQueue.MessageHandler>().As<IMessageHandler>();
+                    builder.RegisterType<Gateway.MessageQueue.MessageTypeResolver>().As<IMessageTypeResolver>();
 
                     Log.Logger = new LoggerConfiguration()
                         .WriteTo.Console()

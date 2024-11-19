@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using NolowaBackendDotNet.Core.MessageQueue;
 using NolowaNetwork;
 using NolowaNetwork.Module;
+using NolowaNetwork.System;
 using NolowaNetwork.System.Worker;
 using Serilog;
 using System;
@@ -30,6 +31,9 @@ namespace NolowaBackendDotNet
                 ExchangeName = "nolowa.topic",
                 VirtualHostName = "/",
                 ServerName = "apiserver",
+                Port = 6672,
+                UserName = "admin",
+                Password = "adminasdf123!",
             });
 
             host.Run();
@@ -41,6 +45,7 @@ namespace NolowaBackendDotNet
                 .ConfigureContainer<ContainerBuilder>(builder =>
                 {
                     builder.RegisterType<MessageHandler>().As<IMessageHandler>();
+                    builder.RegisterType<Core.MessageQueue.MessageTypeResolver>().As<IMessageTypeResolver>();
 
                     Log.Logger = new LoggerConfiguration()
                         .WriteTo.Console()

@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using NolowaBackendDotNet.Context;
 using NolowaBackendDotNet.Core;
 using NolowaBackendDotNet.Extensions;
@@ -7,9 +6,8 @@ using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.DTOs;
 using NolowaBackendDotNet.Models.IF;
 using NolowaBackendDotNet.Services.Base;
-using NolowaFrontend.Models.Protos.Generated.prot;
+using SharedLib.Messages;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -56,7 +54,16 @@ namespace NolowaBackendDotNet.Services
 
         public async Task<LoginRes> LoginAsync(string email, string password)
         {
-            var accountDTO = await FindAsync(x => x.Email == email && x.Password == password.ToSha256());
+            //var accountDTO = await FindAsync(x => x.Email == email && x.Password == password.ToSha256());
+            
+            // 테스트 동안은 실제로 DB를 가지 않고 리턴한다.
+            var accountDTO = new AccountDTO()
+            {
+                Id = 1,
+                UserId = "Noname",
+                AccountName = "AccountName",
+                Email = "Noname@domain.com",
+            };
 
             if (accountDTO == null)
                 return null;
@@ -67,7 +74,7 @@ namespace NolowaBackendDotNet.Services
                 AccountName = accountDTO.AccountName,
             };
 
-            loginRes.JwtToken = _jwtTokenProvider.GenerateJWTToken(accountDTO);
+            loginRes.Jwt = _jwtTokenProvider.GenerateJWTToken(accountDTO);
 
             return loginRes;
         }

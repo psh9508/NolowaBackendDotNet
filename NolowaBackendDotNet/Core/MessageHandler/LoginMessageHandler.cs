@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace NolowaBackendDotNet.Core.MessageHandler
 {
-    public class LoginMessageHandler : IMessageHandler<LoginMessage>
+    public class LoginMessageHandler : IMessageHandler<LoginReq>
     {
         private readonly IAccountsService _accountsService;
 
@@ -13,9 +13,9 @@ namespace NolowaBackendDotNet.Core.MessageHandler
             _accountsService = accoutService;
         }
 
-        public async Task HandleAsync(LoginMessage message)
+        public async Task HandleAsync(LoginReq message)
         {
-            var result = await _accountsService.LoginAsync(message.Id, message.Password);
+            //var result = await _accountsService.LoginAsync(message.Id, message.Password);
 
             throw new System.NotImplementedException();
         }

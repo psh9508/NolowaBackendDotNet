@@ -1,11 +1,7 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging;
+﻿using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils.Messaging;
-using NolowaBackendDotNet.Core.MessageHandler;
 using NolowaBackendDotNet.Services;
-using NolowaFrontend.Models.Protos.Generated.prot;
 using NolowaNetwork.Models.Message;
-using SharedLib.MessageQueue;
 using SharedLib.Messages;
 using System;
 using System.Text.Json;
@@ -17,8 +13,20 @@ namespace NolowaBackendDotNet.Core.MessageQueue
     //public class MessageHandler : IMessageEventHandler
     public class MessageHandler : NolowaNetwork.System.Worker.IMessageHandler
     {
-        public Task HandleAsync(NetMessageBase message, CancellationToken cancellationToken)
+        public async Task HandleAsync(NetMessageBase message, CancellationToken cancellationToken)
         {
+            // 타입별로 메핑을 해야한다.
+            string messageType = message.MessageType;
+
+            if(messageType == "LoginReq")
+            {
+                var payload = JsonSerializer.Deserialize<LoginReq>(message.JsonPayload);
+
+                var accountService = InstanceResolver.Instance.Resolve<IAccountsService>();
+
+                //return await accountService.LoginAsync(payload.Id, payload.Password);
+            }
+
             throw new NotImplementedException();
         }
 
@@ -36,13 +44,14 @@ namespace NolowaBackendDotNet.Core.MessageQueue
             throw new NotImplementedException();
         }
 
-        private async Task<LoginRes> HandleMessage(LoginMessage message)
+        private async Task<LoginRes> HandleMessage(SharedLib.Messages.LoginReq message)
         {
             try
             {
                 var accountService = InstanceResolver.Instance.Resolve<IAccountsService>();
 
                 return await accountService.LoginAsync(message.Id, message.Password);
+                return null;
             }
             catch (System.Exception ex)
             {

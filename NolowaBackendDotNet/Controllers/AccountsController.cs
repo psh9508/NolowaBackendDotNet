@@ -14,7 +14,7 @@ using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.DTOs;
 using NolowaBackendDotNet.Models.IF;
 using NolowaBackendDotNet.Services;
-using NolowaFrontend.Models.Protos.Generated.prot;
+//using NolowaFrontend.Models.Protos.Generated.prot;
 
 namespace NolowaBackendDotNet.Controllers
 {
@@ -134,17 +134,17 @@ namespace NolowaBackendDotNet.Controllers
 
         //    return Ok(account);
         //}
-        public async Task<ActionResult<LoginRes>> LoginAsync(LoginReq request)
-        {
-            var account = await _accountsService.LoginAsync(request.Email, request.PlainPassword);
+        //public async Task<ActionResult<LoginRes>> LoginAsync(LoginReq request)
+        //{
+        //    var account = await _accountsService.LoginAsync(request.Email, request.PlainPassword);
 
-            if (account == null)
-            {
-                NotFound();
-            }
+        //    if (account == null)
+        //    {
+        //        NotFound();
+        //    }
 
-            return Ok(account);
-        }
+        //    return Ok(account);
+        //}
 
         [HttpPost("Follow")]
         public async Task<ActionResult<FollowerDTO>> ChangeFollowStateAsync([FromBody] IFFollowModel data)
