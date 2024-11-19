@@ -28,7 +28,7 @@ namespace NolowaBackendDotNet
             {
                 Address = "localhost",
                 ExchangeName = "nolowa.topic",
-                HostName = "/",
+                VirtualHostName = "/",
                 ServerName = "apiserver",
             });
 

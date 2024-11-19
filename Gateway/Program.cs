@@ -18,13 +18,19 @@ namespace Gateway
             logger.LogInformation("The application has been started!");
 
             var messageBus = host.Services.GetService<IMessageBus>() ?? throw new Exception();
-            messageBus.Connect(new()
+            bool connectResult = messageBus.Connect(new()
             {
                 Address = "localhost",
                 ExchangeName = "nolowa.topic",
-                HostName = "/",
+                VirtualHostName = "/",
                 ServerName = "gateway",
+                Port = 6672,
+                UserName = "admin",
+                Password = "adminasdf123!",
             });
+
+            if(connectResult == false)
+                throw new InvalidOperationException("RabbitMQ connection failed");
 
             host.Run();
         }
