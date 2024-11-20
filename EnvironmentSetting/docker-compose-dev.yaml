@@ -1,0 +1,66 @@
+version: '3.4'
+
+services:
+  # server:
+  #   image: mcr.microsoft.com/dotnet/core/samples:aspnetapp
+  #   ports:
+  #     - 80
+  #     - 433
+  #   environment:
+  #     ASPNETCORE_URLS: "https://+:443;http://+:80"      
+  #     ASPNETCORE_ENVIRONMENT: "Development"
+  #     ASPNETCORE_Kestrel__Certificates__Default__Password: "Pa55w0rd!"
+  #     ASPNETCORE_Kestrel__Certificates__Default__Path: "/https/nolowa.pfx"
+  #   volumes:
+  #     - ~/.aspnet/https:/https:ro
+  #   depends_on:
+  #    - db
+  #    - directMessageCache
+  #    - postCache
+  #    - searchCache
+  
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    user: root
+    ports:
+      - "1433:1433"
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: my_passw0rd!1
+    volumes:
+      - ./scripts/db/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - ./sqldata:/var/opt/mssql/data
+    entrypoint:
+     - /bin/bash
+     - -c
+     - |
+       /opt/mssql/bin/sqlservr & \
+       sleep 20 && \
+       /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P my_passw0rd!1 -C -i ./docker-entrypoint-initdb.d/init-db.sql && \ 
+       tail -f /dev/null
+  
+  # directMessageCache:
+  #   image: redis
+  #   ports:
+  #     - "5060:6379"
+
+  # postCache:
+  #   image: redis
+  #   ports:
+  #     - "5061:6379"
+
+  # searchCache:
+  #   image: redis
+  #   ports:
+  #     - "5062:6379"
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq-local
+    ports:
+      - "6672:5672"
+      - "25672:15672"
+    environment:
+      RABBITMQ_ERLANG_COOKIE: "RabbitMQ-My-Cookies"
+      RABBITMQ_DEFAULT_USER: "admin"
+      RABBITMQ_DEFAULT_PASS: "adminasdf123!"
