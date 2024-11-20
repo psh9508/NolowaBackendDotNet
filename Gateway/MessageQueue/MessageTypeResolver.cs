@@ -1,4 +1,5 @@
 ﻿using NolowaNetwork.System;
+using SharedLib.Messages;
 
 namespace Gateway.MessageQueue
 {
@@ -11,7 +12,10 @@ namespace Gateway.MessageQueue
 
         public Type? GetType(string typeName)
         {
-            throw new NotImplementedException();
+            if (typeName is "LoginRes")
+                return typeof(LoginRes);
+
+            return null;
         }
 
         public dynamic GetTypeByDynamic(string typeName)

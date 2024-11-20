@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NolowaNetwork.System;
 using SharedLib.Constants;
+using SharedLib.Messages;
 
 namespace Gateway.Controllers
 {
@@ -18,7 +19,7 @@ namespace Gateway.Controllers
         }
 
         [HttpPost("v1/login")]
-        public async Task LoginAsync(string id, string password)
+        public async Task<LoginRes> LoginAsync(string id, string password)
         {
             var loginMessage = _messageMaker.MakeTakeMessage<SharedLib.Messages.LoginReq>(Const.GATEWAY_SERVER_NAME, Const.API_SERVER_NAME);
             loginMessage.Id = id;
@@ -28,14 +29,10 @@ namespace Gateway.Controllers
 
             if (loginResponse == null)
             {
-
+                return null;
             }
 
-            //var loginMessage = _messageMaker.MakeStartMessage<SharedLib.Messages.LoginReq>(Const.GATEWAY_SERVER_NAME, Const.API_SERVER_NAME);
-            //loginMessage.Id = id;
-            //loginMessage.Password = password;
-
-            //await _messageBroker.SendMessageAsync(loginMessage, CancellationToken.None);
+            return loginResponse;
         }
     }
 }

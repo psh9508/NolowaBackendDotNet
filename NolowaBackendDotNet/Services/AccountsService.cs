@@ -71,7 +71,9 @@ namespace NolowaBackendDotNet.Services
             var loginRes = new LoginRes()
             {
                 Id = accountDTO.Id,
+                UserId = accountDTO.UserId,
                 AccountName = accountDTO.AccountName,
+                Email = accountDTO.Email,
             };
 
             loginRes.Jwt = _jwtTokenProvider.GenerateJWTToken(accountDTO);
