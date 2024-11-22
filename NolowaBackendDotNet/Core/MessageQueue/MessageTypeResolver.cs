@@ -15,6 +15,8 @@ namespace NolowaBackendDotNet.Core.MessageQueue
         {
             if (typeName is "LoginReq")
                 return typeof(LoginReq);
+            else if (typeName is "SignUpReq")
+                return typeof(SignUpReq);
 
             return null;
         }

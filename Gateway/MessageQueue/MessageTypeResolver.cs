@@ -1,5 +1,6 @@
 ﻿using NolowaNetwork.System;
 using SharedLib.Messages;
+using SharedLib.Models;
 
 namespace Gateway.MessageQueue
 {
@@ -14,6 +15,8 @@ namespace Gateway.MessageQueue
         {
             if (typeName is "LoginRes")
                 return typeof(LoginRes);
+            else if (typeName is "User")
+                return typeof(User);
 
             return null;
         }

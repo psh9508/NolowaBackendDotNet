@@ -1,8 +1,11 @@
 ﻿using Autofac;
 using NolowaBackendDotNet.Services;
+using NolowaNetwork.Models.Message;
 using NolowaNetwork.System;
 using SharedLib.Constants;
 using SharedLib.Messages;
+using SharedLib.Models;
+using System;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,20 +14,13 @@ namespace NolowaBackendDotNet.Core.MessageQueue
 {
     public class MessageHandler : NolowaNetwork.System.Worker.IMessageHandler
     {
-        //private readonly IMessageMaker _messageMaker;
-        //private readonly IMessageBroker _messageBroker;
+        private readonly Lazy<IMessageMaker> _messageMaker;
+        private readonly Lazy<IMessageBroker> _messageBroker;
 
-        //public MessageHandler(IMessageMaker messageMaker, IMessageBroker messageBroker)
-        //{
-        //    _messageMaker = messageMaker;
-        //    _messageBroker = messageBroker;
-        //}
-
-        private readonly ILifetimeScope _lifetimeScope;
-
-        public MessageHandler(ILifetimeScope lifetimeScope)
+        public MessageHandler(Lazy<IMessageMaker> messageMaker, Lazy<IMessageBroker> messageBroker)
         {
-            _lifetimeScope = lifetimeScope;
+            _messageMaker = messageMaker;
+            _messageBroker = messageBroker;
         }
 
         public async Task HandleAsync(dynamic message, CancellationToken cancellationToken)
@@ -34,20 +30,39 @@ namespace NolowaBackendDotNet.Core.MessageQueue
 
         public async Task HandleAsync(LoginReq message, CancellationToken cancellationToken)
         {
-            var messageMaker = _lifetimeScope.Resolve<IMessageMaker>();
-            var messageBroker = _lifetimeScope.Resolve<IMessageBroker>();
-
             var accountService = InstanceResolver.Instance.Resolve<IAccountsService>();
 
             var response = await accountService.LoginAsync(message.Id, message.Password);
 
-            var responseMessage = messageMaker.MakeResponseMessage<LoginRes>(Const.API_SERVER_NAME, message);
+            var responseMessage = _messageMaker.Value.MakeResponseMessage<LoginRes>(Const.API_SERVER_NAME, message);
             responseMessage.Id = response.Id;
             responseMessage.UserId = response.UserId;
             responseMessage.Password = response.Password;
             responseMessage.Email = response.Email;
 
-            await messageBroker.SendMessageAsync(responseMessage, cancellationToken);
+            await _messageBroker.Value.SendMessageAsync(responseMessage, cancellationToken);
+        }
+
+        public async Task HandleAsync(SignUpReq message, CancellationToken cancellationToken)
+        {
+            var accountService = InstanceResolver.Instance.Resolve<IAccountsService>();
+
+            var response = await accountService.SaveAsync(new()
+            {
+                AccountName = message.AccountName,
+                Email = message.Email,
+                Password = message.Password,
+                //ProfileImage = 
+            });
+
+            var responseMessage = _messageMaker.Value.MakeResponseMessage<User>(Const.API_SERVER_NAME, message);
+            responseMessage.Id = response.Id;
+            responseMessage.UserId = response.UserId;
+            responseMessage.AccountName = response.AccountName;
+            responseMessage.Email = response.Email;
+            responseMessage.Jwt = response.JWTToken;
+
+            await _messageBroker.Value.SendMessageAsync(responseMessage, cancellationToken);
         }
     }
 }
