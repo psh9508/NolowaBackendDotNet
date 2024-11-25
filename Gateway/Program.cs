@@ -1,3 +1,5 @@
+using Amazon.DynamoDBv2.DataModel;
+using Amazon.DynamoDBv2;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using NolowaBackendDotNet.Core.MessageQueue;
@@ -43,6 +45,16 @@ namespace Gateway
                 {
                     builder.RegisterType<Gateway.MessageQueue.MessageHandler>().As<IMessageHandler>();
                     builder.RegisterType<Gateway.MessageQueue.MessageTypeResolver>().As<IMessageTypeResolver>();
+
+                    #region Dynamodb
+                    builder.RegisterInstance<IAmazonDynamoDB>(new AmazonDynamoDBClient(new AmazonDynamoDBConfig()
+                    {
+                        ServiceURL = "http://localhost:8000",
+                        Timeout = TimeSpan.FromSeconds(3),
+                    })).SingleInstance();
+
+                    builder.RegisterType<DynamoDBContext>().As<IDynamoDBContext>().InstancePerLifetimeScope();
+                    #endregion
 
                     Log.Logger = new LoggerConfiguration()
                         .WriteTo.Console()

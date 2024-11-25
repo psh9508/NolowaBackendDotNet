@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using NolowaBackendDotNet.Context;
+using NolowaBackendDotNet.Core;
 using NolowaBackendDotNet.Extensions;
 using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.DTOs;
@@ -29,7 +30,7 @@ namespace NolowaBackendDotNet.Services
         private const int PAGE_POST_COUNT = 5;
         private readonly IPostCacheService _cache;
 
-        public PostsService(NolowaContext context, IMapper mapper, IPostCacheService cache)
+        public PostsService(NolowaContext context, IMapper mapper, IPostCacheService cache, IJWTTokenProvider jwtTokenProvider) : base(jwtTokenProvider)
         {
             _context = context;
             _mapper = mapper;

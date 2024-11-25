@@ -1,12 +1,11 @@
-﻿using Newtonsoft.Json;
+﻿using NolowaNetwork.Models.Message;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace NolowaBackendDotNet.Models.DTOs
 {
-    public class AccountDTO
+    public class AccountDTO : NetMessageBase
     {
         public long Id { get; set; }
         public string UserId { get; set; } = string.Empty;

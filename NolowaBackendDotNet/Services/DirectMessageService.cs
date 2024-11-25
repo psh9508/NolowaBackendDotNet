@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using NolowaBackendDotNet.Context;
+using NolowaBackendDotNet.Core;
 using NolowaBackendDotNet.Extensions;
 using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.DTOs;
@@ -27,7 +28,7 @@ namespace NolowaBackendDotNet.Services
     {
         private readonly NolowaContext context;
 
-        public DirectMessageService(NolowaContext context)
+        public DirectMessageService(NolowaContext context, IJWTTokenProvider jwtTokenProvider) : base(jwtTokenProvider)
         {
             this.context = context;
         }

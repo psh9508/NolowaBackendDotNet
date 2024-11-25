@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DataModel;
+using Microsoft.EntityFrameworkCore;
 using NolowaBackendDotNet.Context;
 using NolowaBackendDotNet.Core;
 using NolowaBackendDotNet.Extensions;
@@ -6,6 +8,7 @@ using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.DTOs;
 using NolowaBackendDotNet.Models.IF;
 using NolowaBackendDotNet.Services.Base;
+using SharedLib.Dynamodb.Models;
 using SharedLib.Messages;
 using System;
 using System.Linq;
@@ -28,11 +31,11 @@ namespace NolowaBackendDotNet.Services
 
     public class AccountsService : ServiceBase<AccountsService>, IAccountsService
     {
-        private readonly IJWTTokenProvider _jwtTokenProvider;
+        private readonly IDynamoDBContext _ddbContext;
 
-        public AccountsService(IJWTTokenProvider jwtTokenProvider)
+        public AccountsService(IJWTTokenProvider jwtTokenProvider, IDynamoDBContext ddbContext) : base(jwtTokenProvider)
         {
-            _jwtTokenProvider = jwtTokenProvider;
+            _ddbContext = ddbContext;
         }
 
         public async Task<AccountDTO> FindAsync(long id)
@@ -83,43 +86,67 @@ namespace NolowaBackendDotNet.Services
 
         public async Task<AccountDTO> SaveAsync(IFSignUpUser signUpUserIFModel)
         {
-            using var transaction = _context.Database.BeginTransaction();
+            #region legacy
+            //using var transaction = _context.Database.BeginTransaction();
+
+            //try
+            //{
+            //    var beInsertedUser = _mapper.Map<Account>(signUpUserIFModel);
+
+            //    // The Password must be encoded by SHA256
+            //    beInsertedUser.Password = beInsertedUser.Password?.ToSha256();
+            //    beInsertedUser.UserId = "RandomID";
+
+            //    if (HasProfileImage(signUpUserIFModel))
+            //    {
+            //        var savedGuid = await SaveProfileImageFileToPhysicalLayer(signUpUserIFModel.ProfileImage);
+
+            //        beInsertedUser.ProfileInfo = new ProfileInfo()
+            //        {
+            //            ProfileImg = new ProfileImage()
+            //            {
+            //                FileHash = savedGuid.ToString(),
+            //                Url = "newUrl",
+            //            },
+            //        };
+            //    }
+
+            //    _context.Accounts.Add(beInsertedUser);
+            //    await _context.SaveChangesAsync();
+
+            //    transaction.Commit();
+
+            //    var savedAccount = await _context.Accounts.Where(x => x.Id == beInsertedUser.Id).SingleAsync();
+
+            //    return _mapper.Map<AccountDTO>(savedAccount);
+            //}
+            //catch (Exception ex)
+            //{
+            //    transaction.Rollback();
+            //    return null;
+            //}
+            #endregion
 
             try
             {
-                var beInsertedUser = _mapper.Map<Account>(signUpUserIFModel);
+                var saveModel = new DdbUser();
+                saveModel.PK = "u#1";
+                saveModel.SK = saveModel.PK;
+                saveModel.Id = 1;
+                saveModel.AccountName = signUpUserIFModel.AccountName;
+                saveModel.Email = signUpUserIFModel.Email;
+                saveModel.Password = signUpUserIFModel.Password.ToSha256();
 
-                // The Password must be encoded by SHA256
-                beInsertedUser.Password = beInsertedUser.Password?.ToSha256();
-                beInsertedUser.UserId = "RandomID";
+                await _ddbContext.SaveAsync(saveModel);
 
-                if (HasProfileImage(signUpUserIFModel))
+                return new AccountDTO()
                 {
-                    var savedGuid = await SaveProfileImageFileToPhysicalLayer(signUpUserIFModel.ProfileImage);
-
-                    beInsertedUser.ProfileInfo = new ProfileInfo()
-                    {
-                        ProfileImg = new ProfileImage()
-                        {
-                            FileHash = savedGuid.ToString(),
-                            Url = "newUrl",
-                        },
-                    };
-                }
-
-                _context.Accounts.Add(beInsertedUser);
-                await _context.SaveChangesAsync();
-
-                transaction.Commit();
-
-                var savedAccount = await _context.Accounts.Where(x => x.Id == beInsertedUser.Id).SingleAsync();
-
-                return _mapper.Map<AccountDTO>(savedAccount);
+                    AccountName = "aaa"
+                };
             }
             catch (Exception ex)
             {
-                transaction.Rollback();
-                return null;
+                throw;
             }
         }
 

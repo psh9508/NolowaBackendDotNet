@@ -1,12 +1,9 @@
-﻿using Autofac;
+﻿using NolowaBackendDotNet.Models.DTOs;
 using NolowaBackendDotNet.Services;
-using NolowaNetwork.Models.Message;
 using NolowaNetwork.System;
 using SharedLib.Constants;
 using SharedLib.Messages;
-using SharedLib.Models;
 using System;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,11 +13,16 @@ namespace NolowaBackendDotNet.Core.MessageQueue
     {
         private readonly Lazy<IMessageMaker> _messageMaker;
         private readonly Lazy<IMessageBroker> _messageBroker;
+        private readonly Lazy<IAccountsService> _accountService;
 
-        public MessageHandler(Lazy<IMessageMaker> messageMaker, Lazy<IMessageBroker> messageBroker)
+        public MessageHandler(
+            Lazy<IMessageMaker> messageMaker,
+            Lazy<IMessageBroker> messageBroker,
+            Lazy<IAccountsService> accountService)
         {
             _messageMaker = messageMaker;
             _messageBroker = messageBroker;
+            _accountService = accountService;
         }
 
         public async Task HandleAsync(dynamic message, CancellationToken cancellationToken)
@@ -30,9 +32,7 @@ namespace NolowaBackendDotNet.Core.MessageQueue
 
         public async Task HandleAsync(LoginReq message, CancellationToken cancellationToken)
         {
-            var accountService = InstanceResolver.Instance.Resolve<IAccountsService>();
-
-            var response = await accountService.LoginAsync(message.Id, message.Password);
+            var response = await _accountService.Value.LoginAsync(message.Id, message.Password);
 
             var responseMessage = _messageMaker.Value.MakeResponseMessage<LoginRes>(Const.API_SERVER_NAME, message);
             responseMessage.Id = response.Id;
@@ -45,9 +45,7 @@ namespace NolowaBackendDotNet.Core.MessageQueue
 
         public async Task HandleAsync(SignUpReq message, CancellationToken cancellationToken)
         {
-            var accountService = InstanceResolver.Instance.Resolve<IAccountsService>();
-
-            var response = await accountService.SaveAsync(new()
+            var response = await _accountService.Value.SaveAsync(new()
             {
                 AccountName = message.AccountName,
                 Email = message.Email,
@@ -55,12 +53,12 @@ namespace NolowaBackendDotNet.Core.MessageQueue
                 //ProfileImage = 
             });
 
-            var responseMessage = _messageMaker.Value.MakeResponseMessage<User>(Const.API_SERVER_NAME, message);
+            var responseMessage = _messageMaker.Value.MakeResponseMessage<AccountDTO>(Const.API_SERVER_NAME, message);
             responseMessage.Id = response.Id;
             responseMessage.UserId = response.UserId;
             responseMessage.AccountName = response.AccountName;
             responseMessage.Email = response.Email;
-            responseMessage.Jwt = response.JWTToken;
+            responseMessage.JWTToken= response.JWTToken;
 
             await _messageBroker.Value.SendMessageAsync(responseMessage, cancellationToken);
         }

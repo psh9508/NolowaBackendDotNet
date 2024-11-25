@@ -34,7 +34,7 @@ namespace NolowaBackendDotNet.Services
         private readonly IAccountsService _accountService;
         public ISNSLogin SnsLoginProvider { get; set; }
 
-        public AuthenticationService(IAccountsService accountsService)
+        public AuthenticationService(IAccountsService accountsService, IJWTTokenProvider jwtTokenProvider) : base(jwtTokenProvider)
         {
             _accountService = accountsService;
         }

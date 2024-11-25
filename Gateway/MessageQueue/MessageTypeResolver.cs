@@ -1,4 +1,5 @@
-﻿using NolowaNetwork.System;
+﻿using NolowaBackendDotNet.Models.DTOs;
+using NolowaNetwork.System;
 using SharedLib.Messages;
 using SharedLib.Models;
 
@@ -15,8 +16,8 @@ namespace Gateway.MessageQueue
         {
             if (typeName is "LoginRes")
                 return typeof(LoginRes);
-            else if (typeName is "User")
-                return typeof(User);
+            else if (typeName is "AccountDTO")
+                return typeof(AccountDTO);
 
             return null;
         }
