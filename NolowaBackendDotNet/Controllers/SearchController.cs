@@ -37,7 +37,7 @@ namespace NolowaBackendDotNet.Controllers
 
 
         [HttpGet("User/{accountName}")]
-        public async Task<List<AccountDTO>> SearchUsers(string accountName)
+        public async Task<List<DdbUser>> SearchUsers(string accountName)
         {
             var accountID = GetLoggedInUserAccountIDFromToken();
 

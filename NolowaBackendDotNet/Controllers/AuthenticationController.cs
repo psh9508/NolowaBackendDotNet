@@ -35,14 +35,14 @@ namespace NolowaBackendDotNet.Controllers
         }
 
         [HttpGet("Social/Google/Login")]
-        public async Task<AccountDTO> GoogleSocialLogin([FromQuery] string code)
+        public async Task<DdbUser> GoogleSocialLogin([FromQuery] string code)
         {
             _authenticationService.SnsLoginProvider = new GoogleLoginProvider(_httpProvider);
             return await _authenticationService.LoginWithUserInfo<GoogleLoginUserInfoResponse>(code);
         }
 
         [HttpGet("Social/Kakao/Login")]
-        public async Task<AccountDTO> KakaoSocialLogin([FromQuery] string code)
+        public async Task<DdbUser> KakaoSocialLogin([FromQuery] string code)
         {
             _authenticationService.SnsLoginProvider = new KakaoLoginProvider(_httpProvider);
             return await _authenticationService.LoginWithUserInfo<KakaoLoginUserInfoResponse>(code);

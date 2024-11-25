@@ -9,7 +9,7 @@ namespace NolowaBackendDotNet.Models.IF
 {
     public class PreviousDialogListItem
     {
-        public AccountDTO Account{ get; set; }
+        public DdbUser Account{ get; set; }
 
         public string Message { get; set; } = string.Empty;
 

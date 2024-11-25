@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace NolowaBackendDotNet.Models.DTOs
 {
-    public class AccountDTO : NetMessageBase
+    public class DdbUser : NetMessageBase
     {
         //public long Id { get; set; }
         public string USN { get; set; } = string.Empty;

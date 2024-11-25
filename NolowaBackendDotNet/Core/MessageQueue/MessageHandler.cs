@@ -35,6 +35,15 @@ namespace NolowaBackendDotNet.Core.MessageQueue
         {
             var response = await _accountService.Value.LoginAsync(message.Id, message.Password);
 
+            if(response is null)
+            {
+                //await _messageBroker.Value.SendMessageAsync(new()
+                //{
+                    
+                //}, cancellationToken);
+                return;
+            }
+
             var responseMessage = _messageMaker.Value.MakeResponseMessage<LoginRes>(Const.API_SERVER_NAME, message);
             responseMessage.Id = response.Id;
             responseMessage.UserId = response.UserId;

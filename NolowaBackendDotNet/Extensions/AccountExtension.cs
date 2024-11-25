@@ -11,14 +11,14 @@ namespace NolowaBackendDotNet.Extensions
 {
     public static class AccountExtension
     {
-        public static AccountDTO ToDTO(this Account src)
+        public static DdbUser ToDTO(this Account src)
         {
             if (src.IsNull())
                 return null;
 
             var mapper = InstanceResolver.Instance.Resolve<IMapper>();
 
-            return mapper.Map<AccountDTO>(src);
+            return mapper.Map<DdbUser>(src);
         }
     }
 }

@@ -110,7 +110,7 @@ namespace NolowaBackendDotNet.Services
                                                      , account => account.Id
                                                      , (dm, account) => new PreviousDialogListItem()
                                                      {
-                                                         Account = _mapper.Map<AccountDTO>(new Account()
+                                                         Account = _mapper.Map<DdbUser>(new Account()
                                                          {
                                                              Id = account.Id,
                                                              UserId = account.UserId,

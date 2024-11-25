@@ -15,7 +15,7 @@ namespace NolowaBackendDotNet.Core
 {
     public interface IJWTTokenProvider
     {
-        public string GenerateJWTToken(AccountDTO account);
+        public string GenerateJWTToken(SharedLib.Dynamodb.Models.DdbUser account);
     }
 
     public class JWTTokenProvider : IJWTTokenProvider
@@ -27,7 +27,7 @@ namespace NolowaBackendDotNet.Core
             _jwtOption = jwtOption.Value;
         }
 
-        public string GenerateJWTToken(AccountDTO account)
+        public string GenerateJWTToken(SharedLib.Dynamodb.Models.DdbUser account)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOption.Secret));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);

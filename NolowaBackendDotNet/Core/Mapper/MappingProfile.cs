@@ -13,7 +13,7 @@ namespace NolowaBackendDotNet.Core.Mapper
     {
         public MappingProfile()
         {
-            CreateMap<Account, AccountDTO>()
+            CreateMap<Account, DdbUser>()
                 .ForMember(d => d.ProfileInfo, o => o.NullSubstitute(new ProfileInfo()
                 {
                     ProfileImg = new ProfileImage()

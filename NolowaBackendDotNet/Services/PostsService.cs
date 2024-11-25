@@ -19,9 +19,9 @@ namespace NolowaBackendDotNet.Services
 {
     public interface IPostsService
     {
-        Task<IEnumerable<PostDTO>> GetHomePostsAsync(AccountDTO loginedUserAccount);
+        Task<IEnumerable<PostDTO>> GetHomePostsAsync(DdbUser loginedUserAccount);
         Task<IEnumerable<PostDTO>> GetUserPostsAsync(long userId);
-        Task<IEnumerable<PostDTO>> GetMoreHomePostsAsync(AccountDTO loginedUserAccount, int pageNumber);
+        Task<IEnumerable<PostDTO>> GetMoreHomePostsAsync(DdbUser loginedUserAccount, int pageNumber);
         Post InsertPost(Post post);
     }
 
@@ -37,7 +37,7 @@ namespace NolowaBackendDotNet.Services
             _cache = cache; 
         }
 
-        public async Task<IEnumerable<PostDTO>> GetHomePostsAsync(AccountDTO loginedUserAccount)
+        public async Task<IEnumerable<PostDTO>> GetHomePostsAsync(DdbUser loginedUserAccount)
         {
             // 기존에 캐싱 되어있을지도 모르는 데이터를 삭제
             //await _cache.RemoveAllAsync(loginedUserAccount.Id.ToString());
@@ -80,7 +80,7 @@ namespace NolowaBackendDotNet.Services
             }
         }
 
-        public async Task<IEnumerable<PostDTO>> GetMoreHomePostsAsync(AccountDTO loginedUserAccount, int pageNumber)
+        public async Task<IEnumerable<PostDTO>> GetMoreHomePostsAsync(DdbUser loginedUserAccount, int pageNumber)
         {
             //var cachedNextPageData = await _cache.GetAsync<IEnumerable<PostDTO>>(loginedUserAccount.Id.ToString());
             var cachedNextPageData = await _cache.GetAsync<IEnumerable<PostDTO>>(loginedUserAccount.USN);
@@ -101,7 +101,7 @@ namespace NolowaBackendDotNet.Services
             return requestedPagePosts;
         }
 
-        private async Task<IEnumerable<PostDTO>> GetRequestedPageAndSaveNextPageToCacheAsync(AccountDTO loginedUserAccount, int pageNumber)
+        private async Task<IEnumerable<PostDTO>> GetRequestedPageAndSaveNextPageToCacheAsync(DdbUser loginedUserAccount, int pageNumber)
         {
             var followerIds = new List<long>();
 

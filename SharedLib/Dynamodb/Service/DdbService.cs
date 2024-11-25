@@ -6,6 +6,7 @@ namespace SharedLib.Dynamodb.Service
     public interface IDbService
     {
         public Task<T> SaveAsync<T>(T model) where T : DdbBase;
+        public Task<T> FindAsync<T>(string pk);
     }
 
     public class DdbService : IDbService
@@ -28,6 +29,20 @@ namespace SharedLib.Dynamodb.Service
                 await _ddbContext.SaveAsync(model);
 
                 return model;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<T> FindAsync<T>(string pk)
+        {
+            try
+            {
+                var loadedData = await _ddbContext.LoadAsync<T>(pk, pk, CancellationToken.None);
+
+                return loadedData;
             }
             catch (Exception ex)
             {

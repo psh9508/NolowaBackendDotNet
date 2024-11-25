@@ -37,7 +37,7 @@ namespace NolowaBackendDotNet.Controllers
         }
 
         [HttpPost("Save")]
-        public async Task<ActionResult<AccountDTO>> SaveNewAccount([FromBody] IFSignUpUser newAccount)
+        public async Task<ActionResult<DdbUser>> SaveNewAccount([FromBody] IFSignUpUser newAccount)
         {
             var savedAccount = await _accountsService.SaveAsync(newAccount);
 
@@ -164,7 +164,7 @@ namespace NolowaBackendDotNet.Controllers
         }
 
         [HttpGet("users/{id}")]
-        public async Task<ActionResult<AccountDTO>> GetUser(long id)
+        public async Task<ActionResult<DdbUser>> GetUser(long id)
         {
             return await _accountsService.FindAsync(id);
         }

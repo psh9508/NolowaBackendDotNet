@@ -17,7 +17,7 @@ namespace NolowaBackendDotNet.Services
     public interface ISearchService
     {
         Task<List<string>> GetSearchedKeywordsAsync(long userID);
-        Task<List<AccountDTO>> SearchUsersAsync(long searchAccountID, string accountName);
+        Task<List<DdbUser>> SearchUsersAsync(long searchAccountID, string accountName);
         Task<List<ScoreInfo>> GetSearchkeywordRankAsync(int startIndex = 0, int endIndex = 5);
     }
 
@@ -42,13 +42,13 @@ namespace NolowaBackendDotNet.Services
             return await searchedKeywords.ToListAsync();
         }
 
-        public async Task<List<AccountDTO>> SearchUsersAsync(long userID, string accountName)
+        public async Task<List<DdbUser>> SearchUsersAsync(long userID, string accountName)
         {
             // 대소문자 무시하고 비교
             var searchedUsers = _context.Accounts.Where(x => x.AccountName.Contains(accountName))
                                                  .Include(x => x.ProfileInfo)
                                                  .ThenInclude(x => x.ProfileImg)
-                                                 .Select(x => _mapper.Map<AccountDTO>(x));
+                                                 .Select(x => _mapper.Map<DdbUser>(x));
 
             // 다른 쓰레드로 키워드 검색 될 때마다 Redis에 점수를 올려 순위를 기록한다.
             // 이 쓰레드는 리턴을 기다리지 않고 다음 로직을 탄다.
