@@ -3,13 +3,12 @@
 namespace SharedLib.Dynamodb.Models
 {
     [DynamoDBTable("NolowaDatabase")]
-    public class DdbUser
+    public class DdbUser : DdbBase
     {
-        [DynamoDBHashKey]
-        public string PK { get; set; } = string.Empty;
-        [DynamoDBRangeKey]
-        public string SK { get; set; } = string.Empty;
-        public long Id { get; set; }
+        public override string Prefix => "u";
+        public override string USN { get; set; } = string.Empty;
+
+        //public long Id { get; set; }
         public string UserId { get; set; } = string.Empty;
         public string AccountName { get; set; } = string.Empty;
         public DateTime JoinDate { get; set; } = new();
@@ -21,5 +20,6 @@ namespace SharedLib.Dynamodb.Models
 
         [DynamoDBIgnore]
         public string Jwt { get; set; } = string.Empty;
+        
     }
 }

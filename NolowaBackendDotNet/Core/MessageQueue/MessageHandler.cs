@@ -3,6 +3,7 @@ using NolowaBackendDotNet.Services;
 using NolowaNetwork.System;
 using SharedLib.Constants;
 using SharedLib.Messages;
+using SharedLib.Models;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -53,12 +54,12 @@ namespace NolowaBackendDotNet.Core.MessageQueue
                 //ProfileImage = 
             });
 
-            var responseMessage = _messageMaker.Value.MakeResponseMessage<AccountDTO>(Const.API_SERVER_NAME, message);
-            responseMessage.Id = response.Id;
+            var responseMessage = _messageMaker.Value.MakeResponseMessage<User>(Const.API_SERVER_NAME, message);
+            //responseMessage.Id = response.Id;
+            responseMessage.USN = response.USN;
             responseMessage.UserId = response.UserId;
             responseMessage.AccountName = response.AccountName;
             responseMessage.Email = response.Email;
-            responseMessage.JWTToken= response.JWTToken;
 
             await _messageBroker.Value.SendMessageAsync(responseMessage, cancellationToken);
         }

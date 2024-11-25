@@ -18,6 +18,8 @@ namespace Gateway.MessageQueue
                 return typeof(LoginRes);
             else if (typeName is "AccountDTO")
                 return typeof(AccountDTO);
+            else if (typeName is "User")
+                return typeof(User);
 
             return null;
         }

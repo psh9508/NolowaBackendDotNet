@@ -40,7 +40,8 @@ namespace NolowaBackendDotNet.Services
         public async Task<IEnumerable<PostDTO>> GetHomePostsAsync(AccountDTO loginedUserAccount)
         {
             // 기존에 캐싱 되어있을지도 모르는 데이터를 삭제
-            await _cache.RemoveAllAsync(loginedUserAccount.Id.ToString());
+            //await _cache.RemoveAllAsync(loginedUserAccount.Id.ToString());
+            await _cache.RemoveAllAsync(loginedUserAccount.USN.ToString());
 
             return await GetMoreHomePostsAsync(loginedUserAccount, pageNumber: 1);
         }
@@ -81,7 +82,8 @@ namespace NolowaBackendDotNet.Services
 
         public async Task<IEnumerable<PostDTO>> GetMoreHomePostsAsync(AccountDTO loginedUserAccount, int pageNumber)
         {
-            var cachedNextPageData = await _cache.GetAsync<IEnumerable<PostDTO>>(loginedUserAccount.Id.ToString());
+            //var cachedNextPageData = await _cache.GetAsync<IEnumerable<PostDTO>>(loginedUserAccount.Id.ToString());
+            var cachedNextPageData = await _cache.GetAsync<IEnumerable<PostDTO>>(loginedUserAccount.USN);
 
             if (cachedNextPageData?.Count() > 0)
             {
@@ -103,7 +105,8 @@ namespace NolowaBackendDotNet.Services
         {
             var followerIds = new List<long>();
 
-            followerIds.Add(loginedUserAccount.Id);
+            //followerIds.Add(loginedUserAccount.Id);
+            followerIds.Add(long.Parse(loginedUserAccount.USN));
             followerIds.AddRange(loginedUserAccount.Followers.Select(x => x.Id));
 
             var followersPosts = _context.Posts.Where(x => followerIds.Contains(x.AccountId))
@@ -119,7 +122,8 @@ namespace NolowaBackendDotNet.Services
             var requestedPagePosts = followersPosts.Take(PAGE_POST_COUNT); // 요청 페이지
             var cachePagePosts = followersPosts.Skip(PAGE_POST_COUNT).Take(PAGE_POST_COUNT); // 캐시 될 요청 페이지의 다음 페이지
 
-            await SaveToCache(loginedUserAccount.Id.ToString(), cachePagePosts); // 페이지 캐시
+            //await SaveToCache(loginedUserAccount.Id.ToString(), cachePagePosts); // 페이지 캐시
+            await SaveToCache(loginedUserAccount.USN, cachePagePosts); // 페이지 캐시
 
             return requestedPagePosts;
         }

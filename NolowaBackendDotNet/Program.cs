@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using NolowaBackendDotNet.Services;
 using NolowaBackendDotNet.Core;
+using SharedLib.Dynamodb.Service;
 
 namespace NolowaBackendDotNet
 {
@@ -75,6 +76,7 @@ namespace NolowaBackendDotNet
                     }));
 
                     builder.RegisterType<DynamoDBContext>().As<IDynamoDBContext>().InstancePerLifetimeScope();
+                    builder.RegisterType<DdbService>().As<IDbService>().InstancePerLifetimeScope();
                     #endregion
 
                     Log.Logger = new LoggerConfiguration()

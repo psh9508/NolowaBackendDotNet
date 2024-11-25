@@ -1,6 +1,4 @@
-﻿using Amazon.DynamoDBv2;
-using Amazon.DynamoDBv2.DataModel;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using NolowaBackendDotNet.Context;
 using NolowaBackendDotNet.Core;
 using NolowaBackendDotNet.Extensions;
@@ -9,7 +7,9 @@ using NolowaBackendDotNet.Models.DTOs;
 using NolowaBackendDotNet.Models.IF;
 using NolowaBackendDotNet.Services.Base;
 using SharedLib.Dynamodb.Models;
+using SharedLib.Dynamodb.Service;
 using SharedLib.Messages;
+using SharedLib.Models;
 using System;
 using System.Linq;
 using System.Linq.Expressions;
@@ -22,7 +22,7 @@ namespace NolowaBackendDotNet.Services
         Task<AccountDTO> FindAsync(long id);
         //Task<AccountDTO> LoginAsync(string email, string password);
         Task<LoginRes> LoginAsync(string email, string password);
-        Task<AccountDTO> SaveAsync(IFSignUpUser newAccount);
+        Task<User> SaveAsync(IFSignUpUser newAccount);
         Task<bool> HasFollowedAsync(IFFollowModel data);
         Task<FollowerDTO> FollowAsync(IFFollowModel data);
         Task<FollowerDTO> UnFollowAsync(IFFollowModel data);
@@ -31,11 +31,11 @@ namespace NolowaBackendDotNet.Services
 
     public class AccountsService : ServiceBase<AccountsService>, IAccountsService
     {
-        private readonly IDynamoDBContext _ddbContext;
+        private readonly IDbService _ddbService;
 
-        public AccountsService(IJWTTokenProvider jwtTokenProvider, IDynamoDBContext ddbContext) : base(jwtTokenProvider)
+        public AccountsService(IJWTTokenProvider jwtTokenProvider, IDbService ddbService) : base(jwtTokenProvider)
         {
-            _ddbContext = ddbContext;
+            _ddbService = ddbService;
         }
 
         public async Task<AccountDTO> FindAsync(long id)
@@ -62,7 +62,8 @@ namespace NolowaBackendDotNet.Services
             // 테스트 동안은 실제로 DB를 가지 않고 리턴한다.
             var accountDTO = new AccountDTO()
             {
-                Id = 1,
+                //Id = 1,
+                USN = "1",
                 UserId = "Noname",
                 AccountName = "AccountName",
                 Email = "Noname@domain.com",
@@ -73,7 +74,8 @@ namespace NolowaBackendDotNet.Services
 
             var loginRes = new LoginRes()
             {
-                Id = accountDTO.Id,
+                //Id = accountDTO.Id,
+                Id = long.Parse(accountDTO.USN),
                 UserId = accountDTO.UserId,
                 AccountName = accountDTO.AccountName,
                 Email = accountDTO.Email,
@@ -84,7 +86,7 @@ namespace NolowaBackendDotNet.Services
             return loginRes;
         }
 
-        public async Task<AccountDTO> SaveAsync(IFSignUpUser signUpUserIFModel)
+        public async Task<User> SaveAsync(IFSignUpUser signUpUserIFModel)
         {
             #region legacy
             //using var transaction = _context.Database.BeginTransaction();
@@ -130,18 +132,22 @@ namespace NolowaBackendDotNet.Services
             try
             {
                 var saveModel = new DdbUser();
-                saveModel.PK = "u#1";
-                saveModel.SK = saveModel.PK;
-                saveModel.Id = 1;
+                //saveModel.Id = 1;
+                saveModel.USN = "1";
                 saveModel.AccountName = signUpUserIFModel.AccountName;
                 saveModel.Email = signUpUserIFModel.Email;
                 saveModel.Password = signUpUserIFModel.Password.ToSha256();
+                saveModel.JoinDate = DateTime.Now;
 
-                await _ddbContext.SaveAsync(saveModel);
+                var savedData = await _ddbService.SaveAsync(saveModel);
 
-                return new AccountDTO()
+                return new User()
                 {
-                    AccountName = "aaa"
+                    USN = savedData.USN,
+                    UserId = savedData.UserId,
+                    AccountName = saveModel.AccountName,
+                    Email = saveModel.Email,
+                    JoinDate = saveModel.JoinDate,
                 };
             }
             catch (Exception ex)

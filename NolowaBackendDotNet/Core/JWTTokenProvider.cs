@@ -34,7 +34,8 @@ namespace NolowaBackendDotNet.Core
 
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, account.Id.ToString()),
+                //new Claim(JwtRegisteredClaimNames.Sub, account.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Sub, account.USN.ToString()),
                 new Claim(JwtRegisteredClaimNames.UniqueName, account.AccountName),
                 //new Claim(JwtRegisteredClaimNames.Email, account.Email), // Personal data
                 //new Claim(ClaimTypes.Role, account.)

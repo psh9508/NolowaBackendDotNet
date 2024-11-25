@@ -71,7 +71,12 @@ namespace NolowaBackendDotNet.Services
                 if (savedAccount.IsNull())
                     return null;
 
-                userInDB = savedAccount;
+                // 맵핑 해줘야함
+                userInDB = new AccountDTO()
+                {
+                    Email = savedAccount.Email,
+                    USN = savedAccount.USN,
+                };
             }
 
             userInDB.JWTToken = _jwtTokenProvider.GenerateJWTToken(userInDB);

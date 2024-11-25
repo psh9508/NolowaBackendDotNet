@@ -7,7 +7,8 @@ namespace NolowaBackendDotNet.Models.DTOs
 {
     public class AccountDTO : NetMessageBase
     {
-        public long Id { get; set; }
+        //public long Id { get; set; }
+        public string USN { get; set; } = string.Empty;
         public string UserId { get; set; } = string.Empty;
         public string AccountName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
