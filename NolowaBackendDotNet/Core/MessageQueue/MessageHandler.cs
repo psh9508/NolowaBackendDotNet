@@ -49,6 +49,7 @@ namespace NolowaBackendDotNet.Core.MessageQueue
             responseMessage.UserId = response.UserId;
             responseMessage.Password = response.Password;
             responseMessage.Email = response.Email;
+            responseMessage.Jwt = response.Jwt;
 
             await _messageBroker.Value.SendMessageAsync(responseMessage, cancellationToken);
         }
