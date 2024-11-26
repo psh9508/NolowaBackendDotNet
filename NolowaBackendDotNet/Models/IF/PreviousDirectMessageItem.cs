@@ -1,4 +1,5 @@
 ﻿using NolowaBackendDotNet.Models.DTOs;
+using SharedLib.Dynamodb.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace NolowaBackendDotNet.Models.IF
 {
     public class PreviousDialogListItem
     {
-        public AccountDTO Account{ get; set; }
+        public DdbUser Account{ get; set; }
 
         public string Message { get; set; } = string.Empty;
 

@@ -29,7 +29,7 @@ namespace Gateway.Controllers
 
             var saveResponse = await _messageBroker.TakeMessageAsync<User>(saveMessage.TakeId, saveMessage, CancellationToken.None);
 
-            if (saveResponse != null)
+            if (saveResponse is null)
             {
                 return null;
             }

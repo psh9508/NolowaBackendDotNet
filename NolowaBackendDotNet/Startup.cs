@@ -106,24 +106,6 @@ namespace NolowaBackendDotNet
 
             //services.Add(ServiceDescriptor.Singleton<IDirectMessageRedis, DirectMessageRedis>());
             //services.Add(ServiceDescriptor.Singleton<IPostRedis, PostRedis>());
-            services.AddSingleton<IPostRedis, PostRedis>();
-            services.AddSingleton<IDirectMessageRedis, DirectMessageRedis>();
-            services.AddSingleton<ISearchRedis, SearchRedis>();
-
-            services.AddSingleton<IPostCacheService, PostCacheService>();
-            services.AddSingleton<IDirectMessageCacheService, DirectMessageCacheService>();
-            services.AddSingleton<ISearchCacheService, SearchCacheService>();
-
-            services.AddSingleton<IBackgroundCacheToDBTaskQueue, BackgroundCacheToDBTaskQueue>();
-            services.AddSingleton<IMessageQueueService, MessageQueueService>();
-
-            AddScoped(services);
-
-            services.AddHostedService<InsertCacheToDBMonitorLoop>();
-
-            //services.AddTransient(typeof(IHttpProvider<,>), typeof(HttpProvider<,>));
-            services.AddTransient(typeof(IHttpHeader), typeof(HttpProvider));
-            services.AddTransient(typeof(IHttpProvider), typeof(HttpProvider));
 
             // Message
 
@@ -142,17 +124,6 @@ namespace NolowaBackendDotNet
 
             // 싱글톤 객체에 복사본을 만들어서 Injection을 할 수 없는 상황에서 Resolve 할 때 사용
             InstanceResolver.Instance.ServiceProvider = services.BuildServiceProvider(); 
-        }
-
-        private void AddScoped(IServiceCollection services)
-        {
-            services.AddScoped<IAccountsService, AccountsService>();
-            services.AddScoped<IAuthenticationService, AuthenticationService>();
-            services.AddScoped<IPostsService, PostsService>();
-            services.AddScoped<ISearchService, SearchService>();
-            services.AddScoped<IJWTTokenProvider, JWTTokenProvider>();
-            services.AddScoped<IDirectMessageService, DirectMessageService>();
-            //services.AddScoped<ICacheService, CacheService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -181,8 +152,9 @@ namespace NolowaBackendDotNet
 
             // DB, 레디스등 올바로 동작하는지 확인
             // 여기서 타임아웃까지 기다리지 않도록 처리해야함
-            var redis = InstanceResolver.Instance.Resolve<IPostRedis>();
-            redis.GetAsync("healthCheck");
+           
+            //var redis = InstanceResolver.Instance.Resolve<IPostRedis>();
+            //redis.GetAsync("healthCheck");
         }
     }
 }

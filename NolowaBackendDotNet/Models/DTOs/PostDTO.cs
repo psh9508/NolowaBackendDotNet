@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SharedLib.Dynamodb.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,6 @@ namespace NolowaBackendDotNet.Models.DTOs
         public long AccountId { get; set; }
 
         [JsonProperty("postedUser")]
-        public AccountDTO Account { get; set; }
+        public DdbUser Account { get; set; }
     }
 }

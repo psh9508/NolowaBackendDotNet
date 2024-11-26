@@ -14,6 +14,7 @@ using NolowaBackendDotNet.Models.SNSLogin;
 using NolowaBackendDotNet.Models.SNSLogin.Google;
 using NolowaBackendDotNet.Models.SNSLogin.Kakao;
 using NolowaBackendDotNet.Services.Base;
+using SharedLib.Dynamodb.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace NolowaBackendDotNet.Services
         ISNSLogin SnsLoginProvider { get; set; }
 
         string GetAuthorizationRequestURI();
-        Task<AccountDTO> LoginWithUserInfo<TResponse>(string code) where TResponse : SNSUserResponseBase;
+        Task<DdbUser> LoginWithUserInfo<TResponse>(string code) where TResponse : SNSUserResponseBase;
     }
 
     public class AuthenticationService : ServiceBase<AuthenticationService>, IAuthenticationService
@@ -34,7 +35,7 @@ namespace NolowaBackendDotNet.Services
         private readonly IAccountsService _accountService;
         public ISNSLogin SnsLoginProvider { get; set; }
 
-        public AuthenticationService(IAccountsService accountsService)
+        public AuthenticationService(IAccountsService accountsService, IJWTTokenProvider jwtTokenProvider) : base(jwtTokenProvider)
         {
             _accountService = accountsService;
         }
@@ -44,39 +45,46 @@ namespace NolowaBackendDotNet.Services
             return SnsLoginProvider.GetAuthorizationRequestURI();
         }
 
-        public async Task<AccountDTO> LoginWithUserInfo<TResponse>(string code) where TResponse : SNSUserResponseBase
+        public async Task<DdbUser> LoginWithUserInfo<TResponse>(string code) where TResponse : SNSUserResponseBase
         {
-            _logger.LogStartTrace();
+            //_logger.LogStartTrace();
 
-            bool hasAccessToken = await SnsLoginProvider.SetAccessTokenAsync(code);
+            //bool hasAccessToken = await SnsLoginProvider.SetAccessTokenAsync(code);
 
-            if(hasAccessToken == false)
-                return null;
+            //if(hasAccessToken == false)
+            //    return null;
 
-            var userInfo = await SnsLoginProvider.GetUserInfoAsync<TResponse>();
+            //var userInfo = await SnsLoginProvider.GetUserInfoAsync<TResponse>();
 
-            if (userInfo.IsNull())
-                return null;
+            //if (userInfo.IsNull())
+            //    return null;
 
-            var userInDB = _context.Accounts.Where(x => x.Email == userInfo.Email).FirstOrDefault()?.ToDTO();
+            //var userInDB = _context.Accounts.Where(x => x.Email == userInfo.Email).FirstOrDefault()?.ToDTO();
 
-            if (userInDB.IsNull())
-            {
-                var savedAccount = await _accountService.SaveAsync(new Models.IF.IFSignUpUser()
-                {
-                    Email = userInfo.Email,
-                    AccountName = userInfo.Name,
-                });
+            //if (userInDB.IsNull())
+            //{
+            //    var savedAccount = await _accountService.SaveAsync(new Models.IF.IFSignUpUser()
+            //    {
+            //        Email = userInfo.Email,
+            //        AccountName = userInfo.Name,
+            //    });
 
-                if (savedAccount.IsNull())
-                    return null;
+            //    if (savedAccount.IsNull())
+            //        return null;
 
-                userInDB = savedAccount;
-            }
+            //    // 맵핑 해줘야함
+            //    userInDB = new SharedLib.Dynamodb.Models.DdbUser()
+            //    {
+            //        Email = savedAccount.Email,
+            //        USN = savedAccount.USN,
+            //    };
+            //}
 
-            userInDB.JWTToken = _jwtTokenProvider.GenerateJWTToken(userInDB);
+            //userInDB.JWTToken = _jwtTokenProvider.GenerateJWTToken(userInDB);
 
-            return userInDB;
+            //return userInDB;
+
+            return null;
         }
     }
 }

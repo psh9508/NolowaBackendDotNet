@@ -6,8 +6,12 @@ using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.DTOs;
 using NolowaBackendDotNet.Models.IF;
 using NolowaBackendDotNet.Services.Base;
+using SharedLib.Dynamodb.Models;
+using SharedLib.Dynamodb.Service;
 using SharedLib.Messages;
+using SharedLib.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -16,10 +20,10 @@ namespace NolowaBackendDotNet.Services
 {
     public interface IAccountsService
     {
-        Task<AccountDTO> FindAsync(long id);
+        Task<DdbUser> FindAsync(long id);
         //Task<AccountDTO> LoginAsync(string email, string password);
         Task<LoginRes> LoginAsync(string email, string password);
-        Task<AccountDTO> SaveAsync(IFSignUpUser newAccount);
+        Task<SharedLib.Models.User> SaveAsync(IFSignUpUser newAccount);
         Task<bool> HasFollowedAsync(IFFollowModel data);
         Task<FollowerDTO> FollowAsync(IFFollowModel data);
         Task<FollowerDTO> UnFollowAsync(IFFollowModel data);
@@ -28,14 +32,14 @@ namespace NolowaBackendDotNet.Services
 
     public class AccountsService : ServiceBase<AccountsService>, IAccountsService
     {
-        private readonly IJWTTokenProvider _jwtTokenProvider;
+        private readonly IDbService _ddbService;
 
-        public AccountsService(IJWTTokenProvider jwtTokenProvider)
+        public AccountsService(IJWTTokenProvider jwtTokenProvider, IDbService ddbService) : base(jwtTokenProvider)
         {
-            _jwtTokenProvider = jwtTokenProvider;
+            _ddbService = ddbService;
         }
 
-        public async Task<AccountDTO> FindAsync(long id)
+        public async Task<DdbUser> FindAsync(long id)
         {
             return await FindAsync(x => x.Id == id);
         }
@@ -54,76 +58,108 @@ namespace NolowaBackendDotNet.Services
 
         public async Task<LoginRes> LoginAsync(string email, string password)
         {
-            //var accountDTO = await FindAsync(x => x.Email == email && x.Password == password.ToSha256());
-            
-            // 테스트 동안은 실제로 DB를 가지 않고 리턴한다.
-            var accountDTO = new AccountDTO()
-            {
-                Id = 1,
-                UserId = "Noname",
-                AccountName = "AccountName",
-                Email = "Noname@domain.com",
-            };
+            var user = await _ddbService.FindAsync<DdbUser>($"u#{email}");
 
-            if (accountDTO == null)
+            if (user == null)
+            {
+                // 회원가입 내역이 없는 유저
                 return null;
+            }
+
+            if (password.ToSha256() != user.Password)
+            {
+                // 비밀번호 불일치
+                return null;
+            }
 
             var loginRes = new LoginRes()
             {
-                Id = accountDTO.Id,
-                UserId = accountDTO.UserId,
-                AccountName = accountDTO.AccountName,
-                Email = accountDTO.Email,
+                AccountName = user.AccountName,
+                Email = user.Email,
+                JoinDate = user.JoinDate,
+                USN = user.USN,
             };
 
-            loginRes.Jwt = _jwtTokenProvider.GenerateJWTToken(accountDTO);
+            loginRes.Jwt = _jwtTokenProvider.GenerateJWTToken(user);
 
             return loginRes;
         }
 
-        public async Task<AccountDTO> SaveAsync(IFSignUpUser signUpUserIFModel)
+        public async Task<SharedLib.Models.User> SaveAsync(IFSignUpUser newAccount)
         {
-            using var transaction = _context.Database.BeginTransaction();
+            #region legacy
+            //using var transaction = _context.Database.BeginTransaction();
+
+            //try
+            //{
+            //    var beInsertedUser = _mapper.Map<Account>(signUpUserIFModel);
+
+            //    // The Password must be encoded by SHA256
+            //    beInsertedUser.Password = beInsertedUser.Password?.ToSha256();
+            //    beInsertedUser.UserId = "RandomID";
+
+            //    if (HasProfileImage(signUpUserIFModel))
+            //    {
+            //        var savedGuid = await SaveProfileImageFileToPhysicalLayer(signUpUserIFModel.ProfileImage);
+
+            //        beInsertedUser.ProfileInfo = new ProfileInfo()
+            //        {
+            //            ProfileImg = new ProfileImage()
+            //            {
+            //                FileHash = savedGuid.ToString(),
+            //                Url = "newUrl",
+            //            },
+            //        };
+            //    }
+
+            //    _context.Accounts.Add(beInsertedUser);
+            //    await _context.SaveChangesAsync();
+
+            //    transaction.Commit();
+
+            //    var savedAccount = await _context.Accounts.Where(x => x.Id == beInsertedUser.Id).SingleAsync();
+
+            //    return _mapper.Map<AccountDTO>(savedAccount);
+            //}
+            //catch (Exception ex)
+            //{
+            //    transaction.Rollback();
+            //    return null;
+            //}
+            #endregion
 
             try
             {
-                var beInsertedUser = _mapper.Map<Account>(signUpUserIFModel);
+                var saveModel = new SharedLib.Dynamodb.Models.DdbUser();
+                //saveModel.Id = 1;
+                saveModel.USN = "1";
+                saveModel.AccountName = newAccount.AccountName;
+                saveModel.Email = newAccount.Email;
+                saveModel.Password = newAccount.Password.ToSha256();
+                saveModel.JoinDate = DateTime.Now;
 
-                // The Password must be encoded by SHA256
-                beInsertedUser.Password = beInsertedUser.Password?.ToSha256();
-                beInsertedUser.UserId = "RandomID";
+                var savedData = await _ddbService.SaveAsync(saveModel);
+                // 이메일로 비밀번호 가져올 수 있는 접근패턴에 대응하기 위한 데이터
+                var emailKeyData = saveModel;
+                emailKeyData.Key = saveModel.Email;
+                await _ddbService.SaveAsync(saveModel);
 
-                if (HasProfileImage(signUpUserIFModel))
+                return new User()
                 {
-                    var savedGuid = await SaveProfileImageFileToPhysicalLayer(signUpUserIFModel.ProfileImage);
-
-                    beInsertedUser.ProfileInfo = new ProfileInfo()
-                    {
-                        ProfileImg = new ProfileImage()
-                        {
-                            FileHash = savedGuid.ToString(),
-                            Url = "newUrl",
-                        },
-                    };
-                }
-
-                _context.Accounts.Add(beInsertedUser);
-                await _context.SaveChangesAsync();
-
-                transaction.Commit();
-
-                var savedAccount = await _context.Accounts.Where(x => x.Id == beInsertedUser.Id).SingleAsync();
-
-                return _mapper.Map<AccountDTO>(savedAccount);
+                    USN = savedData.USN,
+                    UserId = savedData.UserId,
+                    AccountName = saveModel.AccountName,
+                    Email = saveModel.Email,
+                    JoinDate = saveModel.JoinDate,
+                };
             }
             catch (Exception ex)
             {
-                transaction.Rollback();
-                return null;
+                throw;
             }
         }
 
-        private async Task<AccountDTO> FindAsync(Expression<Func<Account, bool>> whereExpression)
+        private async Task<DdbUser> FindAsync(Expression<Func<Account, bool>> whereExpression)
         {
             using(var context = new NolowaContext())
             {
@@ -136,7 +172,7 @@ namespace NolowaBackendDotNet.Services
                 if (account == null)
                     return null;
 
-                var accountDTO = _mapper.Map<AccountDTO>(account);
+                var accountDTO = _mapper.Map<DdbUser>(account);
 
                 // 본인 아이디가 키인 데이터를 가져와서 그 데이터에 DestinationID로 Follower의 Post를 가져와야한다. 그래서 SourceAccount를 가져와 반복문을 도는 것임.
                 foreach (var follower in account.FollowerSourceAccounts)
@@ -149,7 +185,7 @@ namespace NolowaBackendDotNet.Services
                                                      .Select(x => _mapper.Map<PostDTO>(x))
                                                      .Take(10);
 
-                    accountDTO.Posts.ToList().AddRnage(followerPost);
+                    //accountDTO.Posts.ToList().AddRnage(followerPost);
                 }
 
                 return accountDTO;

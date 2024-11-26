@@ -1,12 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NolowaBackendDotNet.Context;
 using NolowaBackendDotNet.Core.Base;
-using NolowaBackendDotNet.Models.DTOs;
 using NolowaBackendDotNet.Services;
-using System;
+using SharedLib.Dynamodb.Models;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace NolowaBackendDotNet.Controllers
@@ -37,7 +34,7 @@ namespace NolowaBackendDotNet.Controllers
 
 
         [HttpGet("User/{accountName}")]
-        public async Task<List<AccountDTO>> SearchUsers(string accountName)
+        public async Task<List<DdbUser>> SearchUsers(string accountName)
         {
             var accountID = GetLoggedInUserAccountIDFromToken();
 

@@ -1,4 +1,5 @@
 ﻿using NolowaNetwork.System;
+using SharedLib.Dynamodb.Models;
 using SharedLib.Messages;
 using SharedLib.Models;
 
@@ -15,6 +16,8 @@ namespace Gateway.MessageQueue
         {
             if (typeName is "LoginRes")
                 return typeof(LoginRes);
+            else if (typeName is "AccountDTO")
+                return typeof(DdbUser);
             else if (typeName is "User")
                 return typeof(User);
 

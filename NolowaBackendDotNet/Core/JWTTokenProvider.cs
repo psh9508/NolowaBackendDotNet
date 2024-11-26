@@ -15,7 +15,7 @@ namespace NolowaBackendDotNet.Core
 {
     public interface IJWTTokenProvider
     {
-        public string GenerateJWTToken(AccountDTO account);
+        public string GenerateJWTToken(SharedLib.Dynamodb.Models.DdbUser account);
     }
 
     public class JWTTokenProvider : IJWTTokenProvider
@@ -27,14 +27,15 @@ namespace NolowaBackendDotNet.Core
             _jwtOption = jwtOption.Value;
         }
 
-        public string GenerateJWTToken(AccountDTO account)
+        public string GenerateJWTToken(SharedLib.Dynamodb.Models.DdbUser account)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOption.Secret));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, account.Id.ToString()),
+                //new Claim(JwtRegisteredClaimNames.Sub, account.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Sub, account.USN.ToString()),
                 new Claim(JwtRegisteredClaimNames.UniqueName, account.AccountName),
                 //new Claim(JwtRegisteredClaimNames.Email, account.Email), // Personal data
                 //new Claim(ClaimTypes.Role, account.)

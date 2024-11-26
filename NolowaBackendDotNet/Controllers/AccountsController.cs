@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -14,7 +12,7 @@ using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.DTOs;
 using NolowaBackendDotNet.Models.IF;
 using NolowaBackendDotNet.Services;
-//using NolowaFrontend.Models.Protos.Generated.prot;
+using SharedLib.Dynamodb.Models;
 
 namespace NolowaBackendDotNet.Controllers
 {
@@ -39,7 +37,7 @@ namespace NolowaBackendDotNet.Controllers
         }
 
         [HttpPost("Save")]
-        public async Task<ActionResult<AccountDTO>> SaveNewAccount([FromBody] IFSignUpUser newAccount)
+        public async Task<ActionResult<DdbUser>> SaveNewAccount([FromBody] IFSignUpUser newAccount)
         {
             var savedAccount = await _accountsService.SaveAsync(newAccount);
 
@@ -166,7 +164,7 @@ namespace NolowaBackendDotNet.Controllers
         }
 
         [HttpGet("users/{id}")]
-        public async Task<ActionResult<AccountDTO>> GetUser(long id)
+        public async Task<ActionResult<DdbUser>> GetUser(long id)
         {
             return await _accountsService.FindAsync(id);
         }

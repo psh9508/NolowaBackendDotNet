@@ -4,8 +4,7 @@ namespace SharedLib.Messages
 {
     public class LoginRes : NetMessageBase
     {
-        public long Id { get; set; }
-        public string UserId { get; set; } = string.Empty;
+        public string USN { get; set; } = string.Empty;
         public string AccountName { get; set; } = string.Empty;
         public DateTime JoinDate { get; set; } = new();
         public string Email { get; set; } = string.Empty;

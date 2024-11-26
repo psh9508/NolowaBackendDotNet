@@ -19,13 +19,13 @@ namespace Gateway.Controllers
         }
 
         [HttpPost("v1/login")]
-        public async Task<LoginRes> LoginAsync(string id, string password)
+        public async Task<LoginRes> LoginAsync(LoginReq loginReq)
         {
-            var loginMessage = _messageMaker.MakeTakeMessage<SharedLib.Messages.LoginReq>(Const.GATEWAY_SERVER_NAME, Const.API_SERVER_NAME);
-            loginMessage.Id = id;
-            loginMessage.Password = password;
+            var loginMessage = _messageMaker.MakeTakeMessage<LoginReq>(Const.GATEWAY_SERVER_NAME, Const.API_SERVER_NAME);
+            loginMessage.Id = loginReq.Id;
+            loginMessage.Password = loginReq.Password;
 
-            var loginResponse = await _messageBroker.TakeMessageAsync<SharedLib.Messages.LoginRes>(loginMessage.TakeId, loginMessage, CancellationToken.None);
+            var loginResponse = await _messageBroker.TakeMessageAsync<LoginRes>(loginMessage.TakeId, loginMessage, CancellationToken.None);
 
             if (loginResponse == null)
             {

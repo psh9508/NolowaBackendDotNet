@@ -1,15 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using NolowaBackendDotNet.Core;
 using NolowaBackendDotNet.Core.Base;
 using NolowaBackendDotNet.Core.SNSLogin;
 using NolowaBackendDotNet.Core.SNSLogin.Base;
-using NolowaBackendDotNet.Models.DTOs;
 using NolowaBackendDotNet.Models.SNSLogin.Google;
 using NolowaBackendDotNet.Models.SNSLogin.Kakao;
+using SharedLib.Dynamodb.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace NolowaBackendDotNet.Controllers
@@ -35,14 +32,14 @@ namespace NolowaBackendDotNet.Controllers
         }
 
         [HttpGet("Social/Google/Login")]
-        public async Task<AccountDTO> GoogleSocialLogin([FromQuery] string code)
+        public async Task<DdbUser> GoogleSocialLogin([FromQuery] string code)
         {
             _authenticationService.SnsLoginProvider = new GoogleLoginProvider(_httpProvider);
             return await _authenticationService.LoginWithUserInfo<GoogleLoginUserInfoResponse>(code);
         }
 
         [HttpGet("Social/Kakao/Login")]
-        public async Task<AccountDTO> KakaoSocialLogin([FromQuery] string code)
+        public async Task<DdbUser> KakaoSocialLogin([FromQuery] string code)
         {
             _authenticationService.SnsLoginProvider = new KakaoLoginProvider(_httpProvider);
             return await _authenticationService.LoginWithUserInfo<KakaoLoginUserInfoResponse>(code);

@@ -19,14 +19,15 @@ namespace NolowaBackendDotNet.Services.Base
         protected IMapper _mapper;
         protected readonly IJWTTokenProvider _jwtTokenProvider;
 
-        public ServiceBase()
+        public ServiceBase(IJWTTokenProvider jwtTokenProvider)
         {
             if (TestHelper.IsTest)
                 return;
 
             _context = InstanceResolver.Instance.Resolve<NolowaContext>();
             _mapper = InstanceResolver.Instance.Resolve<IMapper>();
-            _jwtTokenProvider = InstanceResolver.Instance.Resolve<IJWTTokenProvider>();
+            
+            _jwtTokenProvider = jwtTokenProvider;
         }
     }
 }
