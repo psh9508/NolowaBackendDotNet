@@ -20,6 +20,7 @@ using Amazon.DynamoDBv2.DataModel;
 using NolowaBackendDotNet.Services;
 using NolowaBackendDotNet.Core;
 using SharedLib.Dynamodb.Service;
+using SharedLib.IdGen;
 
 namespace NolowaBackendDotNet
 {
@@ -78,6 +79,8 @@ namespace NolowaBackendDotNet
                     builder.RegisterType<DynamoDBContext>().As<IDynamoDBContext>().InstancePerLifetimeScope();
                     builder.RegisterType<DdbService>().As<IDbService>().InstancePerLifetimeScope();
                     #endregion
+
+                    builder.RegisterType<IdGenProvider>().As<IIdGenProvider>().SingleInstance();
 
                     Log.Logger = new LoggerConfiguration()
                         .WriteTo.Console()

@@ -2,21 +2,18 @@
 using Microsoft.EntityFrameworkCore;
 using NolowaBackendDotNet.Context;
 using NolowaBackendDotNet.Core;
-using NolowaBackendDotNet.Extensions;
-using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.DTOs;
 using NolowaBackendDotNet.Services.Base;
 using SharedLib.Dynamodb.Models;
 using SharedLib.Dynamodb.Service;
+using SharedLib.IdGen;
 using SharedLib.Messages;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Text.Unicode;
 using System.Threading.Tasks;
 
 namespace NolowaBackendDotNet.Services
@@ -34,13 +31,15 @@ namespace NolowaBackendDotNet.Services
         private const int PAGE_POST_COUNT = 5;
         //private readonly IPostCacheService _cache;
         private readonly IDbService _ddbService;
+        private readonly IIdGenProvider _idGen;
 
-        public PostsService(NolowaContext context, IMapper mapper, /* IPostCacheService cache,*/ IJWTTokenProvider jwtTokenProvider, IDbService ddbService) : base(jwtTokenProvider)
+        public PostsService(NolowaContext context, IMapper mapper, /* IPostCacheService cache,*/ IJWTTokenProvider jwtTokenProvider, IDbService ddbService, IIdGenProvider idGen) : base(jwtTokenProvider)
         {
             _context = context;
             _mapper = mapper;
             //_cache = cache;
             _ddbService = ddbService;
+            _idGen = idGen;
         }
 
         public async Task<IEnumerable<PostDTO>> GetHomePostsAsync(DdbUser loginedUserAccount)
@@ -72,7 +71,7 @@ namespace NolowaBackendDotNet.Services
             {
                 var ddbPost = new DdbPost();
                 ddbPost.USN= post.UserId.ToString();
-                ddbPost.PostId = Guid.NewGuid().ToString(); // 이게 증분적으로 되어야 한다.
+                ddbPost.PostId = _idGen.GenerateId();
                 ddbPost.Message = post.Message;
                 ddbPost.InsertDate = DateTime.Now;
 

@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.403.6" />
-    <PackageReference Include="IdGen" Version="3.0.7" />
     <PackageReference Include="RabbitMQ.Client" Version="6.4.0" />
   </ItemGroup>
 

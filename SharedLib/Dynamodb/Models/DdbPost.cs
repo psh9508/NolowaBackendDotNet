@@ -16,7 +16,7 @@ namespace SharedLib.Dynamodb.Models
 
         public override string USN { get; set; } = string.Empty;
 
-        public string PostId { get; set; } = string.Empty;
+        public long PostId { get; set; }
         public string Message { get; set; } = string.Empty;
         public DateTime? InsertDate { get; set; }
 
