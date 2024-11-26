@@ -12,7 +12,7 @@ using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.DTOs;
 using NolowaBackendDotNet.Models.IF;
 using NolowaBackendDotNet.Services;
-//using NolowaFrontend.Models.Protos.Generated.prot;
+using SharedLib.Dynamodb.Models;
 
 namespace NolowaBackendDotNet.Controllers
 {

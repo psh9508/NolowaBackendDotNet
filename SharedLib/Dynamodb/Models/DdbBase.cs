@@ -1,9 +1,11 @@
 ﻿using Amazon.DynamoDBv2.DataModel;
+using System.Reflection;
 
 namespace SharedLib.Dynamodb.Models
 {
     abstract public class DdbBase
     {
+        [DynamoDBIgnore]
         abstract public string Prefix { get; }
         abstract public string USN { get; set; }
 
@@ -26,6 +28,16 @@ namespace SharedLib.Dynamodb.Models
                 throw new InvalidOperationException("Key can't be string.Empty");
 
             return $"{Prefix}#{Key}";
+        }
+
+        public string GetTableName()
+        {
+            var tableNameAttribute = this.GetType().GetCustomAttribute<DynamoDBTableAttribute>();
+
+            if (tableNameAttribute is null)
+                throw new InvalidOperationException("DynamoDB 접근 테이블에 DynamoDBTable가 작성되지 않았습니다.");
+
+            return tableNameAttribute.TableName;
         }
     }
 }

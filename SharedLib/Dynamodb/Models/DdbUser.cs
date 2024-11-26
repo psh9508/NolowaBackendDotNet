@@ -20,6 +20,5 @@ namespace SharedLib.Dynamodb.Models
 
         [DynamoDBIgnore]
         public string Jwt { get; set; } = string.Empty;
-        
     }
 }

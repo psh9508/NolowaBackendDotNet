@@ -2,6 +2,7 @@
 using NolowaBackendDotNet.Core;
 using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.DTOs;
+using SharedLib.Dynamodb.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,5 +1,5 @@
-﻿using NolowaBackendDotNet.Models.DTOs;
-using NolowaNetwork.System;
+﻿using NolowaNetwork.System;
+using SharedLib.Dynamodb.Models;
 using SharedLib.Messages;
 using SharedLib.Models;
 

@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using NolowaBackendDotNet.Context;
 using NolowaBackendDotNet.Core.Base;
 using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Services;
@@ -52,14 +51,14 @@ namespace NolowaBackendDotNet.Controllers
             return Ok(posts);
         }
 
-        [HttpPost("New")]
-        public async Task<ActionResult<Post>> InsertNewPost([FromBody] Post newPost)
-        {
-            return await Task.Run(() =>
-            {
-                return _postsService.InsertPost(newPost);
-            });
-        }
+        //[HttpPost("New")]
+        //public async Task<ActionResult<Post>> InsertNewPost([FromBody] Post newPost)
+        //{
+        //    return await Task.Run(() =>
+        //    {
+        //        return _postsService.InsertPost(newPost);
+        //    });
+        //}
 
         [HttpGet("{userId}/Posts")]
         public async Task<ActionResult<IEnumerable<Post>>> GetUserPosts(int userId)

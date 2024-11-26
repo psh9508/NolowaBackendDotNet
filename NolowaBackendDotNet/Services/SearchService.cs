@@ -7,6 +7,7 @@ using NolowaBackendDotNet.Extensions;
 using NolowaBackendDotNet.Models;
 using NolowaBackendDotNet.Models.DTOs;
 using NolowaBackendDotNet.Services.Base;
+using SharedLib.Dynamodb.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;

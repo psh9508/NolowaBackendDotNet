@@ -1,15 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using NolowaBackendDotNet.Core;
 using NolowaBackendDotNet.Core.Base;
 using NolowaBackendDotNet.Core.SNSLogin;
 using NolowaBackendDotNet.Core.SNSLogin.Base;
-using NolowaBackendDotNet.Models.DTOs;
 using NolowaBackendDotNet.Models.SNSLogin.Google;
 using NolowaBackendDotNet.Models.SNSLogin.Kakao;
+using SharedLib.Dynamodb.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace NolowaBackendDotNet.Controllers

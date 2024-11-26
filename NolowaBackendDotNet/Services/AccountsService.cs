@@ -11,6 +11,7 @@ using SharedLib.Dynamodb.Service;
 using SharedLib.Messages;
 using SharedLib.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -19,7 +20,7 @@ namespace NolowaBackendDotNet.Services
 {
     public interface IAccountsService
     {
-        Task<Models.DTOs.DdbUser> FindAsync(long id);
+        Task<DdbUser> FindAsync(long id);
         //Task<AccountDTO> LoginAsync(string email, string password);
         Task<LoginRes> LoginAsync(string email, string password);
         Task<SharedLib.Models.User> SaveAsync(IFSignUpUser newAccount);
@@ -38,7 +39,7 @@ namespace NolowaBackendDotNet.Services
             _ddbService = ddbService;
         }
 
-        public async Task<Models.DTOs.DdbUser> FindAsync(long id)
+        public async Task<DdbUser> FindAsync(long id)
         {
             return await FindAsync(x => x.Id == id);
         }
@@ -57,12 +58,15 @@ namespace NolowaBackendDotNet.Services
 
         public async Task<LoginRes> LoginAsync(string email, string password)
         {
-            var user = await _ddbService.FindAsync<SharedLib.Dynamodb.Models.DdbUser>($"u#{email}");
-            
-            if (user == null)
-                return null;
+            var user = await _ddbService.FindAsync<DdbUser>($"u#{email}");
 
-            if(password.ToSha256() != user.Password)
+            if (user == null)
+            {
+                // 회원가입 내역이 없는 유저
+                return null;
+            }
+
+            if (password.ToSha256() != user.Password)
             {
                 // 비밀번호 불일치
                 return null;
@@ -70,11 +74,10 @@ namespace NolowaBackendDotNet.Services
 
             var loginRes = new LoginRes()
             {
-                //Id = accountDTO.Id,
-                Id = long.Parse(user.USN),
-                UserId = user.UserId,
                 AccountName = user.AccountName,
                 Email = user.Email,
+                JoinDate = user.JoinDate,
+                USN = user.USN,
             };
 
             loginRes.Jwt = _jwtTokenProvider.GenerateJWTToken(user);
@@ -82,7 +85,7 @@ namespace NolowaBackendDotNet.Services
             return loginRes;
         }
 
-        public async Task<SharedLib.Models.User> SaveAsync(IFSignUpUser signUpUserIFModel)
+        public async Task<SharedLib.Models.User> SaveAsync(IFSignUpUser newAccount)
         {
             #region legacy
             //using var transaction = _context.Database.BeginTransaction();
@@ -130,18 +133,18 @@ namespace NolowaBackendDotNet.Services
                 var saveModel = new SharedLib.Dynamodb.Models.DdbUser();
                 //saveModel.Id = 1;
                 saveModel.USN = "1";
-                saveModel.AccountName = signUpUserIFModel.AccountName;
-                saveModel.Email = signUpUserIFModel.Email;
-                saveModel.Password = signUpUserIFModel.Password.ToSha256();
+                saveModel.AccountName = newAccount.AccountName;
+                saveModel.Email = newAccount.Email;
+                saveModel.Password = newAccount.Password.ToSha256();
                 saveModel.JoinDate = DateTime.Now;
 
                 var savedData = await _ddbService.SaveAsync(saveModel);
-
                 // 이메일로 비밀번호 가져올 수 있는 접근패턴에 대응하기 위한 데이터
-                saveModel.Key = saveModel.Email;
+                var emailKeyData = saveModel;
+                emailKeyData.Key = saveModel.Email;
                 await _ddbService.SaveAsync(saveModel);
 
-                return new SharedLib.Models.User()
+                return new User()
                 {
                     USN = savedData.USN,
                     UserId = savedData.UserId,
@@ -156,7 +159,7 @@ namespace NolowaBackendDotNet.Services
             }
         }
 
-        private async Task<Models.DTOs.DdbUser> FindAsync(Expression<Func<Account, bool>> whereExpression)
+        private async Task<DdbUser> FindAsync(Expression<Func<Account, bool>> whereExpression)
         {
             using(var context = new NolowaContext())
             {
@@ -169,7 +172,7 @@ namespace NolowaBackendDotNet.Services
                 if (account == null)
                     return null;
 
-                var accountDTO = _mapper.Map<Models.DTOs.DdbUser>(account);
+                var accountDTO = _mapper.Map<DdbUser>(account);
 
                 // 본인 아이디가 키인 데이터를 가져와서 그 데이터에 DestinationID로 Follower의 Post를 가져와야한다. 그래서 SourceAccount를 가져와 반복문을 도는 것임.
                 foreach (var follower in account.FollowerSourceAccounts)
@@ -182,7 +185,7 @@ namespace NolowaBackendDotNet.Services
                                                      .Select(x => _mapper.Map<PostDTO>(x))
                                                      .Take(10);
 
-                    accountDTO.Posts.ToList().AddRnage(followerPost);
+                    //accountDTO.Posts.ToList().AddRnage(followerPost);
                 }
 
                 return accountDTO;

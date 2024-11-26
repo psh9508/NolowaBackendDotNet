@@ -15,15 +15,18 @@ namespace NolowaBackendDotNet.Core.MessageQueue
         private readonly Lazy<IMessageMaker> _messageMaker;
         private readonly Lazy<IMessageBroker> _messageBroker;
         private readonly Lazy<IAccountsService> _accountService;
+        private readonly Lazy<IPostsService> _postService;
 
         public MessageHandler(
             Lazy<IMessageMaker> messageMaker,
             Lazy<IMessageBroker> messageBroker,
-            Lazy<IAccountsService> accountService)
+            Lazy<IAccountsService> accountService,
+            Lazy<IPostsService> postService)
         {
             _messageMaker = messageMaker;
             _messageBroker = messageBroker;
             _accountService = accountService;
+            _postService = postService;
         }
 
         public async Task HandleAsync(dynamic message, CancellationToken cancellationToken)
@@ -45,8 +48,7 @@ namespace NolowaBackendDotNet.Core.MessageQueue
             }
 
             var responseMessage = _messageMaker.Value.MakeResponseMessage<LoginRes>(Const.API_SERVER_NAME, message);
-            responseMessage.Id = response.Id;
-            responseMessage.UserId = response.UserId;
+            responseMessage.USN= response.USN;
             responseMessage.Password = response.Password;
             responseMessage.Email = response.Email;
             responseMessage.Jwt = response.Jwt;
@@ -72,6 +74,12 @@ namespace NolowaBackendDotNet.Core.MessageQueue
             responseMessage.Email = response.Email;
 
             await _messageBroker.Value.SendMessageAsync(responseMessage, cancellationToken);
+        }
+
+        public async Task HandleAsync(NewPostReq message, CancellationToken cancellationToken)
+        {
+            var response = _postService.Value.InsertPostAsync(message);
+
         }
     }
 }

@@ -110,16 +110,16 @@ namespace NolowaBackendDotNet.Services
                                                      , account => account.Id
                                                      , (dm, account) => new PreviousDialogListItem()
                                                      {
-                                                         Account = _mapper.Map<DdbUser>(new Account()
-                                                         {
-                                                             Id = account.Id,
-                                                             UserId = account.UserId,
-                                                             AccountName = account.AccountName,
-                                                             ProfileInfo = new ProfileInfo()
-                                                             {
-                                                                 ProfileImg = account.ProfileInfo?.ProfileImg,
-                                                             },
-                                                         }),
+                                                         //Account = _mapper.Map<DdbUser>(new Account()
+                                                         //{
+                                                         //    Id = account.Id,
+                                                         //    UserId = account.UserId,
+                                                         //    AccountName = account.AccountName,
+                                                         //    ProfileInfo = new ProfileInfo()
+                                                         //    {
+                                                         //        ProfileImg = account.ProfileInfo?.ProfileImg,
+                                                         //    },
+                                                         //}),
                                                          Message = dm.Message,
                                                          Time = dm.InsertTime,
                                                          NewMessageCount = GetUnreadMessageCountAsync(loginUserId, dm.SenderId, dm.ReceiverId).Result,
