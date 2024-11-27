@@ -49,6 +49,7 @@ namespace NolowaBackendDotNet.Core.MessageQueue
 
             var responseMessage = _messageMaker.Value.MakeResponseMessage<LoginRes>(Const.API_SERVER_NAME, message);
             responseMessage.USN= response.USN;
+            responseMessage.AccountName = response.AccountName;
             responseMessage.Password = response.Password;
             responseMessage.Email = response.Email;
             responseMessage.Jwt = response.Jwt;
@@ -80,6 +81,10 @@ namespace NolowaBackendDotNet.Core.MessageQueue
         {
             var response = _postService.Value.InsertPostAsync(message);
 
+            var responseMessage = _messageMaker.Value.MakeResponseMessage<NewPostRes>(Const.API_SERVER_NAME, message);
+            //responseMessage.
+
+            await _messageBroker.Value.SendMessageAsync(responseMessage, cancellationToken);
         }
     }
 }

@@ -70,7 +70,7 @@ namespace NolowaBackendDotNet.Services
             try
             {
                 var ddbPost = new DdbPost();
-                ddbPost.USN= post.UserId.ToString();
+                ddbPost.USN= post.USN.ToString();
                 ddbPost.PostId = _idGen.GenerateId();
                 ddbPost.Message = post.Message;
                 ddbPost.InsertDate = DateTime.Now;

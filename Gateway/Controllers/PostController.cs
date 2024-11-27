@@ -24,7 +24,7 @@ namespace Gateway.Controllers
         public async Task<NewPostRes> InsertNewPost(NewPostReq newPost)
         {
             var newPostMessage = _messageMaker.MakeTakeMessage<NewPostReq>(Const.GATEWAY_SERVER_NAME, Const.API_SERVER_NAME);
-            newPostMessage.UserId = newPost.UserId;
+            newPostMessage.USN = newPost.USN;
             newPostMessage.Message = newPost.Message;
 
             var newPostResponse = await _messageBroker.TakeMessageAsync<NewPostRes>(newPostMessage.TakeId, newPostMessage, CancellationToken.None);
@@ -35,7 +35,6 @@ namespace Gateway.Controllers
             }
 
             return newPostResponse;
-
         }
     }
 }

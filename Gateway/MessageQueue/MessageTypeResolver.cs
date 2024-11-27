@@ -20,6 +20,8 @@ namespace Gateway.MessageQueue
                 return typeof(DdbUser);
             else if (typeName is "User")
                 return typeof(User);
+            else if (typeName is "NewPostRes")
+                return typeof(NewPostRes);
 
             return null;
         }
